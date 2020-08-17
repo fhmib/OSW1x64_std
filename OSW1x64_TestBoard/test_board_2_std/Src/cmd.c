@@ -15,7 +15,7 @@ int8_t cmd_help(uint8_t argc, char **argv)
 
     buf[12 - strlen(cmdlist[i].cmd)] = 0;
     PRINT("cmd: ");
-    PRINT("%s%s- %s\n", cmdlist[i].cmd, buf, cmdlist[i].desc);
+    PRINT("%s%s- %s\r\n", cmdlist[i].cmd, buf, cmdlist[i].desc);
     buf[12 - strlen(cmdlist[i].cmd)] = ' ';
     HAL_Delay(30);
   }
@@ -29,11 +29,11 @@ int8_t cmd_help2(char *cmd_name)
   for (i=0; i < cmd_count; ++i) {
     if (strcasecmp(cmdlist[i].cmd, cmd_name) == 0) {
       PRINT("cmd: ");
-      PRINT("%s\n", cmdlist[i].cmd);
+      PRINT("%s\r\n", cmdlist[i].cmd);
       PRINT("     usage:   ");
-      PRINT("%s\n", cmdlist[i].info); 
+      PRINT("%s\r\n", cmdlist[i].info); 
       PRINT("     example: ");
-      PRINT("%s\n", cmdlist[i].example);
+      PRINT("%s\r\n", cmdlist[i].example);
       break;
     }
   }
@@ -67,6 +67,6 @@ int8_t process_cmd(const char *buf)
     }
   }
 
-  PRINT("Unknown command\n");
+  PRINT("Unknown command\r\n");
   return 0;
 }

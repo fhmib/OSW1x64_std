@@ -3,8 +3,9 @@
 
 #include <stdint.h>
 
-#define CMD_FAILED "Command execution failed, Returned code is %d (= %#X)\n"
-#define CMD_SUCCESS "Command executed successfully\n"
+#define RETURN_FAILED "Returned status is %d (= %#X)\r\n"
+#define CMD_FAILED "Command execution failed, Returned code is %d (= %#X)\r\n"
+#define CMD_SUCCESS "success\r\n"
 
 typedef struct _console_cmd
 {

@@ -81,7 +81,7 @@ uint8_t uart1_irq_sel;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t ch;
+  uint8_t ch, r_flag = 0;
   uint8_t cmd[CMD_LENGTH];
   uint32_t cmd_len = 0;
 
@@ -112,6 +112,8 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+  CLEAR_BIT(TERMINAL_UART.Instance->SR, USART_SR_RXNE);
+  __HAL_UART_FLUSH_DRREGISTER(&TERMINAL_UART);
   rb_init(usart1_tr->rb, USART_RX_BUF_SIZE, usart1_tr->rx_buf);
   rb_init(usart1_tr->wb, USART_TX_BUF_SIZE, usart1_tr->tx_buf);
   uart1_irq_sel = 1;
@@ -122,8 +124,8 @@ int main(void)
   HAL_GPIO_WritePin(HARD_RESET_GPIO_Port, HARD_RESET_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(MASTER_RESET_GPIO_Port, MASTER_RESET_Pin, GPIO_PIN_SET);
 
-  PRINT("COM is ready\n");
-  PRINT("Firmware Version: " VER "\n");
+  PRINT("\r\nCOM is ready\r\n");
+  PRINT("Firmware Version: " VER "\r\n");
   PRINT(">");
   /* USER CODE END 2 */
  
@@ -135,11 +137,17 @@ int main(void)
   {
     if (serial_available() > 0) {
       ch = serial_read();
-      
-      if (ch == '\r') continue;
 
-      if (ch == '\n') {
-        PRINT("\n");
+      if (ch == '\r' || ch == '\n') {
+        if (ch == '\r') {
+          r_flag = 1;
+        } else {
+          if (r_flag) {
+            r_flag = 0;
+            continue;
+          }
+        }
+        PRINT("\r\n");
         cmd[cmd_len] = 0;
         process_cmd((char*)cmd);
         PRINT(">");
@@ -151,10 +159,12 @@ int main(void)
           HAL_UART_Transmit(&TERMINAL_UART, &ch, 1, 0xFFFFFFFF);
           --cmd_len;
         } 
+        r_flag = 0;
       } else {
         if (cmd_len < CMD_LENGTH - 1)
           cmd[cmd_len++] = ch;
         HAL_UART_Transmit(&TERMINAL_UART, &ch, 1, 0xFFFFFFFF);
+        r_flag = 0;
       }
     }
     /* USER CODE END WHILE */

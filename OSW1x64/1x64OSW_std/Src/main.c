@@ -313,7 +313,7 @@ void OSW_Init(void)
     HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_RESET);
     Init_Run_Status();
     EPT("Startup with POWER Reset\n");
-    THROW_LOG("Startup with POWER Reset\n");
+    //THROW_LOG("Startup with POWER Reset\n");
   } else {
     Reset_Switch();
     // Init device

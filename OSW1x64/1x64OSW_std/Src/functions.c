@@ -41,7 +41,9 @@ void Throw_Log(uint8_t *buf, uint32_t length)
   MsgStruct log_msg;
   RTC_DateTypeDef date;
   RTC_TimeTypeDef time;
+#ifdef PRINT_DEBUG_MESSAGE
   osStatus_t status;
+#endif
 
   HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
   HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
@@ -52,10 +54,13 @@ void Throw_Log(uint8_t *buf, uint32_t length)
   memcpy((char*)log_msg.pbuf + log_msg.length, buf, length);
   log_msg.length += length;
   log_msg.type = MSG_TYPE_LOG;
-
+#ifdef PRINT_DEBUG_MESSAGE
   if ((status = osMessageQueuePut(mid_LogMsg, &log_msg, 0U, 0U)) != osOK) {
     EPT("Put Message to Queue failed, status = %d\n", status);
   }
+#else
+  osMessageQueuePut(mid_LogMsg, &log_msg, 0U, 0U);
+#endif
 }
 
 uint32_t Log_Write(uint32_t addr, uint8_t *pbuf, uint32_t length)
@@ -842,6 +847,13 @@ uint32_t debug_cal_threshold(uint8_t num, int32_t val)
   status = write_32_to_eeprom(EEPROM_ADDR, addr + (num - 1) * 4, (uint32_t)val);
   if (status != osOK) {
     return RESPOND_FAILURE;
+  }
+
+  // Read threshold to variable
+  status = Get_Threshold_Table(&thr_table);
+  if (status) {
+    EPT("Get threshold table failed, status = %d\n", status);
+    THROW_LOG("Get threshold table failed, status = %d\n", status);
   }
 
   return RESPOND_SUCCESS;

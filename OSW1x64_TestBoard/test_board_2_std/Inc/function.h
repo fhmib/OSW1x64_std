@@ -110,6 +110,7 @@ int8_t debug_dump(uint8_t argc, char **argv);
 int8_t debug_eeprom(uint8_t argc, char **argv);
 int8_t debug_reset_log(uint8_t argc, char **argv);
 int8_t debug_monitor(uint8_t argc, char **argv);
+int8_t debug_crc32(uint8_t argc, char **argv);
 
 int8_t process_command(uint32_t cmd, uint8_t *pdata, uint32_t len, uint8_t *rx_buf, uint32_t *rx_len);
 uint8_t Cal_Check(uint8_t *pdata, uint32_t len);

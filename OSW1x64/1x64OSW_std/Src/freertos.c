@@ -472,6 +472,8 @@ void logTask(void *argument)
   uint8_t next_sector;
   uint8_t remainder;
 
+  osDelay(pdMS_TO_TICKS(1000));
+
   if (log_file_state.cur_sector == LOG_FIRST_SECTOR + file_flash_count - 1) {
     overflow_addr = file_flash_end + 1;
     next_sector_addr = file_flash_addr[0];

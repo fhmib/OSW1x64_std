@@ -15,7 +15,7 @@ RespondStu resp_buf;
 
 UpgradeStruct up_state;
 
-char *fw_version = "ONET00.0100.06"; // 14 bytes
+char *fw_version = "ONET00.0100.07"; // 14 bytes
 
 extern UpgradeFlashState upgrade_status;
 

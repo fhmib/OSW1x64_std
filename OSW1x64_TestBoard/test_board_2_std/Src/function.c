@@ -9,7 +9,7 @@
 
 const char *INVALID_ARG = "Invalid arguments";
 const char *HELP = "help";
-#define UP_SUCCESS "Package %u send success\n"
+#define UP_SUCCESS "Package %u send success\r\n"
 
 #define FW_BLOCK_MAX_SIZE 1024
 #define TO_STR(s) #s
@@ -53,7 +53,7 @@ int8_t cmd_upgrade(uint8_t argc, char **argv)
 int8_t upgrade_init()
 {
   block_size = FW_BLOCK_MAX_SIZE;
-  PRINT("Initialize Upgrade\n");
+  PRINT("Initialize Upgrade\r\n");
   *(uint32_t*)(&txBuf[0]) = switch_endian(1);
   *(uint32_t*)(&txBuf[4]) = switch_endian(block_size);
   *(uint32_t*)(&txBuf[8]) = 0;
@@ -66,9 +66,9 @@ int8_t upgrade_init_with_size(char *arg)
   block_size = strtoul(arg, NULL, 0);
   if (block_size > FW_BLOCK_MAX_SIZE || block_size < 256) {
     block_size = FW_BLOCK_MAX_SIZE;
-    EPT("Block size exceed limitation, default to " TO_STR(FW_BLOCK_MAX_SIZE) "\n");
+    EPT("Block size exceed limitation, default to " TO_STR(FW_BLOCK_MAX_SIZE) "\r\n");
   }
-  PRINT("Initialize Upgrade\n");
+  PRINT("Initialize Upgrade\r\n");
   *(uint32_t*)(&txBuf[0]) = switch_endian(1);
   *(uint32_t*)(&txBuf[4]) = switch_endian(block_size);
   *(uint32_t*)(&txBuf[8]) = 0;
@@ -83,44 +83,47 @@ int8_t upgrade_file()
   uint32_t fw_length, every_size, send_size = 0;
   uint8_t retry = 0;
 
+  HAL_Delay(1);
   __HAL_UART_DISABLE_IT(&TERMINAL_UART, UART_IT_RXNE);
+  CLEAR_BIT(TERMINAL_UART.Instance->SR, USART_SR_RXNE);
+  __HAL_UART_FLUSH_DRREGISTER(&TERMINAL_UART);
   uart1_irq_sel = 0;
-  PRINT2("Download image...\n");
+  PRINT2("Download image...\r\n");
 
   if (HAL_UART_Receive(&TERMINAL_UART, fw_buf, 256, 1000 * 60) != HAL_OK) {
-    PRINT2("UART Timeout\n");
+    PRINT2("UART Timeout\r\n");
     __HAL_UART_ENABLE_IT(&TERMINAL_UART, UART_IT_RXNE);
     uart1_irq_sel = 1;
-    return -1;
+    return 1;
   }
   fw_length = (fw_buf[FW_HEAD_FW_LENGTH] << 24) | (fw_buf[FW_HEAD_FW_LENGTH + 1] << 16) |\
            (fw_buf[FW_HEAD_FW_LENGTH + 2] << 8) | (fw_buf[FW_HEAD_FW_LENGTH + 3] << 0);
   fw_crc = (fw_buf[FW_HEAD_CRC] << 24) | (fw_buf[FW_HEAD_CRC + 1] << 16) |\
            (fw_buf[FW_HEAD_CRC + 2] << 8) | (fw_buf[FW_HEAD_CRC + 3] << 0);
   HAL_UART_Receive(&TERMINAL_UART, fw_buf + 256, fw_length, 1000 * 10);
-  PRINT2("Download success, Length = %u, crc = %#X\n", fw_length, fw_crc);
+  PRINT2("Download success, Length = %u, crc = %#X\r\n", fw_length, fw_crc);
   if (Cal_CRC32(&fw_buf[256], fw_length) == fw_crc) {
-    PRINT2("CRC32 success\n");
+    PRINT2("CRC32 success\r\n");
   } else {
-    PRINT2("CRC32 failed\n");
+    PRINT2("CRC32 failed\r\n");
     __HAL_UART_ENABLE_IT(&TERMINAL_UART, UART_IT_RXNE);
     uart1_irq_sel = 1;
-    return -2;
+    return 2;
   }
 
-  PRINT2("Sending image...\n");
+  PRINT2("Sending image...\r\n");
   while (send_size < fw_length + FW_FILE_HEADER_LENGTH) {
     *(uint32_t*)(&txBuf[0]) = switch_endian(seq);
     every_size = send_size + block_size > fw_length + FW_FILE_HEADER_LENGTH ?\
                  fw_length + FW_FILE_HEADER_LENGTH - send_size : block_size ;
     *(uint32_t*)(&txBuf[4]) = switch_endian(every_size);
-    //PRINT2("send_size = %u\n", send_size);
+    //PRINT2("send_size = %u\r\n", send_size);
     memcpy(&txBuf[8], &fw_buf[send_size], every_size);
     *(uint32_t*)(&txBuf[8 + every_size]) = 0;
     ret = process_command(CMD_UPGRADE_DATA, txBuf, 12 + every_size, rBuf, &rLen);
     if (ret) {
       if (seq == 1 && retry < 3) {
-        PRINT2("Retry\n");
+        PRINT2("Retry\r\n");
         retry++;
         continue;
       }
@@ -131,9 +134,9 @@ int8_t upgrade_file()
   }
 
   if (send_size == fw_length + FW_FILE_HEADER_LENGTH)
-    PRINT2("Send fw success\n");
+    PRINT2("Send fw success\r\n");
   else
-    PRINT2("Send fw failed\n");
+    PRINT2("Send fw failed\r\n");
 
   __HAL_UART_ENABLE_IT(&TERMINAL_UART, UART_IT_RXNE);
   uart1_irq_sel = 1;
@@ -158,7 +161,7 @@ int8_t cmd_version(uint8_t argc, char **argv)
     while (i--) {
       ret = process_command(CMD_QUERY_VERSION, txBuf, 8, rBuf, &rLen);
       if (ret) {
-        PRINT("i = %u\n", i);
+        PRINT("i = %u\r\n", i);
         return ret;
       }
     }
@@ -178,15 +181,15 @@ int8_t cmd_version(uint8_t argc, char **argv)
   p = rBuf + CMD_SEQ_MSG_DATA;
   p += 4;
   p += 16;
-  PRINT("Product Number: %s\n", (char*)p);
+  PRINT("Product Number: %s\r\n", (char*)p);
   p += 10;
-  PRINT("Manufacture Date: %s\n", (char*)p);
+  PRINT("Manufacture Date: %s\r\n", (char*)p);
   p += 10;
-  PRINT("Firmware Version: %s\n", (char*)p);
+  PRINT("Firmware Version: %s\r\n", (char*)p);
   p += 37;
-  PRINT("Assembly Serial Number: %s\n", (char*)p);
+  PRINT("Assembly Serial Number: %s\r\n", (char*)p);
   p += 20;
-  PRINT("Filter Serial Number: %s\n", (char*)p);
+  PRINT("Filter Serial Number: %s\r\n", (char*)p);
 
   return ret;
 }
@@ -211,15 +214,15 @@ int8_t cmd_reset(uint8_t argc, char **argv)
       return ret;
     }
     
-    PRINT("Reset success\n");
+    PRINT("Reset success\r\n");
     p = rBuf + CMD_SEQ_MSG_DATA;
     p += 4;
     p += 36;
-    PRINT("Firmware Version: %s\n", (char*)p);
+    PRINT("Firmware Version: %s\r\n", (char*)p);
     p += 37;
-    PRINT("Assembly Serial Number: %s\n", (char*)p);
+    PRINT("Assembly Serial Number: %s\r\n", (char*)p);
     p += 20;
-    PRINT("Filter Serial Number: %s\n", (char*)p);
+    PRINT("Filter Serial Number: %s\r\n", (char*)p);
   } else {
     cmd_help2(argv[0]);
     return 0;
@@ -247,7 +250,7 @@ int8_t cmd_temp(uint8_t argc, char **argv)
   
   p = rBuf + CMD_SEQ_MSG_DATA;
   temp = Buffer_To_BE32(p);
-  PRINT("Temperature: %.1lf\n", (double)temp/10);
+  PRINT("Temperature: %.1lf\r\n", (double)temp/10);
 
   return ret;
 }
@@ -272,11 +275,11 @@ int8_t cmd_device_status(uint8_t argc, char **argv)
   p = rBuf + CMD_SEQ_MSG_DATA;
   temp = Buffer_To_BE32(p);
   if (temp == 0) {
-    PRINT("Device in normal status\n");
+    PRINT("Device in normal status\r\n");
   } else if (temp == 0xA5) {
-    PRINT("Device in error status\n");
+    PRINT("Device in error status\r\n");
   } else {
-    PRINT("Unknown status\n");
+    PRINT("Unknown status\r\n");
   }
 
   return ret;
@@ -310,10 +313,10 @@ int8_t get_voltage()
   for (i = 0; i < 4; ++i) {
     value = (int32_t)Buffer_To_BE32(p);
     voltage = (float)value / 10;
-    PRINT("Voltage target Value : %.1fV\n", voltage);
+    PRINT("Voltage target Value : %.1fV\r\n", voltage);
     value = (int32_t)Buffer_To_BE32(p + 4);
     voltage = (float)value / 10;
-    PRINT("Voltage Current Value : %.1fV\n", voltage);
+    PRINT("Voltage Current Value : %.1fV\r\n", voltage);
     p += 8;
   }
 
@@ -321,7 +324,7 @@ int8_t get_voltage()
 }
 
 int8_t get_voltage_threshold()
-{ 
+{
   int8_t ret;
   uint8_t *p = rBuf + CMD_SEQ_MSG_DATA + 4;
   int32_t i, value;
@@ -336,13 +339,13 @@ int8_t get_voltage_threshold()
   for (i = 0; i < 4; ++i) {
     value = (int32_t)Buffer_To_BE32(p);
     voltage = (float)value / 10;
-    PRINT("Voltage target Value : %.1fV\n", voltage);
+    PRINT("Voltage target Value : %.1fV\r\n", voltage);
     value = (int32_t)Buffer_To_BE32(p + 4);
     voltage = (float)value / 10;
-    PRINT("Voltage alarm high threshold : %.1fV\n", voltage);
+    PRINT("Voltage alarm high threshold : %.1fV\r\n", voltage);
     value = (int32_t)Buffer_To_BE32(p + 8);
     voltage = (float)value / 10;
-    PRINT("Voltage alarm low threshold : %.1fV\n", voltage);
+    PRINT("Voltage alarm low threshold : %.1fV\r\n", voltage);
     p += 12;
   }
 
@@ -367,7 +370,7 @@ int8_t set_log_time(uint8_t argc, char **argv)
   sprintf((char*)txBuf, "%04lu%02lu%02lu%02lu%02lu%02lu", strtoul(argv[0], NULL, 10),\
     strtoul(argv[1], NULL, 10), strtoul(argv[2], NULL, 10), strtoul(argv[3], NULL, 10), \
     strtoul(argv[4], NULL, 10), strtoul(argv[5], NULL, 10));
-  PRINT("Sending date %s to module\n", txBuf);
+  PRINT("Sending date %s to module\r\n", txBuf);
   memset(txBuf + 15, 0, 5);
 
   return process_command(CMD_SET_LOG_TIME, txBuf, 20, rBuf, &rLen);
@@ -383,7 +386,7 @@ int8_t get_log_time(void)
     return ret;
   }
   
-  PRINT("Received date %s\n", rBuf + CMD_SEQ_MSG_DATA);
+  PRINT("Received date %s\r\n", rBuf + CMD_SEQ_MSG_DATA);
   
   return ret;
 }
@@ -415,7 +418,7 @@ int8_t log_packets()
   p = rBuf + CMD_SEQ_MSG_DATA + 4;
   size = Buffer_To_BE32(p);
   count = Buffer_To_BE32(p + 4);
-  PRINT("size = %u, packets = %u\n", size, count);
+  PRINT("size = %u, packets = %u\r\n", size, count);
 
   return ret;
 }
@@ -441,7 +444,7 @@ int8_t log_content(char *arg1, char *arg2)
   packets = Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA]);
   number = Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 4]);
   size = Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 8]);
-  PRINT("size = %u, packets = %u, number = %u\n", size, packets, number);
+  PRINT("size = %u, packets = %u, number = %u\r\n", size, packets, number);
   PRINT_CHAR("LOG", &rBuf[CMD_SEQ_MSG_DATA + 12], rLen - CMD_SEQ_MSG_DATA - 12 - 8);
 
   return ret;
@@ -466,11 +469,11 @@ int8_t cmd_IL(uint8_t argc, char **argv)
     return ret;
   }
 
-  PRINT("Insertion Loss:\n");
+  PRINT("Insertion Loss:\r\n");
   for (i = 0; i < 64; ++i) {
     val = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + i * 4]);
     val_f = (float)val / 100;
-    PRINT("%u,%.2f\n", i + 1, val_f);
+    PRINT("%u,%.2f\r\n", i + 1, val_f);
   }
 
   return ret;
@@ -512,7 +515,7 @@ int8_t get_switch()
     return ret;
   }
   
-  PRINT("Switch channel is %u\n", Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA));
+  PRINT("Switch channel is %u\r\n", Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA));
   
   return ret;
 }
@@ -535,13 +538,13 @@ int8_t cmd_maintain(uint8_t argc, char **argv)
   }
 
   val = Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA + 4);
-  PRINT("Error Code 1 : %#X\n", val);
+  PRINT("Error Code 1 : %#X\r\n", val);
   val = Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA + 8);
-  PRINT("Error Code 2 : %#X\n", val);
+  PRINT("Error Code 2 : %#X\r\n", val);
   val = Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA + 12);
-  PRINT("Error Code 3 : %#X\n", val);
+  PRINT("Error Code 3 : %#X\r\n", val);
   val = Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA + 16);
-  PRINT("Error Code 4 : %#X\n", val);
+  PRINT("Error Code 4 : %#X\r\n", val);
 
   return ret;
 }
@@ -568,6 +571,8 @@ int8_t cmd_for_debug(uint8_t argc, char **argv)
     return debug_reset_log(argc, argv);
   } else if (argc == 2 && !strcasecmp(argv[1], "monitor")) {
     return debug_monitor(argc, argv);
+  } else if (argc == 2 && !strcasecmp(argv[1], "crc32")) {
+    return debug_crc32(argc, argv);
   } else {
     cmd_help2(argv[0]);
     return 0;
@@ -586,8 +591,8 @@ int8_t debug_dac(uint8_t argc, char **argv)
   } else if (!strncasecmp(argv[2], "sw", 2)) {
     sw_num = strtoul(argv[2] + 2, NULL, 10);
     if (sw_num < 1 || sw_num > 7) {
-      PRINT("Switch number invalid\n");
-      return -1;
+      PRINT("Switch number invalid\r\n");
+      return 1;
     }
   } else {
     cmd_help2(argv[0]);
@@ -596,14 +601,14 @@ int8_t debug_dac(uint8_t argc, char **argv)
   
   sscanf(argv[3], "%d", &val_x);
   if (val_x <= -16384 || val_x >= 16384) {
-    PRINT("Value x invalid\n");
-    return -2;
+    PRINT("Value x invalid\r\n");
+    return 2;
   }
   
   sscanf(argv[4], "%d", &val_y);
   if (val_y <= -16384 || val_y >= 16384) {
-    PRINT("Value y invalid\n");
-    return -3;
+    PRINT("Value y invalid\r\n");
+    return 3;
   }
 
   BE32_To_Buffer(0x5A5AA5A5, txBuf);
@@ -618,11 +623,11 @@ int8_t debug_dac(uint8_t argc, char **argv)
 #if 0
   temp1 = Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA]);
   temp2 = Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 4]);
-  PRINT("Positive x dac channel = %u, value = %u\n", (temp1 >> 24) & 0xFF, (temp2 >> 16) & 0xFFFF);
-  PRINT("Negative x dac channel = %u, value = %u\n", (temp1 >> 16) & 0xFF, (temp2 >> 0) & 0xFFFF);
+  PRINT("Positive x dac channel = %u, value = %u\r\n", (temp1 >> 24) & 0xFF, (temp2 >> 16) & 0xFFFF);
+  PRINT("Negative x dac channel = %u, value = %u\r\n", (temp1 >> 16) & 0xFF, (temp2 >> 0) & 0xFFFF);
   temp2 = Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 8]);
-  PRINT("Positive y dac channel = %u, value = %u\n", (temp1 >> 8) & 0xFF, (temp2 >> 16) & 0xFFFF);
-  PRINT("Negative y dac channel = %u, value = %u\n", (temp1 >> 0) & 0xFF, (temp2 >> 0) & 0xFFFF);
+  PRINT("Positive y dac channel = %u, value = %u\r\n", (temp1 >> 8) & 0xFF, (temp2 >> 16) & 0xFFFF);
+  PRINT("Negative y dac channel = %u, value = %u\r\n", (temp1 >> 0) & 0xFF, (temp2 >> 0) & 0xFFFF);
 #endif
   return ret;
 
@@ -636,8 +641,8 @@ int8_t debug_adc(uint8_t argc, char **argv)
   if (!strncasecmp(argv[2], "sw", 2)) {
     sw_num = strtoul(argv[2] + 2, NULL, 10);
     if (sw_num < 1 || sw_num > 7) {
-      PRINT("Switch number invalid\n");
-      return -1;
+      PRINT("Switch number invalid\r\n");
+      return 1;
     }
     
     BE32_To_Buffer(0x5A5AA5A5, txBuf);
@@ -649,14 +654,14 @@ int8_t debug_adc(uint8_t argc, char **argv)
     }
 
     temp = Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA]);
-    PRINT("Positive x = %u, Negative x = %u\n", (temp >> 16) & 0xFFFF, (temp >> 0) & 0xFFFF);
+    PRINT("Positive x = %u, Negative x = %u\r\n", (temp >> 16) & 0xFFFF, (temp >> 0) & 0xFFFF);
     temp = Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 4]);
-    PRINT("Positive y = %u, Negative y = %u\n", (temp >> 16) & 0xFFFF, (temp >> 0) & 0xFFFF);
+    PRINT("Positive y = %u, Negative y = %u\r\n", (temp >> 16) & 0xFFFF, (temp >> 0) & 0xFFFF);
   } else if (!strncasecmp(argv[2], "vol", 3)) {
     sw_num = strtoul(argv[2] + 3, NULL, 10);
     if (sw_num > 7) {
-      PRINT("ADC number invalid\n");
-      return -2;
+      PRINT("ADC number invalid\r\n");
+      return 2;
     }
     
     BE32_To_Buffer(0x5A5AA5A5, txBuf);
@@ -668,7 +673,7 @@ int8_t debug_adc(uint8_t argc, char **argv)
     }
 
     temp = Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA]);
-    PRINT("Value = %u\n", temp & 0xFFFF);
+    PRINT("Value = %u\r\n", temp & 0xFFFF);
   } else {
     cmd_help2(argv[0]);
     return 0;
@@ -685,30 +690,30 @@ int8_t debug_tag(uint8_t argc, char **argv)
   if (!strcasecmp(argv[2], "pn")) {
     type = 0;
     if (len > 8) {
-      PRINT("PN must less than 8 bytes\n");
-      return -1;
+      PRINT("PN must less than 8 bytes\r\n");
+      return 1;
     }
   } else if (!strcasecmp(argv[2], "date")) {
     type = 1;
     if (len > 8) {
-      PRINT("Date must less than 8 bytes\n");
-      return -1;
+      PRINT("Date must less than 8 bytes\r\n");
+      return 1;
     }
   } else if (!strcasecmp(argv[2], "asn")) {
     type = 2;
     if (len > 12) {
-      PRINT("ASN must less than 12 bytes\n");
-      return -1;
+      PRINT("ASN must less than 12 bytes\r\n");
+      return 1;
     }
   } else if (!strcasecmp(argv[2], "fsn")) {
     type = 3;
     if (len > 23) {
-      PRINT("FSN must less than 23 bytes\n");
-      return -1;
+      PRINT("FSN must less than 23 bytes\r\n");
+      return 1;
     }
   } else {
     cmd_help2(argv[0]);
-    return 1;
+    return 0;
   }
 
   BE32_To_Buffer(0x5A5AA5A5, txBuf);
@@ -742,7 +747,7 @@ int8_t debug_pin(uint8_t argc, char **argv)
     type = 2;
   } else {
     cmd_help2(argv[0]);
-    return 1;
+    return 0;
   }
 
   val = strtoul(argv[3], NULL, 10);
@@ -764,7 +769,8 @@ int8_t debug_switch_io(uint8_t argc, char **argv)
 
   chan = strtoul(argv[2], NULL, 10);
   if (chan > 64 || chan == 0) {
-    return -1;
+    PRINT("Channel number invalid\r\n");
+    return 1;
   }
   chan -= 1;
 
@@ -803,8 +809,8 @@ int8_t debug_cal(uint8_t argc, char **argv)
   } else if (argc == 6 && !strncasecmp(argv[2], "sw", 2)) {
     sw_num = strtoul(argv[2] + 2, NULL, 10);
     if (sw_num < 1 || sw_num > 7) {
-      PRINT("Switch number invalid\n");
-      return -1;
+      PRINT("Switch number invalid\r\n");
+      return 1;
     }
     num = strtoul(argv[3], NULL, 10);
     sscanf(argv[4], "%d", &val_x);
@@ -827,7 +833,7 @@ int8_t debug_cal(uint8_t argc, char **argv)
     ret = process_command(CMD_FOR_DEBUG, txBuf, 16, rBuf, &rLen);
   } else {
     cmd_help2(argv[0]);
-    return 1;
+    return 0;
   }
 
   return ret;
@@ -846,8 +852,8 @@ int8_t debug_dump(uint8_t argc, char **argv)
   } else if (!strncasecmp(argv[2], "sw", 2)) {
     which = strtoul(argv[2] + 2, NULL, 10);
     if (which < 1 || which > 7) {
-      PRINT("Switch number invalid\n");
-      return -1;
+      PRINT("Switch number invalid\r\n");
+      return 1;
     }
     if (which == 1) count = 6;
     else if (which == 7) count = 9;
@@ -856,7 +862,7 @@ int8_t debug_dump(uint8_t argc, char **argv)
     which = 8;
   } else {
     cmd_help2(argv[0]);
-    return 1;
+    return 0;
   }
 
   BE32_To_Buffer(0x5A5AA5A5, txBuf);
@@ -868,59 +874,59 @@ int8_t debug_dump(uint8_t argc, char **argv)
   }
   
   if (which == 0) {
-    PRINT("Insertion Loss:\n");
+    PRINT("Insertion Loss:\r\n");
     for (i = 0; i < 64; ++i) {
       val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + i * 4]);
       val_f = (float)val_x / 100;
-      PRINT("%u,%.2f\n", i + 1, val_f);
+      PRINT("%u,%.2f\r\n", i + 1, val_f);
     }
   } else if (which < 8) {
-    PRINT("Switch:\n");
+    PRINT("Switch:\r\n");
     for (i = 0; i < count; ++i) {
       val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + i * 8]);
       val_y = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + i * 8 + 4]);
-      PRINT("%u,%d,%d\n", i + 1, val_x, val_y);
+      PRINT("%u,%d,%d\r\n", i + 1, val_x, val_y);
     }
   } else if (which == 8) {
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 0 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("2.5V High Threshold: %.1f\n", val_f);
+    PRINT("2.5V High Threshold: %.1f\r\n", val_f);
 
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 1 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("2.5V Low Threshold: %.1f\n", val_f);
+    PRINT("2.5V Low Threshold: %.1f\r\n", val_f);
 
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 2 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("3.3V High Threshold: %.1f\n", val_f);
+    PRINT("3.3V High Threshold: %.1f\r\n", val_f);
 
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 3 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("3.3V Low Threshold: %.1f\n", val_f);
+    PRINT("3.3V Low Threshold: %.1f\r\n", val_f);
 
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 4 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("5.0V High Threshold: %.1f\n", val_f);
+    PRINT("5.0V High Threshold: %.1f\r\n", val_f);
 
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 5 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("5.0V Low Threshold: %.1f\n", val_f);
+    PRINT("5.0V Low Threshold: %.1f\r\n", val_f);
 
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 6 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("64.0V High Threshold: %.1f\n", val_f);
+    PRINT("64.0V High Threshold: %.1f\r\n", val_f);
 
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 7 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("64.0V Low Threshold: %.1f\n", val_f);
+    PRINT("64.0V Low Threshold: %.1f\r\n", val_f);
 
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 8 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("Temperature High Threshold: %.1f\n", val_f);
+    PRINT("Temperature High Threshold: %.1f\r\n", val_f);
 
     val_x = (int32_t)Buffer_To_BE32(&rBuf[CMD_SEQ_MSG_DATA + 9 * 4]);
     val_f = (float)val_x / 10;
-    PRINT("Temperature Low Threshold: %.1f\n", val_f);
+    PRINT("Temperature Low Threshold: %.1f\r\n", val_f);
 
   }
 
@@ -936,12 +942,12 @@ int8_t debug_eeprom(uint8_t argc, char **argv)
     addr = strtoul(argv[3], NULL, 0);
     len = strtoul(argv[4], NULL, 0);
     if (addr & 0xFFFF0000 || len > 1024) {
-      PRINT("Args invalid\n");
-      return 2;
+      PRINT("Args invalid\r\n");
+      return 1;
     }
   } else {
     cmd_help2(argv[0]);
-    return 1;
+    return 0;
   }
 
   BE32_To_Buffer(0x5A5AA5A5, txBuf);
@@ -982,8 +988,19 @@ int8_t debug_monitor(uint8_t argc, char **argv)
 
   io_alarm = HAL_GPIO_ReadPin(IN_ALARM_GPIO_Port, IN_ALARM_Pin);
   io_sw_ready = HAL_GPIO_ReadPin(IN_READY_GPIO_Port, IN_READY_Pin);
-  PRINT("Alarm signal is %s\n", io_alarm == GPIO_PIN_SET ? "not set" : "set");
-  PRINT("Switch Ready signal is %s\n", io_sw_ready == GPIO_PIN_SET ? "not set" : "set");
+  PRINT("Alarm signal is %s\r\n", io_alarm == GPIO_PIN_SET ? "not set" : "set");
+  PRINT("Switch Ready signal is %s\r\n", io_sw_ready == GPIO_PIN_SET ? "not set" : "set");
+
+  return 0;
+}
+
+int8_t debug_crc32(uint8_t argc, char **argv)
+{
+  uint8_t buf[8] = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38};
+  uint32_t crc;
+  
+  crc = Cal_CRC32(buf, 8);
+  PRINT("CRC32 result is %#X\r\n", crc);
 
   return 0;
 }
@@ -1011,7 +1028,7 @@ int8_t process_command(uint32_t cmd, uint8_t *pdata, uint32_t len, uint8_t *rx_b
   *(uint32_t*)(&usart2_tx_buf[cmd_len]) = switch_endian(rcv_crc);
   cmd_len += 4;
 
-  //PRINT("tx crc32 = %#X\n", rcv_crc);
+  //PRINT("tx crc32 = %#X\r\n", rcv_crc);
   if (cmd_len > 0x100) print_len = 0x100;
   else print_len = cmd_len;
   if (switch_endian(*(uint32_t*)&usart2_tx_buf[CMD_SEQ_MSG_ID]) != CMD_UPGRADE_DATA) {
@@ -1019,27 +1036,27 @@ int8_t process_command(uint32_t cmd, uint8_t *pdata, uint32_t len, uint8_t *rx_b
   }
 
   if (HAL_UART_Transmit(&COMMUNICATION_UART, usart2_tx_buf, cmd_len, 0xFF) != HAL_OK) {
-    EPT("Transmit failed\n");
-    return -1;
+    EPT("Transmit failed\r\n");
+    return 100;
   }
 
   rx_buf[0] = 0;
   while (rx_buf[0] != 0x55) {
     if (HAL_UART_Receive(&COMMUNICATION_UART, rx_buf, 1, 1000) != HAL_OK) {
-      EPT("Receive failed 1\n");
-      return -2;
+      EPT("Receive failed 1\r\n");
+      return 101;
     }
   }
   if (HAL_UART_Receive(&COMMUNICATION_UART, rx_buf + 1, 8, 0xFF) != HAL_OK) {
-    EPT("Receive failed 2\n");
-    return -3;
+    EPT("Receive failed 2\r\n");
+    return 102;
   }
   trans_msg = (uint32_t*)&rx_buf[5];
   rcv_len = switch_endian(*trans_msg);
   if (HAL_UART_Receive(&COMMUNICATION_UART, rx_buf + 9, rcv_len - 8, 0xFF) != HAL_OK) {
-    EPT("Receive failed 3\n");
+    EPT("Receive failed 3\r\n");
     PRINT_HEX("Received messages", rx_buf, 9);
-    return -4;
+    return 103;
   }
   if (rcv_len + 1 > 0x100) print_len = 0x100;
   else print_len = rcv_len + 1;
@@ -1051,14 +1068,14 @@ int8_t process_command(uint32_t cmd, uint8_t *pdata, uint32_t len, uint8_t *rx_b
   trans_msg = (uint32_t*)&rx_buf[1 + rcv_len - 4];
   rcv_crc = Cal_CRC32(&rx_buf[1], rcv_len - 4);
   if (rcv_crc != switch_endian(*trans_msg)) {
-    EPT("Checksum failed\n");
-    return -5;
+    EPT("Checksum failed\r\n");
+    return 104;
   }
 
   err_code = switch_endian(*(uint32_t*)&rx_buf[1 + rcv_len - 8]);
   if (err_code != 0) {
-    PRINT(CMD_FAILED, err_code, err_code);
-    return -6;
+    PRINT(RETURN_FAILED, err_code, err_code);
+    return 105;
   }
   *rx_len = rcv_len + 1;
 
@@ -1173,33 +1190,33 @@ void PRINT_HEX(char *head, uint8_t *pdata, uint32_t len)
 {
   uint32_t i;
   
-  PRINT("************* PRINT HEX *************\n");
-  PRINT("%s:\n", head);
+  PRINT("************* PRINT HEX *************\r\n");
+  PRINT("%s:\r\n", head);
   for (i = 0; i < len; ++i) {
     if (i % 0x10 == 0) {
       PRINT("%08X : ", i / 0x10);
     }
-    PRINT("0x%02X%s", pdata[i], (i + 1) % 0x10 == 0 ? "\n" : i == len - 1 ? "\n" : " ");
-    HAL_Delay(5);
+    PRINT("0x%02X%s", pdata[i], (i + 1) % 0x10 == 0 ? "\r\n" : i == len - 1 ? "\r\n" : " ");
+    HAL_Delay(1);
   }
-  PRINT("************* PRINT END *************\n");
+  PRINT("************* PRINT END *************\r\n");
 }
 
 void PRINT_CHAR(char *head, uint8_t *pdata, uint32_t len)
 {
   uint32_t i;
   
-  PRINT("************* PRINT CHAR *************\n");
-  PRINT("%s:\n", head);
+  PRINT("************* PRINT CHAR *************\r\n");
+  PRINT("%s:\r\n", head);
   for (i = 0; i < len; ++i) {
     if (i % 0x40 == 0) {
       PRINT("%08X : ", i / 0x40);
     }
     PRINT("%c%s", pdata[i] == '\n' ? 'N' : pdata[i] == '\r' ? 'R' : pdata[i],\
-          (i + 1) % 0x40 == 0 ? "\n" : i == len - 1 ? "\n" : "");
-    HAL_Delay(5);
+          (i + 1) % 0x40 == 0 ? "\r\n" : i == len - 1 ? "\r\n" : "");
+    HAL_Delay(1);
   }
-  PRINT("************* PRINT CHAR *************\n");
+  PRINT("************* PRINT CHAR *************\r\n");
 }
 
 uint32_t switch_endian(uint32_t i)
