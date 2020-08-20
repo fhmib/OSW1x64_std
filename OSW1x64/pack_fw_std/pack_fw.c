@@ -8,6 +8,8 @@
 
 typedef enum {
 	FW_HEAD_MODULE_NAME    = 0x00,
+	FW_HEAD_MODULE_PN      = 0x20,
+	FW_HEAD_MODULE_HW      = 0x40,
 	FW_HEAD_FW_LENGTH      = 0xC0,
 	FW_HEAD_CRC            = 0xC4,
 	FW_HEAD_END            = 0xFF,
@@ -26,8 +28,10 @@ int main(int argc, char *argv[])
 	struct stat file_stat;
 	uint32_t file_length, length;
 	uint8_t buf[256];
-	char d_name[16];
+	char d_name[64];
 	char m_name[32];
+	char pn[32];
+	char hw[32];
 
 	if (argc < 2) {
 		printf("Need file\n");
@@ -39,9 +43,11 @@ int main(int argc, char *argv[])
 		printf("open %s failed\n", argv[1]);
 	}
 
-	printf("Please input version:");
+	sprintf(pn, "45070038");
+	sprintf(hw, "01.01");
+	printf("Please input software version:");
 	scanf("%s", buf);
-	sprintf(d_name, "fw_%s", buf);
+	sprintf(d_name, "45070038_OSW1x64_%s%s.bin", hw, buf);
 	sprintf(m_name, "ONET-OSW1x64");
 
 	fp = fopen(d_name, "wb");
@@ -65,6 +71,8 @@ int main(int argc, char *argv[])
 
 	memset(buf, 0, sizeof(buf));
 	sprintf(&buf[FW_HEAD_MODULE_NAME], "%s", m_name);
+	sprintf(&buf[FW_HEAD_MODULE_PN], "%s", pn);
+	sprintf(&buf[FW_HEAD_MODULE_HW], "%s", hw);
 	buf[FW_HEAD_FW_LENGTH] = (uint8_t)(file_length >> 24);
 	buf[FW_HEAD_FW_LENGTH + 1] = (uint8_t)(file_length >> 16);
 	buf[FW_HEAD_FW_LENGTH + 2] = (uint8_t)(file_length >> 8);
@@ -78,7 +86,7 @@ int main(int argc, char *argv[])
 	printf("Write %u bytes to %s\n", length, d_name);
 
 	while ((length = fread(buf, 1, 256, fp_old)) != 0) {
-		printf("Write %u bytes to %s\n", length, argv[1]);
+		printf("Write %u bytes to %s\n", length, d_name);
 		fwrite(buf, 1, length, fp);
 	}
 

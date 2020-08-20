@@ -103,16 +103,30 @@ typedef enum {
 } VoltageAdcChannel;
 
 typedef struct {
-  double vol_2_5_high;
-  double vol_2_5_low;
-  double vol_3_3_high;
-  double vol_3_3_low;
-  double vol_5_0_high;
-  double vol_5_0_low;
-  double vol_64_0_high;
-  double vol_64_0_low;
-  double temp_high;
-  double temp_low;
+  double vol_2_5_high_alarm;
+  double vol_2_5_high_clear;
+  double vol_2_5_low_alarm;
+  double vol_2_5_low_clear;
+
+  double vol_3_3_high_alarm;
+  double vol_3_3_high_clear;
+  double vol_3_3_low_alarm;
+  double vol_3_3_low_clear;
+
+  double vol_5_0_high_alarm;
+  double vol_5_0_high_clear;
+  double vol_5_0_low_alarm;
+  double vol_5_0_low_clear;
+
+  double vol_64_0_high_alarm;
+  double vol_64_0_high_clear;
+  double vol_64_0_low_alarm;
+  double vol_64_0_low_clear;
+
+  double temp_high_alarm;
+  double temp_high_clear;
+  double temp_low_alarm;
+  double temp_low_clear;
 } ThresholdStruct;
 
 typedef struct {
@@ -142,6 +156,7 @@ typedef struct {
   uint8_t uart_reset; // Indicate if reset by uart communication
   uint32_t exp; // exception
   uint32_t init_err;
+  ThresholdStruct thr_table;
 } RunTimeStatus;
 
 void Throw_Log(uint8_t *buf, uint32_t length);
@@ -186,5 +201,6 @@ uint32_t debug_cal_il(uint8_t num, int32_t val);
 uint32_t debug_cal_threshold(uint8_t num, int32_t val);
 uint32_t debug_cal_dump(uint32_t which, uint32_t *resp_len);
 uint32_t debug_eeprom(uint32_t addr, uint32_t *len);
+uint32_t debug_write_log(uint32_t value, uint32_t len);
 
 #endif

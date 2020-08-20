@@ -74,7 +74,7 @@ uint32_t Log_Write(uint32_t addr, uint8_t *pbuf, uint32_t length)
   while (w_len < length) {
     if (w_len + 4 > length) {
       for (i = 0, data = 0; i < 4; ++i) {
-        data |= (i < remainder ? pbuf[w_len + i] : ' ') << i * 8;
+        data |= (i < remainder ? pbuf[w_len + i] : i == 3 ? '\n' : ' ') << i * 8;
       }
     } else {
       memcpy(&data, pbuf + w_len, 4);
@@ -95,7 +95,11 @@ uint32_t Log_Write_byte(uint32_t addr, uint8_t ch, uint32_t length)
 {
   uint32_t w_len = 0, data;
 
-  data = ch << 24 | ch << 16 | ch << 8 | ch;
+  if (ch == '\n' && length == 4) {
+    data = ch << 24 | ' ' << 16 | ' ' << 8 | ' ';
+  } else {
+    data = ch << 24 | ch << 16 | ch << 8 | ch;
+  }
   /* Unlock the Flash to enable the flash control register access *************/
   HAL_FLASH_Unlock();
 
@@ -189,9 +193,9 @@ osStatus_t Reset_Log_Status()
 
 osStatus_t Get_Threshold_Table(ThresholdStruct *table)
 {
+#if 0
   osStatus_t status;
   int32_t value;
-
   status = get_32_from_eeprom(EEPROM_ADDR, EE_VOLTAGE_2_5_THR, (uint32_t*)&value);
   if (value == 0xFFFFFFFF) {
     table->vol_2_5_high = 2.6;
@@ -261,8 +265,36 @@ osStatus_t Get_Threshold_Table(ThresholdStruct *table)
   } else {
     table->temp_low = (double)value / 10;
   }
-  
+
   return status;
+#else
+  table->vol_2_5_high_alarm = 2.5 * 1.06;
+  table->vol_2_5_high_clear = 2.5 * 1.05;
+  table->vol_2_5_low_alarm = 2.5 * 0.94;
+  table->vol_2_5_low_clear = 2.5 * 0.95;
+
+  table->vol_3_3_high_alarm = 3.3 * 1.06;
+  table->vol_3_3_high_clear = 3.3 * 1.05;
+  table->vol_3_3_low_alarm = 3.3 * 0.94;
+  table->vol_3_3_low_clear = 3.3 * 0.95;
+
+  table->vol_5_0_high_alarm = 5 * 1.06;
+  table->vol_5_0_high_clear = 5 * 1.05;
+  table->vol_5_0_low_alarm = 5 * 0.94;
+  table->vol_5_0_low_clear = 5 * 0.95;
+
+  table->vol_64_0_high_alarm = 64 * 1.06;
+  table->vol_64_0_high_clear = 64 * 1.05;
+  table->vol_64_0_low_alarm = 64 * 0.94;
+  table->vol_64_0_low_clear = 64 * 0.95;
+
+  table->temp_high_alarm = 85 * 1.01;
+  table->temp_high_clear = 85;
+  table->temp_low_alarm = -10 * 1.01;
+  table->temp_low_clear = -10;
+
+#endif
+  return osOK;
 }
 
 uint32_t Get_Switch_Channel_By_IO()
@@ -837,13 +869,14 @@ uint32_t debug_cal_il(uint8_t num, int32_t val)
 
 uint32_t debug_cal_threshold(uint8_t num, int32_t val)
 {
-  osStatus status;
-  uint16_t addr = EE_VOLTAGE_2_5_THR;
+  //osStatus status;
+  //uint16_t addr = EE_VOLTAGE_2_5_THR;
 
-  if (num > 10 || num == 0) {
+  if (num > 20 || num == 0) {
     return RESPOND_FAILURE;
   }
 
+#if 0
   status = write_32_to_eeprom(EEPROM_ADDR, addr + (num - 1) * 4, (uint32_t)val);
   if (status != osOK) {
     return RESPOND_FAILURE;
@@ -854,6 +887,70 @@ uint32_t debug_cal_threshold(uint8_t num, int32_t val)
   if (status) {
     EPT("Get threshold table failed, status = %d\n", status);
     THROW_LOG("Get threshold table failed, status = %d\n", status);
+  }
+#endif
+  
+  switch (num) {
+    case 1:
+      run_status.thr_table.vol_2_5_high_alarm = (double)val / 1000;
+      break;
+    case 2:
+      run_status.thr_table.vol_2_5_high_clear = (double)val / 1000;
+      break;
+    case 3:
+      run_status.thr_table.vol_2_5_low_alarm = (double)val / 1000;
+      break;
+    case 4:
+      run_status.thr_table.vol_2_5_low_clear = (double)val / 1000;
+      break;
+    case 5:
+      run_status.thr_table.vol_3_3_high_alarm = (double)val / 1000;
+      break;
+    case 6:
+      run_status.thr_table.vol_3_3_high_clear = (double)val / 1000;
+      break;
+    case 7:
+      run_status.thr_table.vol_3_3_low_alarm = (double)val / 1000;
+      break;
+    case 8:
+      run_status.thr_table.vol_3_3_low_clear = (double)val / 1000;
+      break;
+    case 9:
+      run_status.thr_table.vol_5_0_high_alarm = (double)val / 1000;
+      break;
+    case 10:
+      run_status.thr_table.vol_5_0_high_clear = (double)val / 1000;
+      break;
+    case 11:
+      run_status.thr_table.vol_5_0_low_alarm = (double)val / 1000;
+      break;
+    case 12:
+      run_status.thr_table.vol_5_0_low_clear = (double)val / 1000;
+      break;
+    case 13:
+      run_status.thr_table.vol_64_0_high_alarm = (double)val / 1000;
+      break;
+    case 14:
+      run_status.thr_table.vol_64_0_high_clear = (double)val / 1000;
+      break;
+    case 15:
+      run_status.thr_table.vol_64_0_low_alarm = (double)val / 1000;
+      break;
+    case 16:
+      run_status.thr_table.vol_64_0_low_clear = (double)val / 1000;
+      break;
+    case 17:
+      run_status.thr_table.temp_high_alarm = (double)val / 1000;
+      break;
+    case 18:
+      run_status.thr_table.temp_high_clear = (double)val / 1000;
+      break;
+    case 19:
+      run_status.thr_table.temp_low_alarm = (double)val / 1000;
+      break;
+    case 20:
+      run_status.thr_table.temp_low_clear = (double)val / 1000;
+      break;
   }
 
   return RESPOND_SUCCESS;
@@ -899,15 +996,38 @@ uint32_t debug_cal_dump(uint32_t which, uint32_t *resp_len)
       addr = EE_CAL_SWITCH7;
       break;
     case 8: // Threshold
-      len = 5 * 8;
+      len = 5 * 16;
       addr = EE_VOLTAGE_2_5_THR;
       break;
   }
-  status = RTOS_EEPROM_Read(EEPROM_ADDR, addr, resp_buf.buf, len);
-  if (status != osOK) {
-    EPT("Read EEPROM failed, status = %d\n", status);
-    *resp_len = 4;
-    return RESPOND_FAILURE;
+  if (which == 8) {
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_2_5_high_alarm * 1000), resp_buf.buf);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_2_5_high_clear * 1000), resp_buf.buf + 4);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_2_5_low_alarm * 1000), resp_buf.buf + 8);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_2_5_low_clear * 1000), resp_buf.buf + 12);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_3_3_high_alarm * 1000), resp_buf.buf + 16);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_3_3_high_clear * 1000), resp_buf.buf + 20);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_3_3_low_alarm * 1000), resp_buf.buf + 24);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_3_3_low_clear * 1000), resp_buf.buf + 28);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_5_0_high_alarm * 1000), resp_buf.buf + 32);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_5_0_high_clear * 1000), resp_buf.buf + 36);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_5_0_low_alarm * 1000), resp_buf.buf + 40);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_5_0_low_clear * 1000), resp_buf.buf + 44);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_64_0_high_alarm * 1000), resp_buf.buf + 48);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_64_0_high_clear * 1000), resp_buf.buf + 52);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_64_0_low_alarm * 1000), resp_buf.buf + 56);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.vol_64_0_low_clear * 1000), resp_buf.buf + 60);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.temp_high_alarm * 1000), resp_buf.buf + 64);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.temp_high_clear * 1000), resp_buf.buf + 68);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.temp_low_alarm * 1000), resp_buf.buf + 72);
+    BE32_To_Buffer((uint32_t)(int32_t)(run_status.thr_table.temp_low_clear * 1000), resp_buf.buf + 76);
+  } else {
+    status = RTOS_EEPROM_Read(EEPROM_ADDR, addr, resp_buf.buf, len);
+    if (status != osOK) {
+      EPT("Read EEPROM failed, status = %d\n", status);
+      *resp_len = 4;
+      return RESPOND_FAILURE;
+    }
   }
   
   *resp_len = len;
@@ -925,6 +1045,20 @@ uint32_t debug_eeprom(uint32_t addr, uint32_t *len)
     return RESPOND_FAILURE;
   }
   
+  return RESPOND_SUCCESS;
+}
+
+uint32_t debug_write_log(uint32_t value, uint32_t len)
+{
+  uint8_t buf[1025];
+
+  if (len == 0 || len > 1024) {
+    return RESPOND_FAILURE;
+  }
+  memset(buf, (uint8_t)value, len);
+  buf[len] = 0;
+  THROW_LOG("%s", (char*)buf);
+
   return RESPOND_SUCCESS;
 }
 

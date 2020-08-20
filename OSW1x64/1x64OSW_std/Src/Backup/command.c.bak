@@ -8,23 +8,14 @@
 #include "i2c.h"
 #include "spi.h"
 #include "rtc.h"
+#include "functions.h"
 
 TransStu trans_buf;
 RespondStu resp_buf;
 
 UpgradeStruct up_state;
 
-char *fw_version = "ONET00.0100.06"; // 14 bytes
-
-SwitchMapStruct switch_map[] = {
-  {SWITCH_NUM_1, /*DAC channel*/  6,  2,  3,  5, /*ADC channel*/  0,  1,  2,  3},
-  {SWITCH_NUM_2, /*DAC channel*/  4,  8,  1,  0, /*ADC channel*/  4,  5,  6,  7},
-  {SWITCH_NUM_3, /*DAC channel*/ 12, 10,  7,  9, /*ADC channel*/  8,  9, 10, 11},
-  {SWITCH_NUM_4, /*DAC channel*/ 14, 13, 15, 11, /*ADC channel*/ 12, 13, 14, 15},
-  {SWITCH_NUM_5, /*DAC channel*/ 22, 17, 26, 21, /*ADC channel*/ 16, 17, 18, 19},
-  {SWITCH_NUM_6, /*DAC channel*/ 18, 20, 19, 16, /*ADC channel*/ 20, 21, 22, 23},
-  {SWITCH_NUM_7, /*DAC channel*/ 23, 29, 31, 25, /*ADC channel*/ 24, 25, 26, 27}
-};
+char *fw_version = "ONET00.0100.07"; // 14 bytes
 
 extern UpgradeFlashState upgrade_status;
 
@@ -37,14 +28,15 @@ CmdStruct command_list[] = {
   {CMD_QUERY_TEMP, Cmd_Get_Temperature},
   {CMD_DEVICE_STATUS, Cmd_Device_Status},
   {CMD_QUERY_VOLTAGE, Cmd_Voltage},
-  {CMD_QUERY_VOL_THR, NULL},
+  {CMD_QUERY_VOL_THR, Cmd_Voltage_Threshold},
   {CMD_SET_LOG_TIME, Cmd_Set_Time},
   {CMD_QUERY_LOG_TIME, Cmd_Get_Time},
   {CMD_QUERY_LOG_NUM, Cmd_LOG_Number},
   {CMD_QUERY_LOG, Cmd_LOG_Content},
-  {CMD_QUERY_IL, NULL},
-  {CMD_SET_SWITCH, NULL},
-  {CMD_QUERY_SWITCH, NULL},
+  {CMD_QUERY_IL, Cmd_Get_IL},
+  {CMD_SET_SWITCH, Cmd_Set_Switch},
+  {CMD_QUERY_SWITCH, Cmd_Get_Switch},
+  {CMD_MAINTAIN, Cmd_Maintain},
 
   {CMD_FOR_DEBUG, Cmd_For_Debug},
 };
@@ -66,7 +58,7 @@ uint32_t Cmd_Process()
     }
   }
 
-  EPT("Unknow command id = %#X\n", cmd_id);
+  THROW_LOG("Unknow command id = %#X\n", cmd_id);
   FILL_RESP_MSG(cmd_id, RESPOND_UNKNOWN_CMD, 0);
   return 0;
 }
@@ -90,7 +82,8 @@ int Uart_Respond(uint32_t cmd, uint32_t status, uint8_t *pdata, uint32_t len)
   cmd_len += 4;
   
   if (HAL_UART_Transmit(&huart1, trans_buf.buf, cmd_len, 0xFF) != HAL_OK) {
-    EPT("Respond command failed\n");
+    THROW_LOG("Respond command failed, ErrorCode = %#X\n", huart1.ErrorCode);
+    EPT("Respond command failed, ErrorCode = %#X\n", huart1.ErrorCode);
       return -1;
   } else {
     if (status != 0)
@@ -107,7 +100,8 @@ uint32_t Cmd_Upgrade_Init()
   memset(p, 4, 0);
 
   if (block_size > UPGRADE_MAX_DATA_LENGTH || block_size < UPGRADE_MIN_DATA_LENGTH) {
-    EPT("FW received invalid block size %u\n", block_size);
+    EPT("Received invalid block size %u\n", block_size);
+    THROW_LOG("Received invalid block size %u\n", block_size);
     FILL_RESP_MSG(CMD_UPGRADE_INIT, RESPOND_NOT_CPLT, 4);
     return RESPOND_NOT_CPLT;
   }
@@ -135,28 +129,32 @@ uint32_t Cmd_Upgrade_Data()
   p_fw_data += 8;
 
   if (up_state.run != RUN_MODE_UPGRADE) {
-    EPT("Cannot excute command\n");
+    EPT("Cannot excute command because of wrong mode\n");
+    THROW_LOG("Cannot excute command because of wrong mode\n");
     FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_UNKNOWN_CMD, 8);
     return RESPOND_UNKNOWN_CMD;
   }
 
   if (length > up_state.block_size) {
-    EPT("FW received invalid data length %u\n", length);
+    EPT("Received invalid data length %u\n", length);
+    THROW_LOG("Received invalid data length %u\n", length);
     FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
     return RESPOND_SEGMENT_ERR;
   }
 
   if (seq == 0x1) {
     if (length != up_state.block_size) {
-      EPT("FW received invalid data length : %u\n", length);
+      EPT("Received invalid data length : %u\n", length);
+      THROW_LOG("Received invalid data length : %u\n", length);
       FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
       return RESPOND_SEGMENT_ERR;
     }
     if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_NAME], "ONET-OSW1x64")) {
       EPT("The file is not the firmware corresponding to this module\n");
-      PRINT_HEX("module name", p_fw_data, 0x20);
-      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_UNKNOWN_CMD, 8);
-      return RESPOND_UNKNOWN_CMD;
+      THROW_LOG("The file is not the firmware corresponding to this module\n");
+      //PRINT_HEX("module name", p_fw_data, 0x20);
+      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+      return RESPOND_SEGMENT_ERR;
     }
     up_state.pre_seq = seq;
     up_state.recvd_length = 0;
@@ -193,8 +191,9 @@ uint32_t Cmd_Upgrade_Data()
     up_state.pre_seq = seq;
   } else {
     EPT("Seq invalid : %u\tpre_seq : %u\n", seq, up_state.pre_seq);
-    FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_UNKNOWN_CMD, 8);
-    return RESPOND_UNKNOWN_CMD;
+    THROW_LOG("Seq invalid : %u\tpre_seq : %u\n", seq, up_state.pre_seq);
+    FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+    return RESPOND_SEGMENT_ERR;
   }
 
   while (flash_in_use && to++ < 6) {
@@ -202,6 +201,7 @@ uint32_t Cmd_Upgrade_Data()
   }
   if (to >= 6) {
     EPT("Waiting flash timeout\n");
+    THROW_LOG("Waiting flash timeout\n");
     up_state.pre_state = UPGRADE_FAILURE;
     FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_NOT_CPLT, 8);
     return RESPOND_NOT_CPLT;
@@ -212,8 +212,8 @@ uint32_t Cmd_Upgrade_Data()
     if (Update_Up_Status(&upgrade_status) != osOK) {
       EPT("Update upgrade status to eeprom failed\n");
       up_state.pre_state = UPGRADE_FAILURE;
-      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_NOT_CPLT, 8);
-      return RESPOND_NOT_CPLT;
+      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+      return RESPOND_SEGMENT_ERR;
     }
   }
   FLASH_If_Write(up_state.upgrade_addr + up_state.recvd_length, (uint32_t*)p_fw_data, length / 4);
@@ -231,26 +231,30 @@ uint32_t Cmd_Upgrade_Install()
 
   if (up_state.run != RUN_MODE_UPGRADE) {
     EPT("Cannot excute cmd beacuse of wrong mode\n");
+    THROW_LOG("Cannot excute command because of wrong mode\n");
     FILL_RESP_MSG(CMD_UPGRADE_INSTALL, RESPOND_UNKNOWN_CMD, 4);
     return RESPOND_UNKNOWN_CMD;
   }
 
   if (up_state.recvd_length != up_state.fw_size) {
-    EPT("The received length %u is not equal to length in head %u.\n", up_state.recvd_length, up_state.fw_size);
-    FILL_RESP_MSG(CMD_UPGRADE_INSTALL, RESPOND_DL_CHK_ERR, 4);
-    return RESPOND_DL_CHK_ERR;
+    EPT("The received length %u is not equal to length in header %u.\n", up_state.recvd_length, up_state.fw_size);
+    THROW_LOG("The received length %u is not equal to length in header %u.\n", up_state.recvd_length, up_state.fw_size);
+    FILL_RESP_MSG(CMD_UPGRADE_INSTALL, RESPOND_DL_INSTALL_FAIL, 4);
+    return RESPOND_DL_INSTALL_FAIL;
   }
 
   if (up_state.pre_seq < 3) {
     EPT("No valid data.\n");
-    FILL_RESP_MSG(CMD_UPGRADE_INSTALL, RESPOND_DL_CHK_ERR, 4);
-    return RESPOND_DL_CHK_ERR;
+    THROW_LOG("No valid data.\n");
+    FILL_RESP_MSG(CMD_UPGRADE_INSTALL, RESPOND_DL_INSTALL_FAIL, 4);
+    return RESPOND_DL_INSTALL_FAIL;
   }
 
   uint8_t *pdata = (uint8_t*)up_state.upgrade_addr;
   uint32_t crc = Cal_CRC32(pdata, up_state.fw_size);
   if (crc ^ up_state.crc32) {
     EPT("CRC verified failed. %#X != %#X\n", crc, up_state.crc32);
+    THROW_LOG("CRC verified failed. %#X != %#X\n", crc, up_state.crc32);
     FILL_RESP_MSG(CMD_UPGRADE_INSTALL, RESPOND_DL_CHK_ERR, 4);
     return RESPOND_DL_CHK_ERR;
   }
@@ -263,10 +267,12 @@ uint32_t Cmd_Upgrade_Install()
                 upgrade_status.factory_length, upgrade_status.factory_crc32);
   if (Update_Up_Status(&upgrade_status) != osOK) {
     EPT("Update upgrade status to eeprom failed\n");
+    THROW_LOG("Update upgrade status to eeprom failed\n");
     FILL_RESP_MSG(CMD_UPGRADE_INSTALL, RESPOND_DL_INSTALL_FAIL, 4);
     return RESPOND_DL_INSTALL_FAIL;
   }
 
+  THROW_LOG("Upgrade firmware success\n");
   FILL_RESP_MSG(CMD_UPGRADE_INSTALL, RESPOND_SUCCESS, 4);
   return RESPOND_SUCCESS;
 }
@@ -305,6 +311,7 @@ uint32_t Cmd_Get_Version()
 uint32_t Cmd_Softreset()
 {
   // TODO: Save system configuration data
+  run_status.uart_reset = 1;
 
   __NVIC_SystemReset();
 
@@ -313,6 +320,7 @@ uint32_t Cmd_Softreset()
 
 uint32_t Cmd_Get_Temperature()
 {
+#if 0
   uint32_t vol;
   int16_t res;
   double voltage, temp;
@@ -332,7 +340,7 @@ uint32_t Cmd_Get_Temperature()
   temp = (voltage - 0.76) / 0.0025 + 25;
   res = (int16_t)(temp * 10);
   if (res > 1250 || res < -45) {
-    EPT("res invalid\n");
+    EPT("res invalid. vol = %u\n", vol);
     *p = switch_endian(1000);
     FILL_RESP_MSG(CMD_QUERY_TEMP, RESPOND_SUCCESS, 4);
     return RESPOND_FAILURE;
@@ -341,19 +349,120 @@ uint32_t Cmd_Get_Temperature()
 
   FILL_RESP_MSG(CMD_QUERY_TEMP, RESPOND_SUCCESS, 4);
   return RESPOND_SUCCESS;
+#else 
+  osStatus_t status;
+  uint16_t value;
+  int32_t *p = (int32_t*)resp_buf.buf;
+  double temp;
+  int32_t res;
+
+  status = RTOS_ADC7828_Read(TEMPERATURE_CHANNEL, &value);
+  if (status != osOK) {
+    EPT("Read adc7828 failed\n");
+    *p = switch_endian(1000);
+    FILL_RESP_MSG(CMD_QUERY_TEMP, RESPOND_SUCCESS, 4);
+    return RESPOND_SUCCESS;
+  }
+  temp = Cal_Temp(value);
+  if (temp > thr_table.temp_high || temp < thr_table.temp_low) {
+    EPT("temperature is %lf, high threshold is %lf, low threshold is %lf\n", temp, thr_table.temp_high, thr_table.temp_low);
+    *p = switch_endian(1000);
+    FILL_RESP_MSG(CMD_QUERY_TEMP, RESPOND_SUCCESS, 4);
+    return RESPOND_SUCCESS;
+  }
+  res = (int32_t)(temp * 10);
+  *p = switch_endian((uint32_t)res);
+
+  FILL_RESP_MSG(CMD_QUERY_TEMP, RESPOND_SUCCESS, 4);
+  return RESPOND_SUCCESS;
+
+#endif
 }
 
 uint32_t Cmd_Device_Status()
 {
-  *(uint32_t*)resp_buf.buf = 0;
+  if (run_status.exp) {
+    BE32_To_Buffer(0xA5, resp_buf.buf);
+  } else {
+    *(uint32_t*)resp_buf.buf = 0;
+  }
   FILL_RESP_MSG(CMD_DEVICE_STATUS, RESPOND_SUCCESS, 4);
   return RESPOND_SUCCESS;
 }
 
 uint32_t Cmd_Voltage()
 {
-  *(uint32_t*)resp_buf.buf = 0;
-  FILL_RESP_MSG(CMD_QUERY_VOLTAGE, RESPOND_SUCCESS, 4);
+  uint16_t value;
+  double voltage;
+  osStatus_t status;
+
+  BE32_To_Buffer(4, resp_buf.buf);
+
+  status = RTOS_ADC7828_Read(VOLTAGE_2_5_CHANNEL, &value);
+  if (status != osOK) {
+    EPT("Read adc7828 failed\n");
+    value = 0;
+  }
+  voltage = (double)value / 4096 * 2.5 * 2;
+  value = (uint16_t)(voltage * 10);
+  BE32_To_Buffer(25, resp_buf.buf + 4);
+  BE32_To_Buffer(value, resp_buf.buf + 8);
+
+  status = RTOS_ADC7828_Read(VOLTAGE_3_3_CHANNEL, &value);
+  if (status != osOK) {
+    EPT("Read adc7828 failed\n");
+    value = 0;
+  }
+  voltage = (double)value / 4096 * 2.5 * 2;
+  value = (uint16_t)(voltage * 10);
+  BE32_To_Buffer(33, resp_buf.buf + 12);
+  BE32_To_Buffer(value, resp_buf.buf + 16);
+
+  status = RTOS_ADC7828_Read(VOLTAGE_5_0_CHANNEL, &value);
+  if (status != osOK) {
+    EPT("Read adc7828 failed\n");
+    value = 0;
+  }
+  voltage = (double)value / 4096 * 2.5 * 3;
+  value = (uint16_t)(voltage * 10);
+  BE32_To_Buffer(50, resp_buf.buf + 20);
+  BE32_To_Buffer(value, resp_buf.buf + 24);
+
+  status = RTOS_ADC7828_Read(VOLTAGE_64_0_CHANNEL, &value);
+  if (status != osOK) {
+    EPT("Read adc7828 failed\n");
+    value = 0;
+  }
+  voltage = (double)value / 4096 * 2.5 * 51;
+  value = (uint16_t)(voltage * 10);
+  BE32_To_Buffer(640, resp_buf.buf + 28);
+  BE32_To_Buffer(value, resp_buf.buf + 32);
+
+  FILL_RESP_MSG(CMD_QUERY_VOLTAGE, RESPOND_SUCCESS, 36);
+  return RESPOND_SUCCESS;
+}
+
+uint32_t Cmd_Voltage_Threshold()
+{
+  BE32_To_Buffer(4, resp_buf.buf);
+
+  BE32_To_Buffer(25, resp_buf.buf + 4);
+  BE32_To_Buffer((uint32_t)(thr_table.vol_2_5_high * 10), resp_buf.buf + 8);
+  BE32_To_Buffer((uint32_t)(thr_table.vol_2_5_low * 10), resp_buf.buf + 12);
+
+  BE32_To_Buffer(33, resp_buf.buf + 16);
+  BE32_To_Buffer((uint32_t)(thr_table.vol_3_3_high * 10), resp_buf.buf + 20);
+  BE32_To_Buffer((uint32_t)(thr_table.vol_3_3_low * 10), resp_buf.buf + 24);
+
+  BE32_To_Buffer(50, resp_buf.buf + 28);
+  BE32_To_Buffer((uint32_t)(thr_table.vol_5_0_high * 10), resp_buf.buf + 32);
+  BE32_To_Buffer((uint32_t)(thr_table.vol_5_0_low * 10), resp_buf.buf + 36);
+
+  BE32_To_Buffer(640, resp_buf.buf + 40);
+  BE32_To_Buffer((uint32_t)(thr_table.vol_64_0_high * 10), resp_buf.buf + 44);
+  BE32_To_Buffer((uint32_t)(thr_table.vol_64_0_low * 10), resp_buf.buf + 48);
+
+  FILL_RESP_MSG(CMD_QUERY_VOL_THR, RESPOND_SUCCESS, 52);
   return RESPOND_SUCCESS;
 }
 
@@ -443,21 +552,25 @@ uint32_t Cmd_LOG_Content()
 
   //packet_count = Buffer_To_BE32(prdata);
   if (packet_count != Buffer_To_BE32(prdata)) {
-    EPT("packet_count != Buffer_To_BE32(prdata)\n");
+    EPT("Wrong number of packages\n");
+    THROW_LOG("Wrong number of packages\n");
     BE32_To_Buffer((uint32_t)packet_count, resp_buf.buf);
     BE32_To_Buffer((uint32_t)0, resp_buf.buf + 4);
     BE32_To_Buffer((uint32_t)0, resp_buf.buf + 8);
-    FILL_RESP_MSG(CMD_QUERY_LOG, RESPOND_UNKNOWN_CMD, 12);
-    return RESPOND_UNKNOWN_CMD;
+    size = 0;
+    FILL_RESP_MSG(CMD_QUERY_LOG, RESPOND_SUCCESS, 12 + size);
+    return RESPOND_SUCCESS;
   }
   packet_num = Buffer_To_BE32(prdata + 4);
   if (packet_num > packet_count || packet_num == 0) {
-    EPT("packet_num = %u invalid\n", packet_num);
+    EPT("packet number = %u is invalid\n", packet_num);
+    THROW_LOG("packet number = %u is invalid\n", packet_num);
     BE32_To_Buffer((uint32_t)packet_count, resp_buf.buf);
     BE32_To_Buffer((uint32_t)0, resp_buf.buf + 4);
     BE32_To_Buffer((uint32_t)0, resp_buf.buf + 8);
-    FILL_RESP_MSG(CMD_QUERY_LOG, RESPOND_UNKNOWN_CMD, 12);
-    return RESPOND_UNKNOWN_CMD;
+    size = 0;
+    FILL_RESP_MSG(CMD_QUERY_LOG, RESPOND_SUCCESS, 12 + size);
+    return RESPOND_SUCCESS;
   }
   addr = log_file_state.header + (packet_num - 1) * LOG_PACKET_LENGTH;
   if (addr >= file_flash_end + 1) {
@@ -470,6 +583,10 @@ uint32_t Cmd_LOG_Content()
   } else {
     size = LOG_PACKET_LENGTH;
   }
+  if (flash_in_use) {
+    THROW_LOG("Reading log when flash in using\n");
+    size = 0;
+  }
   EPT("packet_num = %u, dest addr = %#X, size = %u\n", packet_num, addr, size);
   BE32_To_Buffer((uint32_t)packet_count, resp_buf.buf);
   BE32_To_Buffer((uint32_t)packet_num, resp_buf.buf + 4);
@@ -479,11 +596,136 @@ uint32_t Cmd_LOG_Content()
   return RESPOND_SUCCESS;
 }
 
+uint32_t Cmd_Get_IL(void)
+{
+  osStatus_t status;
+
+  memset(resp_buf.buf, 0, 64 * 4);
+  status = RTOS_EEPROM_Read(EEPROM_ADDR, EE_CAL_IL, resp_buf.buf, 64 * 4);
+  if (status != osOK) {
+    EPT("Read EEPROM failed, status = %d\n", status);
+  }
+
+  FILL_RESP_MSG(CMD_QUERY_IL, RESPOND_SUCCESS, 64 * 4);
+  return RESPOND_SUCCESS;
+}
+
+uint32_t Cmd_Set_Switch(void)
+{
+  uint8_t *prdata = trans_buf.buf + CMD_SEQ_MSG_DATA;
+  uint32_t switch_channel;
+
+  memset(resp_buf.buf, 0, 4);
+  if (HAL_GPIO_ReadPin(SW_MODE_SEL_GPIO_Port, SW_MODE_SEL_Pin) == GPIO_PIN_RESET) {
+    EPT("Switch command come but switch mode is wrong\n");
+    THROW_LOG("Switch command come but switch mode is wrong\n");
+    FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
+    return RESPOND_SUCCESS;
+  }
+  
+  switch_channel = Buffer_To_BE32(prdata);
+  
+  if (switch_channel < 1 || switch_channel > 64) {
+    EPT("Invalid switch chennel\n");
+    THROW_LOG("Invalid switch chennel = %u\n", switch_channel);
+    FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
+    return RESPOND_SUCCESS;
+  }
+  
+  Clear_Switch_Ready();
+
+  if (Set_Switch(switch_channel)) {
+    run_status.switch_channel = 0;
+    if (!Is_Flag_Set(&run_status.exp, EXP_SWITCH)) {
+      THROW_LOG("Switch abnormal\n");
+      Set_Flag(&run_status.exp, EXP_SWITCH);
+    }
+    THROW_LOG("Set switch to %u channel failed\n", switch_channel);
+    FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
+    return RESPOND_SUCCESS;
+  }
+
+  run_status.switch_channel = switch_channel;
+  // DAC need 2ms at least
+  osDelay(pdMS_TO_TICKS(4));
+  
+  // Check
+  if (Get_Current_Switch_Channel() != switch_channel) {
+    Reset_Switch();
+    if (!Is_Flag_Set(&run_status.exp, EXP_SWITCH)) {
+      THROW_LOG("Switch abnormal\n");
+      Set_Flag(&run_status.exp, EXP_SWITCH);
+    }
+    THROW_LOG("Set switch to %u channel failed 2\n", switch_channel);
+    FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
+    return RESPOND_SUCCESS;
+  }
+
+  Set_Switch_Ready();
+  if (Is_Flag_Set(&run_status.exp, EXP_SWITCH)) {
+    THROW_LOG("Switch back to normal\n");
+    Clear_Flag(&run_status.exp, EXP_SWITCH);
+  }
+  FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
+  return RESPOND_SUCCESS;
+}
+
+uint32_t Cmd_Get_Switch(void)
+{
+  int32_t switch_channel;
+
+  memset(resp_buf.buf, 0, 4);
+  switch_channel = Get_Current_Switch_Channel();
+  if (switch_channel < 0) {
+    BE32_To_Buffer(0, resp_buf.buf);
+    FILL_RESP_MSG(CMD_QUERY_SWITCH, RESPOND_SUCCESS, 4);
+    return RESPOND_SUCCESS;
+  }
+  BE32_To_Buffer((uint32_t)switch_channel, resp_buf.buf);
+  FILL_RESP_MSG(CMD_QUERY_SWITCH, RESPOND_SUCCESS, 4);
+  return RESPOND_SUCCESS;
+}
+
+uint32_t Cmd_Maintain(void)
+{
+  uint32_t err1 = 0, err2 = 0, err3 = 0, err4 = 0;
+  
+  if (Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_2_5)) {
+    err1 |= 1 << 0;
+  }
+  if (Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_3_3)) {
+    err1 |= 1 << 5;
+  }
+  if (Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_5_0)) {
+    err1 |= 1 << 6;
+  }
+  if (Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_64_0)) {
+    err1 |= 1 << 3;
+  }
+  if (Is_Flag_Set(&run_status.exp, EXP_ADC_A)) {
+    err1 |= 1 << 9;
+  }
+  if (Is_Flag_Set(&run_status.exp, EXP_ADC_B)) {
+    err1 |= 1 << 10;
+  }
+  if (Is_Flag_Set(&run_status.exp, EXP_TEMPERATURE)) {
+    err2 |= 1 << 1;
+  }
+  
+  BE32_To_Buffer(0, resp_buf.buf);
+  BE32_To_Buffer(err1, resp_buf.buf + 4);
+  BE32_To_Buffer(err2, resp_buf.buf + 8);
+  BE32_To_Buffer(err3, resp_buf.buf + 12);
+  BE32_To_Buffer(err4, resp_buf.buf + 16);
+  FILL_RESP_MSG(CMD_MAINTAIN, RESPOND_SUCCESS, 20);
+  return RESPOND_SUCCESS;
+}
+
 uint32_t Cmd_For_Debug()
 {
   uint8_t *prdata = trans_buf.buf + CMD_SEQ_MSG_DATA;
-  uint32_t sw_num, ret;
-  int32_t val_x, val_y;
+  uint32_t sw_num, ret, u_val;
+  int32_t val_x, val_y, val;
 
   uint32_t temp = Buffer_To_BE32(prdata);
   memset(resp_buf.buf, 0, 4);
@@ -494,12 +736,12 @@ uint32_t Cmd_For_Debug()
   
   temp = Buffer_To_BE32(prdata + 4);
   if (temp == CMD_DEBUG_SW_DAC) {
-    memset(resp_buf.buf, 0, 12);
+    memset(resp_buf.buf, 0, 4);
     sw_num = Buffer_To_BE32(prdata + 8);
     val_x = (int32_t)Buffer_To_BE32(prdata + 12);
     val_y = (int32_t)Buffer_To_BE32(prdata + 16);
     ret = debug_sw_dac(sw_num, val_x, val_y);
-    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 12);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
     return ret;
   } else if (temp == CMD_DEBUG_SW_ADC) {
     memset(resp_buf.buf, 0, 8);
@@ -520,169 +762,62 @@ uint32_t Cmd_For_Debug()
     ret = debug_tag(sw_num, prdata + 16, ret);
     FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
     return ret;
+  } else if (temp == CMD_DEBUG_PIN) {
+    memset(resp_buf.buf, 0, 4);
+    sw_num = Buffer_To_BE32(prdata + 8);
+    ret = Buffer_To_BE32(prdata + 12);
+    ret = debug_pin(sw_num, ret);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_CAL_SW) {
+    memset(resp_buf.buf, 0, 4);
+    sw_num = Buffer_To_BE32(prdata + 8);
+    val = Buffer_To_BE32(prdata + 12);
+    val_x = (int32_t)Buffer_To_BE32(prdata + 16);
+    val_y = (int32_t)Buffer_To_BE32(prdata + 20);
+    ret = debug_cal_switch(sw_num, val, val_x, val_y);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_CAL_IL) {
+    memset(resp_buf.buf, 0, 4);
+    sw_num = Buffer_To_BE32(prdata + 8);
+    val = (int32_t)Buffer_To_BE32(prdata + 12);
+    ret = debug_cal_il(sw_num, val);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_CAL_THR) {
+    memset(resp_buf.buf, 0, 4);
+    sw_num = Buffer_To_BE32(prdata + 8);
+    val = (int32_t)Buffer_To_BE32(prdata + 12);
+    ret = debug_cal_threshold(sw_num, val);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_DUMP) {
+    memset(resp_buf.buf, 0, 4);
+    sw_num = Buffer_To_BE32(prdata + 8);
+    ret = debug_cal_dump(sw_num, &u_val);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, u_val);
+    return ret;
+  } else if (temp == CMD_DEBUG_EEPROM) {
+    memset(resp_buf.buf, 0, 4);
+    sw_num = Buffer_To_BE32(prdata + 8);
+    u_val = Buffer_To_BE32(prdata + 12);
+    ret = debug_eeprom(sw_num, &u_val);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, u_val);
+    return ret;
+  } else if (temp == CMD_DEBUG_RESET_LOG) {
+    memset(resp_buf.buf, 0, 4);
+    if (Reset_Log_Status() == osOK) {
+      FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_SUCCESS, 4);
+      return RESPOND_SUCCESS;
+    }
+    else {
+      FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_FAILURE, 4);
+      return RESPOND_FAILURE;
+    }
   }
 
   FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 4);
   return RESPOND_UNKNOWN_CMD;
 }
-
-uint32_t debug_sw_dac(uint8_t sw_num, int32_t val_x, int32_t val_y)
-{
-  uint32_t i;
-  uint16_t dac_px_val, dac_nx_val, dac_py_val, dac_ny_val;
-  osStatus_t status;
-
-  if (sw_num >= SWITCH_NUM_TOTAL) {
-    return RESPOND_FAILURE;
-  }
-  if (sw_num != SWITCH_ALL_CHANNEL) {
-    for (i = 0; i < sizeof(switch_map)/sizeof(switch_map[0]); ++i) {
-      if (switch_map[i].sw_num == sw_num) {
-        // x
-        if (val_x >= 0) {
-          dac_px_val = (uint16_t)val_x;
-          dac_nx_val = 0;
-        } else {
-          dac_px_val = 0;
-          dac_nx_val = (uint16_t)my_abs(val_x);
-        }
-        // y
-        if (val_y >= 0) {
-          dac_py_val = (uint16_t)val_y;
-          dac_ny_val = 0;
-        } else {
-          dac_py_val = 0;
-          dac_ny_val = (uint16_t)my_abs(val_y);
-        }
-        break;
-      }
-    }
-    EPT("Debug: sw_num = %u, px = %u, nx = %u, py = %u, ny = %u\n", sw_num, dac_px_val, dac_nx_val, dac_py_val, dac_ny_val);
-    // write dac
-    status = RTOS_DAC5535_Write(switch_map[i].px_chan, dac_px_val);
-    osDelay(1);
-    status |= RTOS_DAC5535_Write(switch_map[i].nx_chan, dac_nx_val);
-    osDelay(1);
-    status |= RTOS_DAC5535_Write(switch_map[i].py_chan, dac_py_val);
-    osDelay(1);
-    status |= RTOS_DAC5535_Write(switch_map[i].ny_chan, dac_ny_val);
-    if (status != osOK) {
-      EPT("Write dac failed\n");
-      return RESPOND_FAILURE;
-    }
-    val_x = switch_map[i].px_chan << 24;
-    val_x |= switch_map[i].nx_chan << 16;
-    val_x |= switch_map[i].py_chan << 8;
-    val_x |= switch_map[i].ny_chan << 0;
-    BE32_To_Buffer(val_x, resp_buf.buf);
-    val_x = dac_px_val << 16;
-    val_x |= dac_nx_val << 0;
-    BE32_To_Buffer(val_x, resp_buf.buf + 4);
-    val_x = dac_py_val << 16;
-    val_x |= dac_ny_val << 0;
-    BE32_To_Buffer(val_x, resp_buf.buf + 8);
-  } else {
-    dac_px_val = (uint16_t)my_abs(val_x);
-    for (i = 0; i < 32; ++i) {
-      status = RTOS_DAC5535_Write((uint8_t)i, dac_px_val);
-      if (status != osOK) {
-        EPT("Write dac failed\n");
-        return RESPOND_FAILURE;
-      }
-      osDelay(1);
-    }
-  }
-
-  return RESPOND_SUCCESS;
-}
-
-uint32_t debug_sw_adc(uint8_t sw_num)
-{
-  uint32_t i;
-  osStatus_t status;
-  uint16_t px, nx, py, ny;
-
-  if (sw_num >= SWITCH_NUM_TOTAL || sw_num == 0) {
-    return RESPOND_FAILURE;
-  }
-
-  for (i = 0; i < sizeof(switch_map)/sizeof(switch_map[0]); ++i) {
-    if (switch_map[i].sw_num == sw_num)
-      break;
-  }
-  status = RTOS_ADC7953_Read(switch_map[i].adc_px_chan, &px);
-  status |= RTOS_ADC7953_Read(switch_map[i].adc_nx_chan, &nx);
-  status |= RTOS_ADC7953_Read(switch_map[i].adc_py_chan, &py);
-  status |= RTOS_ADC7953_Read(switch_map[i].adc_ny_chan, &ny);
-  if (status != osOK) {
-    EPT("Read adc failed\n");
-    return RESPOND_FAILURE;
-  }
-  i = px << 16;
-  i |= nx << 0;
-  BE32_To_Buffer(i, resp_buf.buf);
-  i = py << 16;
-  i |= ny << 0;
-  BE32_To_Buffer(i, resp_buf.buf + 4);
-
-  return RESPOND_SUCCESS;
-}
-
-uint32_t debug_vol_adc(uint8_t chan)
-{
-  osStatus_t status;
-  uint16_t value;
-
-  if (chan > 7) {
-    return RESPOND_FAILURE;
-  }
-
-  status = RTOS_ADC7828_Read(chan, &value);
-  if (status != osOK) {
-    EPT("Read adc failed\n");
-    return RESPOND_FAILURE;
-  }
-  BE32_To_Buffer((uint32_t)value, resp_buf.buf);
-
-  return RESPOND_SUCCESS;
-}
-
-uint32_t debug_tag(uint8_t type, uint8_t *p, uint32_t length)
-{
-  osStatus_t status;
-  uint16_t addr;
-  uint8_t buf[TAG_MAX_SPACE] = {0};
-
-  if (type > 3 || length > TAG_MAX_SPACE) {
-    return RESPOND_FAILURE;
-  }
-  
-  switch (type) {
-    case 0:
-      addr = EE_TAG_PN;
-      break;
-    case 1:
-      addr = EE_TAG_DATE;
-      break;
-    case 2:
-      addr = EE_TAG_ASN;
-      break;
-    case 3:
-      addr = EE_TAG_FSN;
-      break;
-    default:
-      break;
-  }
-
-  memcpy(buf, p, length);
-  status = RTOS_EEPROM_Write(EEPROM_ADDR, addr, buf, sizeof(buf));
-
-  if (status != osOK) {
-    EPT("Read adc failed\n");
-    return RESPOND_FAILURE;
-  }
-
-  return RESPOND_SUCCESS;
-}
-
 

@@ -65,6 +65,7 @@ typedef enum {
   CMD_DEBUG_DUMP          = 0x09,
   CMD_DEBUG_EEPROM        = 0x0A,
   CMD_DEBUG_RESET_LOG     = 0x0B,
+  CMD_DEBUG_WRITE_LOG     = 0x0C,
 } CmdDebugId;
 
 typedef enum {
@@ -79,7 +80,7 @@ typedef enum {
 int8_t cmd_upgrade(uint8_t argc, char **argv);
 int8_t upgrade_init(void);
 int8_t upgrade_init_with_size(char *arg);
-int8_t upgrade_file(void);
+int8_t upgrade_file(uint8_t verify);
 int8_t upgrade_install(void);
 int8_t cmd_version(uint8_t argc, char **argv);
 int8_t cmd_reset(uint8_t argc, char **argv);
@@ -109,8 +110,11 @@ int8_t debug_cal(uint8_t argc, char **argv);
 int8_t debug_dump(uint8_t argc, char **argv);
 int8_t debug_eeprom(uint8_t argc, char **argv);
 int8_t debug_reset_log(uint8_t argc, char **argv);
+int8_t debug_write_log(char *arg1, char *arg2);
 int8_t debug_monitor(uint8_t argc, char **argv);
 int8_t debug_crc32(uint8_t argc, char **argv);
+int8_t debug_print_hex(uint8_t argc, char **argv);
+int8_t debug_send_hex(uint8_t argc, char **argv);
 
 int8_t process_command(uint32_t cmd, uint8_t *pdata, uint32_t len, uint8_t *rx_buf, uint32_t *rx_len);
 uint8_t Cal_Check(uint8_t *pdata, uint32_t len);

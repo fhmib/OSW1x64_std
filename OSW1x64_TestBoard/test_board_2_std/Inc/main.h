@@ -47,6 +47,7 @@ extern "C" {
 extern uint8_t usart1_tx_buf[];
 extern uint8_t usart2_tx_buf[];
 extern uint8_t uart1_irq_sel;
+extern uint8_t print_trans_data;
 
 /* USER CODE END EC */
 

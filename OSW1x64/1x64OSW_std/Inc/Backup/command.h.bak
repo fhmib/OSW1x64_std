@@ -50,6 +50,7 @@ typedef enum {
   CMD_QUERY_IL            = 0x77, // Optical Switch Insertion Loss Request Command
   CMD_SET_SWITCH          = 0xC0, // Set Switch
   CMD_QUERY_SWITCH        = 0xD0, // Switch Status Request
+  CMD_MAINTAIN            = 0xE0,
 
   // for test
   CMD_FOR_DEBUG           = 0x7FFFFFFF,
@@ -60,6 +61,13 @@ typedef enum {
   CMD_DEBUG_SW_ADC        = 0x02,
   CMD_DEBUG_VOL_ADC       = 0x03,
   CMD_DEBUG_TAG           = 0x04,
+  CMD_DEBUG_PIN           = 0x05,
+  CMD_DEBUG_CAL_SW        = 0x06,
+  CMD_DEBUG_CAL_IL        = 0x07,
+  CMD_DEBUG_CAL_THR       = 0x08,
+  CMD_DEBUG_DUMP          = 0x09,
+  CMD_DEBUG_EEPROM        = 0x0A,
+  CMD_DEBUG_RESET_LOG     = 0x0B,
 } CmdDebugId;
 
 typedef enum {
@@ -94,30 +102,6 @@ typedef struct {
   cmdFunc func;
 }CmdStruct;
 
-
-typedef enum {
-  SWITCH_ALL_CHANNEL = 0,
-  SWITCH_NUM_1 = 1,
-  SWITCH_NUM_2 = 2,
-  SWITCH_NUM_3 = 3,
-  SWITCH_NUM_4 = 4,
-  SWITCH_NUM_5 = 5,
-  SWITCH_NUM_6 = 6,
-  SWITCH_NUM_7 = 7,
-  SWITCH_NUM_TOTAL,
-} SwitchNumber;
-
-typedef struct {
-  uint32_t sw_num;
-  uint8_t px_chan; // dac channel correspond to positive x
-  uint8_t nx_chan; // dac channel correspond to negatve x
-  uint8_t py_chan; // dac channel correspond to positive y
-  uint8_t ny_chan; // dac channel correspond to negatve y
-  uint8_t adc_px_chan; // adc channel correspond to positive x
-  uint8_t adc_nx_chan; // adc channel correspond to negatve x
-  uint8_t adc_py_chan; // adc channel correspond to positive y
-  uint8_t adc_ny_chan; // adc channel correspond to negatve y
-} SwitchMapStruct;
 
 
 #define UPGRADE_MAX_DATA_LENGTH     1024
@@ -171,15 +155,15 @@ uint32_t Cmd_Softreset(void);
 uint32_t Cmd_Get_Temperature(void);
 uint32_t Cmd_Device_Status(void);
 uint32_t Cmd_Voltage(void);
+uint32_t Cmd_Voltage_Threshold(void);
 uint32_t Cmd_Set_Time(void);
 uint32_t Cmd_Get_Time(void);
 uint32_t Cmd_LOG_Number(void);
 uint32_t Cmd_LOG_Content(void);
-
+uint32_t Cmd_Get_IL(void);
+uint32_t Cmd_Set_Switch(void);
+uint32_t Cmd_Get_Switch(void);
+uint32_t Cmd_Maintain(void);
 uint32_t Cmd_For_Debug(void);
-uint32_t debug_sw_dac(uint8_t sw_num, int32_t val_x, int32_t val_y);
-uint32_t debug_sw_adc(uint8_t sw_num);
-uint32_t debug_vol_adc(uint8_t chan);
-uint32_t debug_tag(uint8_t type, uint8_t *p, uint32_t length);
 
 #endif

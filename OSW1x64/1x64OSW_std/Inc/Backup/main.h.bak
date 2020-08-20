@@ -41,6 +41,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 /* USER CODE END Includes */
 
@@ -54,9 +55,11 @@ extern "C" {
 extern uint8_t reset_flag;
 extern uint8_t flash_in_use;
 extern LogFileState log_file_state;
+extern ThresholdStruct thr_table;
 extern const uint32_t file_flash_addr[];
 extern const uint32_t file_flash_end;
 extern const uint8_t file_flash_count;
+extern RunTimeStatus run_status;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -67,6 +70,7 @@ extern const uint8_t file_flash_count;
 #define WATCHDOG_PRIORITY         osPriorityISR
 #define INTERRUPT_TASK_PRIORITY   osPriorityISR
 #define LOG_MESSAGE_PRIORITY      osPriorityLow1
+#define MONITOR_PRIORITY          osPriorityLow
 
 #define WATCH_DOG_DELAY_TIME      500 // ms
 #define CMD_WAIT_TEMP_TIME        50    //ms
@@ -93,6 +97,8 @@ extern const uint8_t file_flash_count;
 #define EEPROM_ADDR               (0x50 << 1)
 #define ADC7828_ADDR              (0x48 << 1)
 #define UPGRADE_MAGIC             0xA5A55A5A
+#define LOG_MAGIC                 0xA5A55A5A
+#define RUN_MAGIC                 0xA5A55A5A
 
 /* USER CODE END EM */
 
@@ -110,6 +116,8 @@ void OSW_Init(void);
 #define Strobe_N_Pin GPIO_PIN_13
 #define Strobe_N_GPIO_Port GPIOH
 #define Strobe_N_EXTI_IRQn EXTI15_10_IRQn
+#define SW_READY_Pin GPIO_PIN_14
+#define SW_READY_GPIO_Port GPIOH
 #define HARD_RST_N_Pin GPIO_PIN_0
 #define HARD_RST_N_GPIO_Port GPIOI
 #define HARD_RST_N_EXTI_IRQn EXTI0_IRQn

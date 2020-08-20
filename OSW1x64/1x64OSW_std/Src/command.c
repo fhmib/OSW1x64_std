@@ -15,7 +15,10 @@ RespondStu resp_buf;
 
 UpgradeStruct up_state;
 
-char *fw_version = "ONET00.0100.07"; // 14 bytes
+char *pn = "45070038";
+char *supplier_id = "ONET"; // 4 bytes
+char *hw_version = "01.01"; // 5 bytes
+char *fw_version = "00.02"; // 5 bytes
 
 extern UpgradeFlashState upgrade_status;
 
@@ -99,7 +102,8 @@ uint32_t Cmd_Upgrade_Init()
 
   memset(p, 4, 0);
 
-  if (block_size > UPGRADE_MAX_DATA_LENGTH || block_size < UPGRADE_MIN_DATA_LENGTH) {
+  if (block_size > UPGRADE_MAX_DATA_LENGTH || block_size < UPGRADE_MIN_DATA_LENGTH
+        || block_size % 4 != 0) {
     EPT("Received invalid block size %u\n", block_size);
     THROW_LOG("Received invalid block size %u\n", block_size);
     FILL_RESP_MSG(CMD_UPGRADE_INIT, RESPOND_NOT_CPLT, 4);
@@ -149,10 +153,10 @@ uint32_t Cmd_Upgrade_Data()
       FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
       return RESPOND_SEGMENT_ERR;
     }
-    if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_NAME], "ONET-OSW1x64")) {
+    if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_PN], pn) || 
+          strncmp((char*)&p_fw_data[FW_HEAD_MODULE_HW], hw_version, 2)) {
       EPT("The file is not the firmware corresponding to this module\n");
       THROW_LOG("The file is not the firmware corresponding to this module\n");
-      //PRINT_HEX("module name", p_fw_data, 0x20);
       FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
       return RESPOND_SEGMENT_ERR;
     }
@@ -292,7 +296,9 @@ uint32_t Cmd_Get_Version()
   status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_DATE, buf, 8);
   memcpy(p, buf, 8);
   p += 10;
-  strcpy((char*)p, fw_version);
+  strcpy((char*)p, supplier_id);
+  strcpy((char*)p + 4, hw_version);
+  strcpy((char*)p + 4 + 5, fw_version);
   p += 37;
   status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_ASN, buf, 12);
   memcpy(p, buf, 12);
@@ -364,13 +370,18 @@ uint32_t Cmd_Get_Temperature()
     return RESPOND_SUCCESS;
   }
   temp = Cal_Temp(value);
-  if (temp > thr_table.temp_high || temp < thr_table.temp_low) {
-    EPT("temperature is %lf, high threshold is %lf, low threshold is %lf\n", temp, thr_table.temp_high, thr_table.temp_low);
+  if (temp > run_status.thr_table.temp_high_alarm || temp < run_status.thr_table.temp_low_alarm) {
+    EPT("Current temperature is %lf, high threshold is %lf, low threshold is %lf\n", temp, run_status.thr_table.temp_high_alarm, run_status.thr_table.temp_low_alarm);
+    THROW_LOG("Current temperature is %lf, high threshold is %lf, low threshold is %lf\n", temp, run_status.thr_table.temp_high_alarm, run_status.thr_table.temp_low_alarm);
     *p = switch_endian(1000);
     FILL_RESP_MSG(CMD_QUERY_TEMP, RESPOND_SUCCESS, 4);
     return RESPOND_SUCCESS;
   }
-  res = (int32_t)(temp * 10);
+  if (temp >= 0)
+    res = (int32_t)(temp * 10 + 0.5);
+  else
+    res = (int32_t)(temp * 10 - 0.5);
+
   *p = switch_endian((uint32_t)res);
 
   FILL_RESP_MSG(CMD_QUERY_TEMP, RESPOND_SUCCESS, 4);
@@ -404,7 +415,7 @@ uint32_t Cmd_Voltage()
     value = 0;
   }
   voltage = (double)value / 4096 * 2.5 * 2;
-  value = (uint16_t)(voltage * 10);
+  value = (uint16_t)(voltage * 10 + 0.5);
   BE32_To_Buffer(25, resp_buf.buf + 4);
   BE32_To_Buffer(value, resp_buf.buf + 8);
 
@@ -414,7 +425,7 @@ uint32_t Cmd_Voltage()
     value = 0;
   }
   voltage = (double)value / 4096 * 2.5 * 2;
-  value = (uint16_t)(voltage * 10);
+  value = (uint16_t)(voltage * 10 + 0.5);
   BE32_To_Buffer(33, resp_buf.buf + 12);
   BE32_To_Buffer(value, resp_buf.buf + 16);
 
@@ -424,7 +435,7 @@ uint32_t Cmd_Voltage()
     value = 0;
   }
   voltage = (double)value / 4096 * 2.5 * 3;
-  value = (uint16_t)(voltage * 10);
+  value = (uint16_t)(voltage * 10 + 0.5);
   BE32_To_Buffer(50, resp_buf.buf + 20);
   BE32_To_Buffer(value, resp_buf.buf + 24);
 
@@ -434,7 +445,7 @@ uint32_t Cmd_Voltage()
     value = 0;
   }
   voltage = (double)value / 4096 * 2.5 * 51;
-  value = (uint16_t)(voltage * 10);
+  value = (uint16_t)(voltage * 10 + 0.5);
   BE32_To_Buffer(640, resp_buf.buf + 28);
   BE32_To_Buffer(value, resp_buf.buf + 32);
 
@@ -447,20 +458,20 @@ uint32_t Cmd_Voltage_Threshold()
   BE32_To_Buffer(4, resp_buf.buf);
 
   BE32_To_Buffer(25, resp_buf.buf + 4);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_2_5_high * 10), resp_buf.buf + 8);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_2_5_low * 10), resp_buf.buf + 12);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_2_5_high_alarm * 10 + 0.5), resp_buf.buf + 8);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_2_5_low_alarm * 10 + 0.5), resp_buf.buf + 12);
 
   BE32_To_Buffer(33, resp_buf.buf + 16);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_3_3_high * 10), resp_buf.buf + 20);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_3_3_low * 10), resp_buf.buf + 24);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_3_3_high_alarm * 10 + 0.5), resp_buf.buf + 20);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_3_3_low_alarm * 10 + 0.5), resp_buf.buf + 24);
 
   BE32_To_Buffer(50, resp_buf.buf + 28);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_5_0_high * 10), resp_buf.buf + 32);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_5_0_low * 10), resp_buf.buf + 36);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_5_0_high_alarm * 10 + 0.5), resp_buf.buf + 32);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_5_0_low_alarm * 10 + 0.5), resp_buf.buf + 36);
 
   BE32_To_Buffer(640, resp_buf.buf + 40);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_64_0_high * 10), resp_buf.buf + 44);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_64_0_low * 10), resp_buf.buf + 48);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_64_0_high_alarm * 10 + 0.5), resp_buf.buf + 44);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_64_0_low_alarm * 10 + 0.5), resp_buf.buf + 48);
 
   FILL_RESP_MSG(CMD_QUERY_VOL_THR, RESPOND_SUCCESS, 52);
   return RESPOND_SUCCESS;
@@ -691,7 +702,7 @@ uint32_t Cmd_Maintain(void)
   uint32_t err1 = 0, err2 = 0, err3 = 0, err4 = 0;
   
   if (Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_2_5)) {
-    err1 |= 1 << 0;
+    err1 |= 1 << 1;
   }
   if (Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_3_3)) {
     err1 |= 1 << 5;
@@ -815,6 +826,13 @@ uint32_t Cmd_For_Debug()
       FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_FAILURE, 4);
       return RESPOND_FAILURE;
     }
+  } else if (temp == CMD_DEBUG_WRITE_LOG) {
+    memset(resp_buf.buf, 0, 4);
+    sw_num = Buffer_To_BE32(prdata + 8);
+    u_val = Buffer_To_BE32(prdata + 12);
+    ret = debug_write_log(sw_num, u_val);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
   }
 
   FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 4);

@@ -46,6 +46,18 @@ uint32_t my_abs(int32_t val)
   return p_val;
 }
 
+uint8_t Is_Value_Approximate(int32_t src, int32_t dst, double factor)
+{
+  double src_rate = (double)src / 0x1000;
+  double dst_rate = (double)dst / 0x4000;
+  
+  if (src_rate < dst_rate - factor || src_rate > dst_rate + factor) {
+    return 0;
+  }
+  
+  return 1;
+}
+
 /**
   * @brief  Update CRC16 for input byte
   * @param  crc_in input value 
@@ -149,7 +161,7 @@ void PRINT_HEX(char *head, uint8_t *pdata, uint32_t len)
       PRINT("%08X : ", i / 0x10);
     }
     PRINT("0x%02X%s", pdata[i], (i + 1) % 0x10 == 0 ? "\n" : i == len - 1 ? "\n" : " ");
-    HAL_Delay(10);
+    osDelay(pdMS_TO_TICKS(10));
   }
   PRINT("************* PRINT END *************\n");
 }
@@ -207,10 +219,12 @@ osStatus_t RTOS_EEPROM_Write(int16_t dev_addr, uint16_t mem_addr, uint8_t *buf, 
   HAL_StatusTypeDef ret;
 
   if ((status = osMutexAcquire(i2c2Mutex, I2C_WAIT_TIMEOUT)) != osOK) {
+    THROW_LOG("Acquire mutex of i2c2 failed\n");
     return status;
   }
 
   if ((ret = I2cEepromWrite(dev_addr, mem_addr, buf, length)) != HAL_OK) {
+    THROW_LOG("Write EEPROM failed, ret = %u, ErrorCode = %#X\n", ret, hi2c2.ErrorCode);
     if (ret == HAL_ERROR) status = osError;
     else if (ret == HAL_BUSY) status = osErrorResource;
     else if (ret == HAL_TIMEOUT) status = osErrorTimeout;
@@ -226,10 +240,12 @@ osStatus_t RTOS_EEPROM_Read(int16_t dev_addr, uint16_t mem_addr, uint8_t *buf, i
   HAL_StatusTypeDef ret;
 
   if ((status = osMutexAcquire(i2c2Mutex, I2C_WAIT_TIMEOUT)) != osOK) {
+    THROW_LOG("Acquire mutex of i2c2 failed\n");
     return status;
   }
   
   if ((ret = I2cEepromRead(dev_addr, mem_addr, buf, length)) != HAL_OK) {
+    THROW_LOG("Read EEPROM failed, ret = %u, ErrorCode = %#X\n", ret, hi2c2.ErrorCode);
     if (ret == HAL_ERROR) status = osError;
     else if (ret == HAL_BUSY) status = osErrorResource;
     else if (ret == HAL_TIMEOUT) status = osErrorTimeout;
@@ -279,16 +295,18 @@ osStatus_t RTOS_DAC5535_Write(uint8_t chan, uint16_t val)
   uint8_t buf[3];
 
   if ((status = osMutexAcquire(spi1Mutex, I2C_WAIT_TIMEOUT)) != osOK) {
+    THROW_LOG("Acquire mutex of spi1 failed\n");
     return status;
   }
 
   buf[0] = ((chan & 0x1F) << 3) | ((val >> 11) & 0x7);
   buf[1] = val >> 3;
   buf[2] = (val & 0x7) << 5;
-  EPT("Dac value: %#X %#X %#X\n", buf[0], buf[1], buf[2]);
+  //EPT("Dac value: %#X %#X %#X\n", buf[0], buf[1], buf[2]);
   HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET);
-  if (HAL_SPI_Transmit(&hspi1, buf, 3, 50) != HAL_OK) {
+  if (HAL_SPI_Transmit(&hspi1, buf, 3, 10) != HAL_OK) {
+    THROW_LOG("Write DAC5535 failed, ErrorCode = %#X\n", hspi1.ErrorCode);
     status = osError;
   }
 
@@ -312,6 +330,7 @@ osStatus_t RTOS_ADC7953_SPI4_Read(uint8_t chan, uint16_t *val)
   uint8_t txbuf[2], rxbuf[2], chan_rb;
 
   if ((status = osMutexAcquire(spi4Mutex, I2C_WAIT_TIMEOUT)) != osOK) {
+    THROW_LOG("Acquire mutex of spi4 failed\n");
     return status;
   }
 
@@ -321,12 +340,12 @@ osStatus_t RTOS_ADC7953_SPI4_Read(uint8_t chan, uint16_t *val)
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_RESET);
   hal_status = HAL_SPI_TransmitReceive(&hspi4, txbuf, rxbuf, 2, 50);
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_SET);
-  osDelay(1);
+  //osDelay(1);
 
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_RESET);
   hal_status = HAL_SPI_TransmitReceive(&hspi4, txbuf, rxbuf, 2, 50);
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_SET);
-  osDelay(1);
+  //osDelay(1);
 
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_RESET);
   hal_status = HAL_SPI_TransmitReceive(&hspi4, txbuf, rxbuf, 2, 50);
@@ -335,17 +354,31 @@ osStatus_t RTOS_ADC7953_SPI4_Read(uint8_t chan, uint16_t *val)
   osMutexRelease(spi4Mutex);
 
   if (hal_status != HAL_OK) {
+    THROW_LOG("Read ADC7953A failed, ErrorCode = %#X\n", hspi4.ErrorCode);
+    if (!Is_Flag_Set(&run_status.exp, EXP_ADC_A)) {
+      THROW_LOG("ADC7953A abnormal\n");
+      Set_Flag(&run_status.exp, EXP_ADC_A);
+    }
     return osError;
   }
 
   chan_rb = rxbuf[0] >> 4;
   if (chan_rb != chan) {
-    EPT("rChanIdx != chanIdx, communication failed\n");
+    EPT("Read 1st ADC7953 failed, rChanIdx != chanIdx\n");
+    THROW_LOG("Read 1st ADC7953 failed, rChanIdx != chanIdx\n");
+    if (!Is_Flag_Set(&run_status.exp, EXP_ADC_A)) {
+      THROW_LOG("ADC7953A abnormal\n");
+      Set_Flag(&run_status.exp, EXP_ADC_A);
+    }
     return osError;
   } else {
     *val = ((rxbuf[0] & 0xf) << 8) | rxbuf[1];
   }
 
+  if (Is_Flag_Set(&run_status.exp, EXP_ADC_A)) {
+    THROW_LOG("ADC7953A back to normal\n");
+    Clear_Flag(&run_status.exp, EXP_ADC_A);
+  }
   return status;
 }
 
@@ -356,6 +389,7 @@ osStatus_t RTOS_ADC7953_SPI5_Read(uint8_t chan, uint16_t *val)
   uint8_t txbuf[2], rxbuf[2], chan_rb;
 
   if ((status = osMutexAcquire(spi5Mutex, I2C_WAIT_TIMEOUT)) != osOK) {
+    THROW_LOG("Acquire mutex of spi5 failed\n");
     return status;
   }
 
@@ -365,12 +399,12 @@ osStatus_t RTOS_ADC7953_SPI5_Read(uint8_t chan, uint16_t *val)
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_RESET);
   hal_status = HAL_SPI_TransmitReceive(&hspi5, txbuf, rxbuf, 2, 50);
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_SET);
-  osDelay(1);
+  //osDelay(1);
 
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_RESET);
   hal_status = HAL_SPI_TransmitReceive(&hspi5, txbuf, rxbuf, 2, 50);
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_SET);
-  osDelay(1);
+  //osDelay(1);
 
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_RESET);
   hal_status = HAL_SPI_TransmitReceive(&hspi5, txbuf, rxbuf, 2, 50);
@@ -379,17 +413,31 @@ osStatus_t RTOS_ADC7953_SPI5_Read(uint8_t chan, uint16_t *val)
   osMutexRelease(spi5Mutex);
 
   if (hal_status != HAL_OK) {
+    THROW_LOG("Read ADC7953B failed, ErrorCode = %#X\n", hspi5.ErrorCode);
+    if (!Is_Flag_Set(&run_status.exp, EXP_ADC_B)) {
+      THROW_LOG("ADC7953B abnormal\n");
+      Set_Flag(&run_status.exp, EXP_ADC_B);
+    }
     return osError;
   }
 
   chan_rb = rxbuf[0] >> 4;
   if (chan_rb != chan) {
-    EPT("rChanIdx != chanIdx, communication failed\n");
+    EPT("Read ADC7953B failed, rChanIdx != chanIdx\n");
+    THROW_LOG("Read ADC7953B failed, rChanIdx != chanIdx\n");
+    if (!Is_Flag_Set(&run_status.exp, EXP_ADC_B)) {
+      THROW_LOG("ADC7953B abnormal\n");
+      Set_Flag(&run_status.exp, EXP_ADC_B);
+    }
     return osError;
   } else {
     *val = ((rxbuf[0] & 0xf) << 8) | rxbuf[1];
   }
 
+  if (Is_Flag_Set(&run_status.exp, EXP_ADC_B)) {
+    THROW_LOG("ADC7953B back to normal\n");
+    Clear_Flag(&run_status.exp, EXP_ADC_B);
+  }
   return status;
 }
 
@@ -400,6 +448,7 @@ osStatus_t RTOS_ADC7828_Read(uint8_t chan, uint16_t *val)
   uint8_t txbuf, rxbuf[2];
 
   if ((status = osMutexAcquire(i2c1Mutex, I2C_WAIT_TIMEOUT)) != osOK) {
+    THROW_LOG("Acquire mutex of i2c1 failed\n");
     return status;
   }
 
@@ -411,6 +460,7 @@ osStatus_t RTOS_ADC7828_Read(uint8_t chan, uint16_t *val)
   osMutexRelease(i2c1Mutex);
 
   if (hal_status != HAL_OK) {
+    THROW_LOG("Read ADC7828 failed, ErrorCode = %#X\n", hi2c1.ErrorCode);
     return osError;
   }
 

@@ -55,7 +55,6 @@ extern "C" {
 extern uint8_t reset_flag;
 extern uint8_t flash_in_use;
 extern LogFileState log_file_state;
-extern ThresholdStruct thr_table;
 extern const uint32_t file_flash_addr[];
 extern const uint32_t file_flash_end;
 extern const uint8_t file_flash_count;
@@ -65,7 +64,6 @@ extern RunTimeStatus run_status;
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 #define UART_PROCESS_PRIORITY     osPriorityRealtime6
-#define UART_DMA_WAIT_PRIORITY    osPriorityRealtime5
 #define CMD_PROCESS_PRIORITY      osPriorityHigh
 #define WATCHDOG_PRIORITY         osPriorityISR
 #define INTERRUPT_TASK_PRIORITY   osPriorityISR

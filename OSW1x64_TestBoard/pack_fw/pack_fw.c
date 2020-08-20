@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	struct stat file_stat;
 	uint32_t file_length, length;
 	uint8_t buf[256];
-	char d_name[16];
+	char d_name[64];
 	char m_name[32];
 
 	if (argc < 2) {
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 
 	printf("Please input version:");
 	scanf("%s", buf);
-	sprintf(d_name, "fw_%s", buf);
+	sprintf(d_name, "OSW1x64_testboard_%s.bin", buf);
 	sprintf(m_name, "ONET-BJ-TESTBOARD2.0");
 
 	fp = fopen(d_name, "wb");
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 	printf("Write %u bytes to %s\n", length, d_name);
 
 	while ((length = fread(buf, 1, 256, fp_old)) != 0) {
-		printf("Write %u bytes to %s\n", length, argv[1]);
+		printf("Write %u bytes to %s\n", length, d_name);
 		fwrite(buf, 1, length, fp);
 	}
 

@@ -4,6 +4,8 @@
 #include "main.h"
 #include "cmsis_os.h"
 
+extern char *supplier_id;
+extern char *hw_version;
 extern char *fw_version;
 
 #define TAG_MAX_SPACE               0x20
@@ -68,6 +70,7 @@ typedef enum {
   CMD_DEBUG_DUMP          = 0x09,
   CMD_DEBUG_EEPROM        = 0x0A,
   CMD_DEBUG_RESET_LOG     = 0x0B,
+  CMD_DEBUG_WRITE_LOG     = 0x0C,
 } CmdDebugId;
 
 typedef enum {
@@ -109,6 +112,8 @@ typedef struct {
 
 typedef enum {
   FW_HEAD_MODULE_NAME    = 0x00,
+	FW_HEAD_MODULE_PN      = 0x20,
+	FW_HEAD_MODULE_HW      = 0x40,
   FW_HEAD_FW_LENGTH      = 0xC0,
   FW_HEAD_CRC            = 0xC4,
   FW_HEAD_END            = 0xFF,

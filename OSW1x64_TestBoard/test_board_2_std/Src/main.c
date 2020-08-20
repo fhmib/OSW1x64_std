@@ -41,7 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define VER "OSW1x64_testboard_1.0.0"
+#define VER "OSW1x64_testboard_1.0.1"
 #define CMD_LENGTH 256
 /* USER CODE END PD */
 
@@ -71,6 +71,7 @@ uint32_t counter = 0;
 extern usart_tr_stu *usart1_tr;
 uint8_t uart1_data;
 uint8_t uart1_irq_sel;
+uint8_t print_trans_data;
 
 /* USER CODE END 0 */
 
@@ -112,6 +113,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+  print_trans_data = 0;
   CLEAR_BIT(TERMINAL_UART.Instance->SR, USART_SR_RXNE);
   __HAL_UART_FLUSH_DRREGISTER(&TERMINAL_UART);
   rb_init(usart1_tr->rb, USART_RX_BUF_SIZE, usart1_tr->rx_buf);

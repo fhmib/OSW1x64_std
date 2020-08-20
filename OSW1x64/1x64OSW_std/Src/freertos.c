@@ -273,7 +273,6 @@ void uartProcessTask(void *argument)
     status = osSemaphoreAcquire(uartProcessSemaphore, wait_time);
     if (status != osOK) {
       HAL_UART_DMAStop(&huart1);
-      msg_id = 0;
       EPT("DMA timeout, stage = %u, ErrorCode = %#X\n", trans_buf.stage, huart1.ErrorCode);
       THROW_LOG("DMA timeout, stage = %u, ErrorCode = %#X\n", trans_buf.stage, huart1.ErrorCode);
       Uart_Respond(msg_id, RESPOND_LENGTH_ERR, NULL, 0);
@@ -290,6 +289,7 @@ void uartProcessTask(void *argument)
         HAL_UART_Receive_IT(&huart1, trans_buf.buf, 1);
       } else {
         // Prepare to receive message header
+        msg_id = 0;
         trans_buf.stage = TRANS_WAIT_HEADER;
         HAL_UART_Receive_DMA(&huart1, &trans_buf.buf[CMD_SEQ_MSG_ID], 8);
       }
@@ -302,7 +302,6 @@ void uartProcessTask(void *argument)
       if (msg_length > TRANS_MAX_LENGTH - 1 || msg_length < 4 * 5) {
         // Length invalid
         PRINT_HEX("buf", trans_buf.buf, 9);
-        msg_id = 0;
         EPT("Invalid length %#X\n", msg_length);
         THROW_LOG("Invalid length %#X\n", msg_length);
         Uart_Respond(msg_id, RESPOND_LENGTH_ERR, NULL, 0);
@@ -323,7 +322,7 @@ void uartProcessTask(void *argument)
       if (chk ^ switch_endian(*p32)) {
         // Incorrect
         THROW_LOG("UART CRC32 verification failed, msg_length = %#X, trans_buf.length = %#X, chk = %#X, rcv_chk = %#X\n",\
-          msg_length, trans_buf.length, chk, switch_endian((uint32_t)trans_buf.buf[trans_buf.length - 4]));
+          msg_length, trans_buf.length, chk, switch_endian(*(uint32_t*)&trans_buf.buf[trans_buf.length - 4]));
         EPT("UART CRC32 verification failed\n");
         EPT("msg_length = %#X, trans_buf.length = %#X, chk = %#X, rcv_chk = %#X\n", msg_length, trans_buf.length, chk, switch_endian((uint32_t)trans_buf.buf[trans_buf.length - 4]));
         PRINT_HEX("buf", trans_buf.buf, trans_buf.length);
@@ -350,7 +349,6 @@ void uartProcessTask(void *argument)
         }
       }
 
-      msg_id = 0;
       trans_buf.stage = TRANS_WAIT_START;
       HAL_UART_Receive_IT(&huart1, trans_buf.buf, 1);
     }
@@ -497,13 +495,14 @@ void logTask(void *argument)
     if (remainder) remainder = 4 - remainder;
     if (log_file_state.offset + log_msg.length + remainder >= overflow_addr) {
       // 1. fill the rest space with ' '
-      Log_Write_byte(log_file_state.offset, ' ', overflow_addr - log_file_state.offset);
-      
+      Log_Write_byte(log_file_state.offset, ' ', overflow_addr - log_file_state.offset - 4);
+      Log_Write_byte(log_file_state.offset + overflow_addr - log_file_state.offset - 4, '\n', 4);
+
       // 2. erase flash
       while (flash_in_use) {
         osDelay(pdMS_TO_TICKS(200));
       }
-      THROW_LOG("Log space overflow, erasing flash sector %u\n", next_sector);
+      //THROW_LOG("Log space overflow, erasing flash sector %u\n", next_sector);
       flash_in_use = 1;
       osSemaphoreAcquire(logEraseSemaphore, 0);
       FLASH_If_Erase_IT(next_sector);
@@ -562,6 +561,7 @@ void monitorTask(void *argument)
     } else {
       voltage = (double)value / 4096 * 2.5 * 2;
     }
+#if 0
     if (voltage > thr_table.vol_2_5_high || voltage < thr_table.vol_2_5_low) {
       if (!Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_2_5)) {
         THROW_LOG("Voltage 2.5V abnormal\n");
@@ -573,6 +573,19 @@ void monitorTask(void *argument)
         Clear_Flag(&run_status.exp, EXP_VOLTAGE_2_5);
       }
     }
+#else
+    if (!Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_2_5)) {
+      if (voltage > run_status.thr_table.vol_2_5_high_alarm || voltage < run_status.thr_table.vol_2_5_low_alarm) {
+        THROW_LOG("Voltage 2.5V abnormal, current voltage = %.3lfV\n", voltage);
+        Set_Flag(&run_status.exp, EXP_VOLTAGE_2_5);
+      }
+    } else {
+      if (voltage <= run_status.thr_table.vol_2_5_high_clear && voltage >= run_status.thr_table.vol_2_5_low_clear) {
+        THROW_LOG("Voltage 2.5V back to normal\n");
+        Clear_Flag(&run_status.exp, EXP_VOLTAGE_2_5);
+      }
+    }
+#endif
 
     status = RTOS_ADC7828_Read(VOLTAGE_3_3_CHANNEL, &value);
     if (status != osOK) {
@@ -580,6 +593,7 @@ void monitorTask(void *argument)
     } else {
       voltage = (double)value / 4096 * 2.5 * 2;
     }
+#if 0
     if (voltage > thr_table.vol_3_3_high || voltage < thr_table.vol_3_3_low) {
       if (!Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_3_3)) {
         THROW_LOG("Voltage 3.3V abnormal\n");
@@ -591,6 +605,19 @@ void monitorTask(void *argument)
         Clear_Flag(&run_status.exp, EXP_VOLTAGE_3_3);
       }
     }
+#else
+    if (!Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_3_3)) {
+      if (voltage > run_status.thr_table.vol_3_3_high_alarm || voltage < run_status.thr_table.vol_3_3_low_alarm) {
+        THROW_LOG("Voltage 3.3V abnormal, current voltage = %.3lfV\n", voltage);
+        Set_Flag(&run_status.exp, EXP_VOLTAGE_3_3);
+      }
+    } else {
+      if (voltage <= run_status.thr_table.vol_3_3_high_clear - 0.05 && voltage >= run_status.thr_table.vol_3_3_low_clear + 0.05) {
+        THROW_LOG("Voltage 3.3V back to normal\n");
+        Clear_Flag(&run_status.exp, EXP_VOLTAGE_3_3);
+      }
+    }
+#endif
 
     status = RTOS_ADC7828_Read(VOLTAGE_5_0_CHANNEL, &value);
     if (status != osOK) {
@@ -599,6 +626,7 @@ void monitorTask(void *argument)
     } else {
       voltage = (double)value / 4096 * 2.5 * 3;
     }
+#if 0
     if (voltage > thr_table.vol_5_0_high || voltage < thr_table.vol_5_0_low) {
       if (!Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_5_0)) {
         THROW_LOG("Voltage 5V abnormal\n");
@@ -610,6 +638,19 @@ void monitorTask(void *argument)
         Clear_Flag(&run_status.exp, EXP_VOLTAGE_5_0);
       }
     }
+#else
+    if (!Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_5_0)) {
+      if (voltage > run_status.thr_table.vol_5_0_high_alarm || voltage < run_status.thr_table.vol_5_0_low_alarm) {
+        THROW_LOG("Voltage 5V abnormal, current voltage = %.3lfV\n", voltage);
+        Set_Flag(&run_status.exp, EXP_VOLTAGE_5_0);
+      }
+    } else {
+      if (voltage <= run_status.thr_table.vol_5_0_high_clear && voltage >= run_status.thr_table.vol_5_0_low_clear) {
+        THROW_LOG("Voltage 5V back to normal\n");
+        Clear_Flag(&run_status.exp, EXP_VOLTAGE_5_0);
+      }
+    }
+#endif
 
     status = RTOS_ADC7828_Read(VOLTAGE_64_0_CHANNEL, &value);
     if (status != osOK) {
@@ -618,6 +659,7 @@ void monitorTask(void *argument)
     } else {
       voltage = (double)value / 4096 * 2.5 * 51;
     }
+#if 0
     if (voltage > thr_table.vol_64_0_high || voltage < thr_table.vol_64_0_low) {
       if (!Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_64_0)) {
         THROW_LOG("Voltage 64V abnormal\n");
@@ -629,6 +671,19 @@ void monitorTask(void *argument)
         Clear_Flag(&run_status.exp, EXP_VOLTAGE_64_0);
       }
     }
+#else
+    if (!Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_64_0)) {
+      if (voltage > run_status.thr_table.vol_64_0_high_alarm || voltage < run_status.thr_table.vol_64_0_low_alarm) {
+        THROW_LOG("Voltage 64V abnormal, current voltage = %.3lfV\n", voltage);
+        Set_Flag(&run_status.exp, EXP_VOLTAGE_64_0);
+      }
+    } else {
+      if (voltage <= run_status.thr_table.vol_64_0_high_clear && voltage >= run_status.thr_table.vol_64_0_low_clear) {
+        THROW_LOG("Voltage 64V back to normal\n");
+        Clear_Flag(&run_status.exp, EXP_VOLTAGE_64_0);
+      }
+    }
+#endif
 
     status = RTOS_ADC7828_Read(TEMPERATURE_CHANNEL, &value);
     if (status != osOK) {
@@ -637,6 +692,7 @@ void monitorTask(void *argument)
     } else {
       temp = Cal_Temp(value);
     }
+#if 0
     if (temp > thr_table.temp_high || temp < thr_table.temp_low) {
       if (!Is_Flag_Set(&run_status.exp, EXP_TEMPERATURE)) {
         THROW_LOG("Temperature abnormal\n");
@@ -648,6 +704,19 @@ void monitorTask(void *argument)
         Clear_Flag(&run_status.exp, EXP_TEMPERATURE);
       }
     }
+#else
+    if (!Is_Flag_Set(&run_status.exp, EXP_TEMPERATURE)) {
+      if (temp > run_status.thr_table.temp_high_alarm || temp < run_status.thr_table.temp_low_alarm) {
+        THROW_LOG("Temperature abnormal, current temperature = %.3lfC\n", temp);
+        Set_Flag(&run_status.exp, EXP_TEMPERATURE);
+      }
+    } else {
+      if (temp <= run_status.thr_table.temp_high_clear && temp >= run_status.thr_table.temp_low_clear) {
+        THROW_LOG("Temperature back to normal\n");
+        Clear_Flag(&run_status.exp, EXP_TEMPERATURE);
+      }
+    }
+#endif
 
     if (run_status.exp && !pre_alarm) {
       Set_Alarm();

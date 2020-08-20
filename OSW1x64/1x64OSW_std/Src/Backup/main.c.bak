@@ -55,16 +55,20 @@ uint8_t reset_flag = 0;
 uint8_t flash_in_use;
 UpgradeFlashState upgrade_status;
 LogFileState log_file_state;
-const uint32_t file_flash_addr[] =  {  0x08100000, 0x08104000, 0x08108000 };
-const uint32_t file_flash_end = 0x0810BFFF;
+ThresholdStruct thr_table;
+const uint32_t file_flash_addr[] =  {  0x08100000, 0x08104000, 0x08108000, 0x0810C000, 0x08110000, 0x08120000,\
+                                       0x08140000, 0x08160000, 0x08180000, 0x081A0000, 0x081C0000, 0x081E0000};
+const uint32_t file_flash_end = 0x081FFFFF;
 const uint8_t file_flash_count = sizeof(file_flash_addr) / sizeof (file_flash_addr[0]);
+
+RunTimeStatus run_status __attribute__((at(0x2002FC00)));
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-void OSW_Pre_Init(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -113,8 +117,12 @@ int main(void)
   MX_USART3_UART_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  OSW_Pre_Init();
-
+  uint8_t buf[3] = {0};
+  if (HAL_SPI_Transmit(&hspi1, buf, 1, 10) != HAL_OK) {
+    EPT("spi1 transmit filed when init\n");
+  }
+  HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
   /* Init scheduler */
   osKernelInitialize();
@@ -195,10 +203,6 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void OSW_Pre_Init()
-{
-  Clear_Alarm();
-}
 
 extern RespondStu resp_buf;
 void OSW_Init(void)
@@ -212,59 +216,123 @@ void OSW_Init(void)
 
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST) != RESET){
     SET_RESETFLAG(BOR_RESET_BIT);
-    EPT("BOR Reset is set\n");
+    //EPT("BOR Reset is set\n");
   }
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST) != RESET){
     SET_RESETFLAG(PIN_RESET_BIT);
-    EPT("PIN Reset is set\n");
+    //EPT("PIN Reset is set\n");
   }
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST) != RESET){
     SET_RESETFLAG(POR_RESET_BIT);
-    EPT("POR/PDR Reset is set\n");
+    //EPT("POR/PDR Reset is set\n");
   }
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST) != RESET){
     SET_RESETFLAG(SFT_RESET_BIT);
-    EPT("Software Reset is set\n");
-    memset(p, 0, 116);
-    p += 4;
-    p += 16;
-    //status = RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_PN, buf, 8);
-    //memcpy(p, buf, 8);
-    p += 10;
-    //status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_DATE, buf, 8);
-    //memcpy(p, buf, 8);
-    p += 10;
-    strcpy((char*)p, fw_version);
-    p += 37;
-    status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_ASN, buf, 12);
-    memcpy(p, buf, 12);
-    p += 20;
-    status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_FSN, buf, 23);
-    memcpy(p, buf, 23);
-    p += 23;
-    if (status != osOK) {
-      EPT("EEPROM ERROR! status = %#X", status);
-    }
-
-    Uart_Respond(CMD_SOFTRESET, RESPOND_SUCCESS, resp_buf.buf, 120);
+    //EPT("Software Reset is set\n");
   }
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) != RESET){
     SET_RESETFLAG(IWDG_RESET_BIT);
-    EPT("Independent Watchdog Reset is set\n");
+    //EPT("Independent Watchdog Reset is set\n");
   }
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST) != RESET){
     SET_RESETFLAG(WWDG_RESET_BIT);
-    EPT("Window Watchdog Reset is set\n");
+    //EPT("Window Watchdog Reset is set\n");
   }
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_LPWRRST) != RESET){
     SET_RESETFLAG(LPWR_RESET_BIT);
-    EPT("Low-Power Reset is set\n");
+    //EPT("Low-Power Reset is set\n");
   }
-/*
-  if (IS_RESETFLAG_SET(BOR_RESET_BIT)) {
-  }
-*/
   __HAL_RCC_CLEAR_RESET_FLAGS();
+  EPT("Run status maigc = %#X, uart_reset = %u\n", run_status.maigc, run_status.uart_reset);
+
+  if (IS_RESETFLAG_SET(SFT_RESET_BIT) || IS_RESETFLAG_SET(IWDG_RESET_BIT)) {
+    if (run_status.maigc == RUN_MAGIC) {
+      if (run_status.uart_reset) {
+        run_status.uart_reset = 0;
+        EPT("Startup with UART Reset\n");
+        THROW_LOG("Startup with SOFT Reset\n");
+        memset(p, 0, 116);
+        p += 4; p += 36;
+        strcpy((char*)p, fw_version);
+        p += 37;
+        status = RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_ASN, buf, 12);
+        memcpy(p, buf, 12);
+        p += 20;
+        status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_FSN, buf, 23);
+        memcpy(p, buf, 23);
+        p += 23;
+        if (status != osOK) {
+          EPT("EEPROM ERROR! status = %d\n", status);
+          //THROW_LOG("Read EEPROM Failed! status = %d\n", status);
+        }
+        Uart_Respond(CMD_SOFTRESET, RESPOND_SUCCESS, resp_buf.buf, 120);
+      } else {
+        if (IS_RESETFLAG_SET(IWDG_RESET_BIT)) {
+          EPT("Startup with WATCHDOG Reset\n");
+          THROW_LOG("Startup with WATCHDOG Reset\n");
+        } else {
+          EPT("Startup with HARD Reset\n");
+          THROW_LOG("Startup with HARD Reset\n");
+        }
+      }
+      
+      EPT("The optical switch channel configured last time is %u\n", run_status.switch_channel);
+      if (run_status.switch_channel != (uint32_t)Get_Current_Switch_Channel()) {
+        EPT("Detect optical switch channel incorrect while initializing\n");
+        THROW_LOG("Detect optical switch channel %u incorrect while initializing\n", run_status.switch_channel);
+        Reset_Switch();
+      }
+      
+      if (run_status.exp) {
+        HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_RESET);
+      } else {
+        HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_SET);
+      }
+      if (run_status.switch_channel) {
+        HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_RESET);
+      } else {
+        HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_SET);
+      }
+    } else {
+      // Init device
+      HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_SET);
+      osDelay(pdMS_TO_TICKS(1));
+      HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_RESET);
+      Init_Run_Status();
+      EPT("Variable run_status exception\n");
+      THROW_LOG("Variable run_status exception\n");
+    }
+  } else if (IS_RESETFLAG_SET(BOR_RESET_BIT) || IS_RESETFLAG_SET(POR_RESET_BIT)) {
+    // Init device
+    HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_SET);
+    osDelay(pdMS_TO_TICKS(1));
+    HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_RESET);
+    Init_Run_Status();
+    EPT("Startup with POWER Reset\n");
+    //THROW_LOG("Startup with POWER Reset\n");
+  } else {
+    Reset_Switch();
+    // Init device
+    HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_SET);
+    osDelay(pdMS_TO_TICKS(1));
+    HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_RESET);
+    Init_Run_Status();
+    EPT("Startup with MASTER Reset\n");
+    THROW_LOG("Startup with MASTER Reset\n");
+  }
+
+  // Read threshold to variable
+  status = Get_Threshold_Table(&thr_table);
+  if (status) {
+    EPT("Get threshold table failed, status = %d\n", status);
+    THROW_LOG("Get threshold table failed, status = %d\n", status);
+  }
 
   // upgrade
   up_state.run = RUN_MODE_APPLICATION;
@@ -274,13 +342,15 @@ void OSW_Init(void)
   FLASH_If_Init();
   status = Get_Up_Status(&upgrade_status);
   if (status) {
-    EPT("Get upgrade status failed, status = %u\n", status);
+    EPT("Get upgrade status failed, status = %d\n", status);
+    THROW_LOG("Get upgrade status failed, status = %d\n", status);
   }
   EPT("upgrade_status: %#X, %u, %u, %u, %#X, %u, %#X\n", upgrade_status.magic, upgrade_status.run, upgrade_status.flash_empty, upgrade_status.length, upgrade_status.crc32,\
                 upgrade_status.factory_length, upgrade_status.factory_crc32);
 
   if (upgrade_status.magic != UPGRADE_MAGIC) {
-    EPT("Verify f_state.magic failed\n");
+    EPT("Verify upgrade magic failed\n");
+    THROW_LOG("Verify upgrade magic failed\n");
   }
   switch (upgrade_status.run) {
     case 0:
@@ -300,6 +370,7 @@ void OSW_Init(void)
       break;
     default:
       EPT("f_state.run invalid\n");
+      THROW_LOG("f_state.run invalid\n");
       up_state.upgrade_addr = RESERVE_ADDRESS;
       up_state.upgrade_sector = RESERVE_SECTOR;
       break;
@@ -326,9 +397,6 @@ void OSW_Init(void)
     }
   }
   log_file_state.cur_sector = LOG_FIRST_SECTOR + i;
-
-  Throw_Log((uint8_t*)"OSW1x64 program\n", 16);
-
 }
 
 extern FLASH_ProcessTypeDef pFlash;
@@ -355,14 +423,19 @@ void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue)
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  uint32_t sw_num;
+  MsgStruct isr_msg;
 
-  if (GPIO_Pin == GPIO_PIN_13) {
+  if (GPIO_Pin == Strobe_N_Pin) {
     if (HAL_GPIO_ReadPin(SW_MODE_SEL_GPIO_Port, SW_MODE_SEL_Pin) == GPIO_PIN_SET) {
-      EPT("Switch strobe signal come but switch mode is set\n");
+      //EPT("Switch strobe signal come but switch mode is wrong\n");
+      //THROW_LOG("Switch strobe signal come but switch mode is wrong\n");
     } else {
-      sw_num = Get_SW_By_IO();
-      EPT("Switch number is %u\n", sw_num);
+      isr_msg.type = MSG_TYPE_SWITCH_ISR;
+      osMessageQueuePut(mid_ISR, &isr_msg, 0U, 0U);
+    }
+  } else if (GPIO_Pin == HARD_RST_N_Pin) {
+    __NVIC_SystemReset();
+    while (1) {
     }
   }
 }
