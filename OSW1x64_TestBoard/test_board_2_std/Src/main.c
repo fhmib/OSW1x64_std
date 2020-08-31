@@ -41,7 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define VER "OSW1x64_testboard_1.0.1"
+#define VER "OSW1x64_testboard_1.0.2"
 #define CMD_LENGTH 256
 /* USER CODE END PD */
 

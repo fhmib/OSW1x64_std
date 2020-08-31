@@ -18,7 +18,7 @@ UpgradeStruct up_state;
 char *pn = "45070038";
 char *supplier_id = "ONET"; // 4 bytes
 char *hw_version = "01.01"; // 5 bytes
-char *fw_version = "00.02"; // 5 bytes
+char *fw_version = "01.01"; // 5 bytes
 
 extern UpgradeFlashState upgrade_status;
 
@@ -172,19 +172,38 @@ uint32_t Cmd_Upgrade_Data()
                       (p_fw_data[FW_HEAD_CRC + 2] <<  8 )| \
                       (p_fw_data[FW_HEAD_CRC + 3] <<  0 );
     EPT("Fw size = %u, crc = %#X\n", up_state.fw_size, up_state.crc32);
+    if (up_state.fw_size > 0x18000) {
+      EPT("File size(%#X) exceeds limit\n", up_state.fw_size);
+      THROW_LOG("File size(%#X) exceeds limit\n", up_state.fw_size);
+      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+      return RESPOND_SEGMENT_ERR;
+    }
 
+    // Ensure the flash for Application is empty or erasing when seq = 1
     if (!upgrade_status.flash_empty) {
       EPT("flash is not empty\n");
       // erase flash
       if (flash_in_use) {
-        EPT("Flash in using\n");
+        if (up_state.is_erasing) {
+          EPT("Flash in using for upgrading...\n");
+        } else {
+          EPT("Flash in using for other functions...\n");
+          THROW_LOG("Flash in using for other functions...\n");
+          osDelay(pdMS_TO_TICKS(600));
+          FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_NOT_CPLT, 8);
+          return RESPOND_NOT_CPLT;
+        }
       } else {
-        flash_in_use = 1;
-        up_state.is_erasing = 1;
         // erase flash
-        if (up_state.upgrade_addr != RESERVE_ADDRESS)
-          FLASH_If_Erase_IT(up_state.upgrade_sector);
-        EPT("erase sector...\n");
+        if (up_state.upgrade_addr != RESERVE_ADDRESS) {
+          if (FLASH_If_Erase_IT(up_state.upgrade_sector) == FLASHIF_OK) {
+            flash_in_use = 1;
+            up_state.is_erasing = 1;
+            EPT("erase sector...\n");
+          } else {
+            Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+          }
+        }
       }
     }
 
@@ -211,7 +230,7 @@ uint32_t Cmd_Upgrade_Data()
     return RESPOND_NOT_CPLT;
   }
 
-  if (upgrade_status.flash_empty) {
+  if (upgrade_status.flash_empty && length > 0) {
     upgrade_status.flash_empty = 0;
     if (Update_Up_Status(&upgrade_status) != osOK) {
       EPT("Update upgrade status to eeprom failed\n");
@@ -220,8 +239,15 @@ uint32_t Cmd_Upgrade_Data()
       return RESPOND_SEGMENT_ERR;
     }
   }
-  FLASH_If_Write(up_state.upgrade_addr + up_state.recvd_length, (uint32_t*)p_fw_data, length / 4);
-  up_state.recvd_length += length;
+  if (length > 0) {
+    if (FLASH_If_Write(up_state.upgrade_addr + up_state.recvd_length, (uint32_t*)p_fw_data, length / 4) != FLASHIF_OK) {
+      Set_Flag(&run_status.internal_exp, INT_EXP_UP_PROGRAM);
+      up_state.pre_state = UPGRADE_FAILURE;
+      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+      return RESPOND_SEGMENT_ERR;
+    }
+    up_state.recvd_length += length;
+  }
   up_state.pre_state = UPGRADE_SUCCESS;
   FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SUCCESS, 8);
   return RESPOND_SUCCESS;
@@ -551,7 +577,7 @@ uint32_t Cmd_LOG_Content()
   uint8_t *prdata = trans_buf.buf + CMD_SEQ_MSG_DATA;
   uint32_t packet_count, packet_num;
   uint32_t addr;
-  uint32_t size;
+  int32_t size;
 
   size = log_file_state.offset - log_file_state.header;
   if (log_file_state.offset < log_file_state.header) {
@@ -656,10 +682,10 @@ uint32_t Cmd_Set_Switch(void)
     return RESPOND_SUCCESS;
   }
 
-  run_status.switch_channel = switch_channel;
   // DAC need 2ms at least
   osDelay(pdMS_TO_TICKS(4));
-  
+  run_status.switch_channel = switch_channel;
+
   // Check
   if (Get_Current_Switch_Channel() != switch_channel) {
     Reset_Switch();
@@ -687,7 +713,11 @@ uint32_t Cmd_Get_Switch(void)
 
   memset(resp_buf.buf, 0, 4);
   switch_channel = Get_Current_Switch_Channel();
-  if (switch_channel < 0) {
+  if (switch_channel <= 0) {
+    if (switch_channel == 0) {
+      THROW_LOG("Optical switch has not been configuired\n");
+    }
+    Clear_Switch_Ready();
     BE32_To_Buffer(0, resp_buf.buf);
     FILL_RESP_MSG(CMD_QUERY_SWITCH, RESPOND_SUCCESS, 4);
     return RESPOND_SUCCESS;
@@ -699,7 +729,7 @@ uint32_t Cmd_Get_Switch(void)
 
 uint32_t Cmd_Maintain(void)
 {
-  uint32_t err1 = 0, err2 = 0, err3 = 0, err4 = 0;
+  uint32_t err1 = 0, err2 = 0, err3 = 0;
   
   if (Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_2_5)) {
     err1 |= 1 << 1;
@@ -727,8 +757,7 @@ uint32_t Cmd_Maintain(void)
   BE32_To_Buffer(err1, resp_buf.buf + 4);
   BE32_To_Buffer(err2, resp_buf.buf + 8);
   BE32_To_Buffer(err3, resp_buf.buf + 12);
-  BE32_To_Buffer(err4, resp_buf.buf + 16);
-  FILL_RESP_MSG(CMD_MAINTAIN, RESPOND_SUCCESS, 20);
+  FILL_RESP_MSG(CMD_MAINTAIN, RESPOND_SUCCESS, 16);
   return RESPOND_SUCCESS;
 }
 
@@ -831,6 +860,21 @@ uint32_t Cmd_For_Debug()
     sw_num = Buffer_To_BE32(prdata + 8);
     u_val = Buffer_To_BE32(prdata + 12);
     ret = debug_write_log(sw_num, u_val);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_RESET_FW) {
+    memset(resp_buf.buf, 0, 4);
+    if (Reset_Up_Status() == osOK) {
+      FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_SUCCESS, 4);
+      return RESPOND_SUCCESS;
+    }
+    else {
+      FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_FAILURE, 4);
+      return RESPOND_FAILURE;
+    }
+  } else if (temp == CMD_DEBUG_INTER_EXP) {
+    memset(resp_buf.buf, 0, 4);
+    ret = debug_get_inter_exp();
     FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
     return ret;
   }

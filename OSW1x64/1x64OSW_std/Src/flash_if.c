@@ -47,7 +47,7 @@
 /* Private define ------------------------------------------------------------*/
 /*  1M0 flash 1 * 1024 * 1024 */
 //#define DOWNLOAD_START_ADRESS    0x08060000
-#define FLASH_SECTOR_COUNT       19
+#define FLASH_SECTOR_COUNT       24
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/

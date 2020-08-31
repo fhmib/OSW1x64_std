@@ -67,8 +67,8 @@ extern RunTimeStatus run_status;
 #define CMD_PROCESS_PRIORITY      osPriorityHigh
 #define WATCHDOG_PRIORITY         osPriorityISR
 #define INTERRUPT_TASK_PRIORITY   osPriorityISR
-#define LOG_MESSAGE_PRIORITY      osPriorityLow1
-#define MONITOR_PRIORITY          osPriorityLow
+#define LOG_MESSAGE_PRIORITY      osPriorityLow
+#define MONITOR_PRIORITY          osPriorityAboveNormal
 
 #define WATCH_DOG_DELAY_TIME      500 // ms
 #define CMD_WAIT_TEMP_TIME        50    //ms

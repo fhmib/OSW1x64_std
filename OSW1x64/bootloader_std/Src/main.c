@@ -116,7 +116,7 @@ int main(void)
   HAL_UART_Transmit(&huart3, (uint8_t*)VERSION, strlen(VERSION), TX_TIMEOUT);
   //HAL_UART_Transmit(&huart3, (uint8_t*)start_msg, strlen(start_msg), TX_TIMEOUT);
 #endif
-  //startup_process();
+  startup_process();
 #if 0
   boot_state = HAL_GPIO_ReadPin(BOOT_GPIO_Port, BOOT_Pin);
   if (boot_state == GPIO_PIN_RESET) {

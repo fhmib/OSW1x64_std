@@ -71,6 +71,8 @@ typedef enum {
   CMD_DEBUG_EEPROM        = 0x0A,
   CMD_DEBUG_RESET_LOG     = 0x0B,
   CMD_DEBUG_WRITE_LOG     = 0x0C,
+  CMD_DEBUG_RESET_FW      = 0x0D,
+  CMD_DEBUG_INTER_EXP     = 0xFF,
 } CmdDebugId;
 
 typedef enum {

@@ -153,42 +153,52 @@ void MX_FREERTOS_Init(void) {
   /* add semaphores, ... */
   uartProcessSemaphore = osSemaphoreNew(1U, 0U, NULL);
   if (uartProcessSemaphore == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   cmdProcessSemaphore = osSemaphoreNew(1U, 0U, NULL);
   if (cmdProcessSemaphore == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   logEraseSemaphore = osSemaphoreNew(1U, 0U, NULL);
   if (logEraseSemaphore == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   mid_LogMsg = osMessageQueueNew(LOG_QUEUE_LENGTH, sizeof(MsgStruct), NULL);
   if (mid_LogMsg == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   mid_ISR = osMessageQueueNew(ISR_QUEUE_LENGTH, sizeof(MsgStruct), NULL);
   if (mid_ISR == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   i2c1Mutex = osMutexNew(&Thread_Mutex_attr);
   if (i2c1Mutex == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   i2c2Mutex = osMutexNew(&Thread_Mutex_attr);
   if (i2c2Mutex == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   spi1Mutex = osMutexNew(&Thread_Mutex_attr);
   if (spi1Mutex == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   spi4Mutex = osMutexNew(&Thread_Mutex_attr);
   if (spi4Mutex == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   spi5Mutex = osMutexNew(&Thread_Mutex_attr);
   if (spi5Mutex == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
   /* USER CODE END RTOS_SEMAPHORES */
@@ -239,6 +249,7 @@ void StartDefaultTask(void *argument)
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 extern TransStu trans_buf;
+extern RespondStu resp_buf;
 struct UartTaskSync{
   uint8_t ProcessOnGoing;
   uint8_t ProcessTimeout;
@@ -326,7 +337,7 @@ void uartProcessTask(void *argument)
         EPT("UART CRC32 verification failed\n");
         EPT("msg_length = %#X, trans_buf.length = %#X, chk = %#X, rcv_chk = %#X\n", msg_length, trans_buf.length, chk, switch_endian((uint32_t)trans_buf.buf[trans_buf.length - 4]));
         PRINT_HEX("buf", trans_buf.buf, trans_buf.length);
-        Uart_Respond(msg_id, RESPOND_CHECKSUM_ERR, NULL, 0);
+        FILL_RESP_MSG(msg_id, RESPOND_CHECKSUM_ERR, 0);
       } else {
         if (!uart_sync.ProcessOnGoing) {
           // Process Command and Respond
@@ -337,25 +348,27 @@ void uartProcessTask(void *argument)
             THROW_LOG("Process command %#X timeout\n", msg_id);
             EPT("Process command timeout\n");
             uart_sync.ProcessTimeout = 1;
-            Uart_Respond(msg_id, RESPOND_LENGTH_ERR, NULL, 0);
+            FILL_RESP_MSG(msg_id, RESPOND_LENGTH_ERR, 0);
           } else if (status != osOK) {
             EPT("Error, status=%#X\n", status);
             THROW_LOG("Error, status=%#X\n", status);
+            FILL_RESP_MSG(msg_id, RESPOND_LENGTH_ERR, 0);
+          } else {
+            // success
           }
         } else {
             EPT("Detected process is ongoing\n");
             THROW_LOG("Detected process is ongoing\n");
-            Uart_Respond(msg_id, RESPOND_LENGTH_ERR, NULL, 0);
+            FILL_RESP_MSG(msg_id, RESPOND_LENGTH_ERR, 0);
         }
       }
 
       trans_buf.stage = TRANS_WAIT_START;
       HAL_UART_Receive_IT(&huart1, trans_buf.buf, 1);
+      Uart_Respond(resp_buf.cmd, resp_buf.status, resp_buf.buf, resp_buf.length);
     }
   }
 }
-
-extern RespondStu resp_buf;
 
 void cmdProcessTask(void *argument)
 {
@@ -373,7 +386,7 @@ void cmdProcessTask(void *argument)
 
     if (uart_sync.ProcessTimeout == 0) {
       osSemaphoreRelease(cmdProcessSemaphore);
-      Uart_Respond(resp_buf.cmd, resp_buf.status, resp_buf.buf, resp_buf.length);
+      //Uart_Respond(resp_buf.cmd, resp_buf.status, resp_buf.buf, resp_buf.length);
     } else {
       EPT("Detected process timeout\n");
       THROW_LOG("Detected process timeout\n");
@@ -503,9 +516,12 @@ void logTask(void *argument)
         osDelay(pdMS_TO_TICKS(200));
       }
       //THROW_LOG("Log space overflow, erasing flash sector %u\n", next_sector);
-      flash_in_use = 1;
       osSemaphoreAcquire(logEraseSemaphore, 0);
-      FLASH_If_Erase_IT(next_sector);
+      if (FLASH_If_Erase_IT(next_sector) == FLASHIF_OK) {
+        flash_in_use = 1;
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_LOG_ERASE);
+      }
 
       // 3. waiting for completion
       osSemaphoreAcquire(logEraseSemaphore, osWaitForever);

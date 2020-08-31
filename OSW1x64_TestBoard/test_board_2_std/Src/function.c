@@ -241,7 +241,7 @@ int8_t cmd_temp(uint8_t argc, char **argv)
 {
   int8_t ret;
   uint8_t *p;
-  uint32_t temp;
+  int32_t temp;
 
   if (argc > 1) {
     cmd_help2(argv[0]);
@@ -255,8 +255,8 @@ int8_t cmd_temp(uint8_t argc, char **argv)
   }
   
   p = rBuf + CMD_SEQ_MSG_DATA;
-  temp = Buffer_To_BE32(p);
-  PRINT("Temperature: %.1lf\r\n", (double)temp/10);
+  temp = (int32_t)Buffer_To_BE32(p);
+  PRINT("Temperature: %.1lfC\r\n", (double)temp/10);
 
   return ret;
 }
@@ -569,8 +569,6 @@ int8_t cmd_maintain(uint8_t argc, char **argv)
   PRINT("Error Code 2 : %#X\r\n", val);
   val = Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA + 12);
   PRINT("Error Code 3 : %#X\r\n", val);
-  val = Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA + 16);
-  PRINT("Error Code 4 : %#X\r\n", val);
 
   return ret;
 }
@@ -597,6 +595,8 @@ int8_t cmd_for_debug(uint8_t argc, char **argv)
     return debug_reset_log(argc, argv);
   } else if (argc == 5 && !strcasecmp(argv[1], "log") && !strcasecmp(argv[2], "write")) {
     return debug_write_log(argv[3], argv[4]);
+  } else if (argc == 3 && !strcasecmp(argv[1], "fw") && !strcasecmp(argv[2], "reset")) {
+    return debug_reset_fw(argc, argv);
   } else if (argc == 2 && !strcasecmp(argv[1], "monitor")) {
     return debug_monitor(argc, argv);
   } else if (argc == 2 && !strcasecmp(argv[1], "crc32")) {
@@ -605,6 +605,8 @@ int8_t cmd_for_debug(uint8_t argc, char **argv)
     return debug_print_hex(argc, argv);
   } else if (argc == 2 && !strcasecmp(argv[1], "send_hex")) {
     return debug_send_hex(argc, argv);
+  } else if (argc == 2 && !strcasecmp(argv[1], "inter_exp")) {
+    return debug_get_inter_exp();
   } else {
     cmd_help2(argv[0]);
     return 0;
@@ -770,6 +772,10 @@ int8_t debug_pin(uint8_t argc, char **argv)
 {
   int8_t ret;
   uint32_t val, type;
+  GPIO_TypeDef *port;
+  uint16_t pin;
+  GPIO_PinState state;
+  
 
   if (!strcasecmp(argv[2], "latch")) {
     type = 0;
@@ -777,22 +783,63 @@ int8_t debug_pin(uint8_t argc, char **argv)
     type = 1;
   } else if (!strcasecmp(argv[2], "sw_ready")) {
     type = 2;
+  } else if (!strcasecmp(argv[2], "D0")) {
+    type = 0xFF;
+    port = OUT_D0_GPIO_Port;
+    pin = OUT_D0_Pin;
+  } else if (!strcasecmp(argv[2], "D1")) {
+    type = 0xFF;
+    port = OUT_D1_GPIO_Port;
+    pin = OUT_D1_Pin;
+  } else if (!strcasecmp(argv[2], "D2")) {
+    type = 0xFF;
+    port = OUT_D2_GPIO_Port;
+    pin = OUT_D2_Pin;
+  } else if (!strcasecmp(argv[2], "D3")) {
+    type = 0xFF;
+    port = OUT_D3_GPIO_Port;
+    pin = OUT_D3_Pin;
+  } else if (!strcasecmp(argv[2], "D4")) {
+    type = 0xFF;
+    port = OUT_D4_GPIO_Port;
+    pin = OUT_D4_Pin;
+  } else if (!strcasecmp(argv[2], "D5")) {
+    type = 0xFF;
+    port = OUT_D5_GPIO_Port;
+    pin = OUT_D5_Pin;
+  } else if (!strcasecmp(argv[2], "sw_mode")) {
+    type = 0xFF;
+    port = OUT_MODE_GPIO_Port;
+    pin = OUT_MODE_Pin;
+  } else if (!strcasecmp(argv[2], "sw_strobe")) {
+    type = 0xFF;
+    port = OUT_STROBE_GPIO_Port;
+    pin = OUT_STROBE_Pin;
   } else {
     cmd_help2(argv[0]);
     return 0;
   }
 
   val = strtoul(argv[3], NULL, 10);
-  BE32_To_Buffer(0x5A5AA5A5, txBuf);
-  BE32_To_Buffer(CMD_DEBUG_PIN, txBuf + 4);
-  BE32_To_Buffer(type, txBuf + 8);
-  BE32_To_Buffer(val, txBuf + 12);
-  ret = process_command(CMD_FOR_DEBUG, txBuf, 16, rBuf, &rLen);
-  if (ret) {
-    return ret;
+  if (type == 0xFF) {
+    if (val) {
+      state = GPIO_PIN_SET;
+    } else {
+      state = GPIO_PIN_RESET;
+    }
+    HAL_GPIO_WritePin(port, pin, state);
+  } else {
+    BE32_To_Buffer(0x5A5AA5A5, txBuf);
+    BE32_To_Buffer(CMD_DEBUG_PIN, txBuf + 4);
+    BE32_To_Buffer(type, txBuf + 8);
+    BE32_To_Buffer(val, txBuf + 12);
+    ret = process_command(CMD_FOR_DEBUG, txBuf, 16, rBuf, &rLen);
+    if (ret) {
+      return ret;
+    }
   }
 
-  return ret;
+  return 0;
 }
 
 int8_t debug_switch_io(uint8_t argc, char **argv)
@@ -1024,6 +1071,13 @@ int8_t debug_reset_log(uint8_t argc, char **argv)
   return process_command(CMD_FOR_DEBUG, txBuf, 8, rBuf, &rLen);
 }
 
+int8_t debug_reset_fw(uint8_t argc, char **argv)
+{
+  BE32_To_Buffer(0x5A5AA5A5, txBuf);
+  BE32_To_Buffer(CMD_DEBUG_RESET_FW, txBuf + 4);
+  return process_command(CMD_FOR_DEBUG, txBuf, 8, rBuf, &rLen);
+}
+
 int8_t debug_write_log(char *arg1, char *arg2)
 {
   uint8_t ch;
@@ -1160,6 +1214,24 @@ int8_t debug_send_hex(uint8_t argc, char **argv)
 
   return 0;
 }
+
+int8_t debug_get_inter_exp()
+{
+  int8_t ret;
+  uint32_t value;
+
+  BE32_To_Buffer(0x5A5AA5A5, txBuf);
+  BE32_To_Buffer(CMD_DEBUG_INTER_EXP, txBuf + 4);
+  ret = process_command(CMD_FOR_DEBUG, txBuf, 8, rBuf, &rLen);
+   if (ret) {
+    return ret;
+  }
+
+  value = Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA);
+  PRINT("Internal Exception Code is %#X\r\n", value);
+  return ret;
+}
+
 
 int8_t process_command(uint32_t cmd, uint8_t *pdata, uint32_t len, uint8_t *rx_buf, uint32_t *rx_len)
 {
@@ -1361,7 +1433,7 @@ void PRINT_HEX(char *head, uint8_t *pdata, uint32_t len)
   PRINT("%s:\r\n", head);
   for (i = 0; i < len; ++i) {
     if (i % 0x10 == 0) {
-      HAL_Delay(1);
+      HAL_Delay(10);
       PRINT("%08X : ", i / 0x10);
     }
     PRINT("0x%02X%s", pdata[i], (i + 1) % 0x10 == 0 ? "\r\n" : i == len - 1 ? "\r\n" : " ");
@@ -1377,7 +1449,7 @@ void PRINT_CHAR(char *head, uint8_t *pdata, uint32_t len)
   PRINT("%s:\r\n", head);
   for (i = 0; i < len; ++i) {
     if (i % 0x40 == 0) {
-      HAL_Delay(4);
+      HAL_Delay(10);
       PRINT("%08X : ", i / 0x40);
     }
     PRINT("%c%s", pdata[i] == '\n' ? 'N' : pdata[i] == '\r' ? 'R' : pdata[i],\

@@ -55,9 +55,14 @@ uint8_t reset_flag = 0;
 uint8_t flash_in_use;
 UpgradeFlashState upgrade_status;
 LogFileState log_file_state;
+#if 1
 const uint32_t file_flash_addr[] =  {  0x08100000, 0x08104000, 0x08108000, 0x0810C000, 0x08110000, 0x08120000,\
                                        0x08140000, 0x08160000, 0x08180000, 0x081A0000, 0x081C0000, 0x081E0000};
 const uint32_t file_flash_end = 0x081FFFFF;
+#else
+const uint32_t file_flash_addr[] =  {  0x08100000, 0x08104000, 0x08108000};
+const uint32_t file_flash_end = 0x0810BFFF;
+#endif
 const uint8_t file_flash_count = sizeof(file_flash_addr) / sizeof (file_flash_addr[0]);
 
 RunTimeStatus run_status __attribute__((at(0x2002FC00)));
@@ -122,6 +127,9 @@ int main(void)
   }
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_SET);
+  
+  run_status.internal_exp = 0;
+  Set_Flag(&run_status.internal_exp, INT_EXP_CONST);
   /* USER CODE END 2 */
   /* Init scheduler */
   osKernelInitialize();
@@ -377,13 +385,17 @@ void OSW_Init(void)
   }
   EPT("FLASH->OPTCR = %#X\n", FLASH->OPTCR);
   if (!upgrade_status.flash_empty) {
-    flash_in_use = 1;
-    up_state.is_erasing = 1;
     // erase flash
     EPT("flash is not empty\n");
-    if (up_state.upgrade_addr != RESERVE_ADDRESS)
-      FLASH_If_Erase_IT(up_state.upgrade_sector);
-    EPT("erase sector...\n");
+    if (up_state.upgrade_addr != RESERVE_ADDRESS) {
+      if (FLASH_If_Erase_IT(up_state.upgrade_sector) == FLASHIF_OK) {
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
   } else {
     EPT("flash is empty\n");
   }
@@ -400,7 +412,6 @@ void OSW_Init(void)
 }
 
 extern FLASH_ProcessTypeDef pFlash;
-extern osMutexId_t i2cMutex;
 extern osMessageQueueId_t mid_ISR;
 extern osSemaphoreId_t logEraseSemaphore;
 void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue)

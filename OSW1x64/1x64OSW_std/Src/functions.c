@@ -79,7 +79,10 @@ uint32_t Log_Write(uint32_t addr, uint8_t *pbuf, uint32_t length)
     } else {
       memcpy(&data, pbuf + w_len, 4);
     }
-    HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, addr, (uint64_t)data);
+    if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, addr, (uint64_t)data) != HAL_OK) {
+      Set_Flag(&run_status.internal_exp, INT_EXP_LOG_PROGRAM);
+      break;
+    }
     addr += 4;
     w_len += 4;
   }
@@ -154,6 +157,13 @@ osStatus_t Update_Up_Status(UpgradeFlashState *up_status)
   BE32_To_Buffer(up_status->crc32, &buf[EE_UP_CRC32 - EE_UP_MAGIC]);
   BE32_To_Buffer(up_status->factory_length, &buf[EE_UP_FACTORY_LENGTH - EE_UP_MAGIC]);
   BE32_To_Buffer(up_status->factory_crc32, &buf[EE_UP_FACTORY_CRC32 - EE_UP_MAGIC]);
+
+  return RTOS_EEPROM_Write(EEPROM_ADDR, EE_UP_MAGIC, buf, sizeof(buf));
+}
+
+osStatus_t Reset_Up_Status()
+{
+  uint8_t buf[4] = {0};
 
   return RTOS_EEPROM_Write(EEPROM_ADDR, EE_UP_MAGIC, buf, sizeof(buf));
 }
@@ -400,6 +410,14 @@ void Reset_Switch(void)
     index = Get_Index_Of_Channel_Map(run_status.switch_channel);
     Clear_Switch_Dac(channel_map[index].first_switch);
     Clear_Switch_Dac(SWITCH_NUM_1);
+  } else if (run_status.maigc != RUN_MAGIC) {
+    Clear_Switch_Dac(SWITCH_NUM_1);
+    Clear_Switch_Dac(SWITCH_NUM_2);
+    Clear_Switch_Dac(SWITCH_NUM_3);
+    Clear_Switch_Dac(SWITCH_NUM_4);
+    Clear_Switch_Dac(SWITCH_NUM_5);
+    Clear_Switch_Dac(SWITCH_NUM_6);
+    Clear_Switch_Dac(SWITCH_NUM_7);
   }
 
   run_status.switch_channel = 0;
@@ -569,8 +587,10 @@ inline void Clear_Switch_Ready(void)
 
 void Init_Run_Status(void)
 {
-  memset(&run_status, 0, sizeof(run_status));
   run_status.maigc = RUN_MAGIC;
+  run_status.switch_channel = 0;
+  run_status.uart_reset = 0;
+  run_status.exp = 0;
 }
 
 void Set_Flag(uint32_t *status, uint32_t bit_addr)
@@ -797,6 +817,7 @@ uint32_t debug_pin(uint8_t pin, uint8_t val)
 
   return RESPOND_SUCCESS;
 }
+
 uint32_t debug_cal_switch(uint8_t sw_num, uint32_t chan, int32_t val_x, int32_t val_y)
 {
   osStatus status;
@@ -1062,3 +1083,8 @@ uint32_t debug_write_log(uint32_t value, uint32_t len)
   return RESPOND_SUCCESS;
 }
 
+uint32_t debug_get_inter_exp(void)
+{
+  BE32_To_Buffer(run_status.internal_exp, resp_buf.buf);
+  return RESPOND_SUCCESS;
+}

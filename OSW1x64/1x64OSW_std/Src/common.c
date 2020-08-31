@@ -267,7 +267,7 @@ HAL_StatusTypeDef I2cEepromWrite(int16_t dev_addr, uint16_t mem_addr, uint8_t *b
     byte_addr = mem_addr % EEPROM_PAGESIZE;
     write_length = MY_MIN(EEPROM_PAGESIZE - byte_addr, length);
 
-    if ((status = HAL_I2C_Mem_Write(&hi2c2, dev_addr, mem_addr, I2C_MEMADD_SIZE_16BIT, buf + offset, write_length, 50)) != HAL_OK) {
+    if ((status = HAL_I2C_Mem_Write(&hi2c2, dev_addr, mem_addr, I2C_MEMADD_SIZE_16BIT, buf + offset, write_length, 100)) != HAL_OK) {
       break;
     }
 
@@ -286,7 +286,7 @@ HAL_StatusTypeDef I2cEepromWrite(int16_t dev_addr, uint16_t mem_addr, uint8_t *b
 // Not safe
 HAL_StatusTypeDef I2cEepromRead(int16_t dev_addr, uint16_t mem_addr, uint8_t *buf, int32_t length)
 {
-  return HAL_I2C_Mem_Read(&hi2c2, dev_addr, mem_addr, I2C_MEMADD_SIZE_16BIT, buf, length, 50);
+  return HAL_I2C_Mem_Read(&hi2c2, dev_addr, mem_addr, I2C_MEMADD_SIZE_16BIT, buf, length, 100);
 }
 
 osStatus_t RTOS_DAC5535_Write(uint8_t chan, uint16_t val)

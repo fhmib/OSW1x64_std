@@ -150,12 +150,21 @@ typedef enum {
   EXP_ADC_B               = 0x7,
 } ExptoinValue;
 
+typedef enum {
+  INT_EXP_UP_ERASE        =  0,
+  INT_EXP_UP_PROGRAM      =  1,
+  INT_EXP_LOG_ERASE       =  2,
+  INT_EXP_LOG_PROGRAM     =  3,
+  INT_EXP_INIT            =  4,
+  INT_EXP_CONST           = 31,
+} InternalExptoinValue;
+
 typedef struct {
   uint32_t maigc;
   uint8_t switch_channel;
   uint8_t uart_reset; // Indicate if reset by uart communication
   uint32_t exp; // exception
-  uint32_t init_err;
+  uint32_t internal_exp;
   ThresholdStruct thr_table;
 } RunTimeStatus;
 
@@ -166,6 +175,7 @@ uint32_t Log_Read(uint32_t addr, uint8_t *pbuf, uint32_t length);
 
 osStatus_t Get_Up_Status(UpgradeFlashState *status);
 osStatus_t Update_Up_Status(UpgradeFlashState *status);
+osStatus_t Reset_Up_Status(void);
 osStatus_t Get_Log_Status(LogFileState *log_status);
 osStatus_t Update_Log_Status(LogFileState *log_status);
 osStatus_t Reset_Log_Status(void);
@@ -202,5 +212,6 @@ uint32_t debug_cal_threshold(uint8_t num, int32_t val);
 uint32_t debug_cal_dump(uint32_t which, uint32_t *resp_len);
 uint32_t debug_eeprom(uint32_t addr, uint32_t *len);
 uint32_t debug_write_log(uint32_t value, uint32_t len);
+uint32_t debug_get_inter_exp(void);
 
 #endif
