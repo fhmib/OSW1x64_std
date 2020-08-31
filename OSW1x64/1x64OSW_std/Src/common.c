@@ -343,12 +343,12 @@ osStatus_t RTOS_ADC7953_SPI4_Read(uint8_t chan, uint16_t *val)
   //osDelay(1);
 
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_RESET);
-  hal_status = HAL_SPI_TransmitReceive(&hspi4, txbuf, rxbuf, 2, 50);
+  hal_status |= HAL_SPI_TransmitReceive(&hspi4, txbuf, rxbuf, 2, 50);
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_SET);
   //osDelay(1);
 
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_RESET);
-  hal_status = HAL_SPI_TransmitReceive(&hspi4, txbuf, rxbuf, 2, 50);
+  hal_status |= HAL_SPI_TransmitReceive(&hspi4, txbuf, rxbuf, 2, 50);
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_SET);
 
   osMutexRelease(spi4Mutex);
@@ -402,12 +402,12 @@ osStatus_t RTOS_ADC7953_SPI5_Read(uint8_t chan, uint16_t *val)
   //osDelay(1);
 
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_RESET);
-  hal_status = HAL_SPI_TransmitReceive(&hspi5, txbuf, rxbuf, 2, 50);
+  hal_status |= HAL_SPI_TransmitReceive(&hspi5, txbuf, rxbuf, 2, 50);
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_SET);
   //osDelay(1);
 
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_RESET);
-  hal_status = HAL_SPI_TransmitReceive(&hspi5, txbuf, rxbuf, 2, 50);
+  hal_status |= HAL_SPI_TransmitReceive(&hspi5, txbuf, rxbuf, 2, 50);
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_SET);
 
   osMutexRelease(spi5Mutex);

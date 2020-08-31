@@ -4,6 +4,8 @@
 #include "main.h"
 #include "cmsis_os.h"
 
+extern char *supplier_id;
+extern char *hw_version;
 extern char *fw_version;
 
 #define TAG_MAX_SPACE               0x20
@@ -68,6 +70,11 @@ typedef enum {
   CMD_DEBUG_DUMP          = 0x09,
   CMD_DEBUG_EEPROM        = 0x0A,
   CMD_DEBUG_RESET_LOG     = 0x0B,
+  CMD_DEBUG_WRITE_LOG     = 0x0C,
+  CMD_DEBUG_RESET_FW      = 0x0D,
+  CMD_DEBUG_UP_BOOT_MODE  = 0xFD,
+  CMD_DEBUG_UP_BOOT       = 0xFE,
+  CMD_DEBUG_INTER_EXP     = 0xFF,
 } CmdDebugId;
 
 typedef enum {
@@ -109,6 +116,8 @@ typedef struct {
 
 typedef enum {
   FW_HEAD_MODULE_NAME    = 0x00,
+	FW_HEAD_MODULE_PN      = 0x20,
+	FW_HEAD_MODULE_HW      = 0x40,
   FW_HEAD_FW_LENGTH      = 0xC0,
   FW_HEAD_CRC            = 0xC4,
   FW_HEAD_END            = 0xFF,
@@ -165,5 +174,7 @@ uint32_t Cmd_Set_Switch(void);
 uint32_t Cmd_Get_Switch(void);
 uint32_t Cmd_Maintain(void);
 uint32_t Cmd_For_Debug(void);
+uint32_t debug_bootloader_mode(void);
+uint32_t debug_bootloader_install(void);
 
 #endif

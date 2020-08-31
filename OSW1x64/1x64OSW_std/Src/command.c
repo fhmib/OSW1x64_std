@@ -153,12 +153,22 @@ uint32_t Cmd_Upgrade_Data()
       FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
       return RESPOND_SEGMENT_ERR;
     }
-    if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_PN], pn) || 
-          strncmp((char*)&p_fw_data[FW_HEAD_MODULE_HW], hw_version, 2)) {
-      EPT("The file is not the firmware corresponding to this module\n");
-      THROW_LOG("The file is not the firmware corresponding to this module\n");
-      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
-      return RESPOND_SEGMENT_ERR;
+    if (!upgrade_bootloader) {
+      if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_PN], pn) || 
+            strncmp((char*)&p_fw_data[FW_HEAD_MODULE_HW], hw_version, 2)) {
+        EPT("The file is not the firmware corresponding to this module\n");
+        THROW_LOG("The file is not the firmware corresponding to this module\n");
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
+    } else {
+      if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_PN], pn) || 
+            strcmp((char*)&p_fw_data[FW_HEAD_MODULE_NAME], "OSW1x64_Bootloader")) {
+        EPT("The file is not the firmware corresponding to this module\n");
+        THROW_LOG("The file is not the firmware corresponding to this module\n");
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
     }
     up_state.pre_seq = seq;
     up_state.recvd_length = 0;
@@ -179,24 +189,48 @@ uint32_t Cmd_Upgrade_Data()
       return RESPOND_SEGMENT_ERR;
     }
 
-    // Ensure the flash for Application is empty or erasing when seq = 1
-    if (!upgrade_status.flash_empty) {
-      EPT("flash is not empty\n");
-      // erase flash
-      if (flash_in_use) {
-        if (up_state.is_erasing) {
-          EPT("Flash in using for upgrading...\n");
+    if (!upgrade_bootloader) {
+      // Ensure the flash for Application is empty or erasing when seq = 1
+      if (!upgrade_status.flash_empty) {
+        EPT("flash is not empty\n");
+        if (flash_in_use) {
+          if (up_state.is_erasing) {
+            EPT("Flash in using for upgrading...\n");
+          } else {
+            EPT("Flash in using for other functions...\n");
+            THROW_LOG("Flash in using for other functions...\n");
+            osDelay(pdMS_TO_TICKS(600));
+            FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_NOT_CPLT, 8);
+            return RESPOND_NOT_CPLT;
+          }
         } else {
-          EPT("Flash in using for other functions...\n");
-          THROW_LOG("Flash in using for other functions...\n");
-          osDelay(pdMS_TO_TICKS(600));
-          FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_NOT_CPLT, 8);
-          return RESPOND_NOT_CPLT;
+          // erase flash
+          if (up_state.upgrade_addr != RESERVE_ADDRESS) {
+            if (FLASH_If_Erase_IT(up_state.upgrade_sector) == FLASHIF_OK) {
+              flash_in_use = 1;
+              up_state.is_erasing = 1;
+              EPT("erase sector...\n");
+            } else {
+              Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+            }
+          }
         }
-      } else {
-        // erase flash
-        if (up_state.upgrade_addr != RESERVE_ADDRESS) {
-          if (FLASH_If_Erase_IT(up_state.upgrade_sector) == FLASHIF_OK) {
+      }
+    } else {
+      if (!reserve_empty) {
+        if (flash_in_use) {
+          if (up_state.is_erasing) {
+            EPT("Flash in using for upgrading...\n");
+          } else {
+            EPT("Flash in using for other functions...\n");
+            THROW_LOG("Flash in using for other functions...\n");
+            osDelay(pdMS_TO_TICKS(600));
+            FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_NOT_CPLT, 8);
+            return RESPOND_NOT_CPLT;
+          }
+        } else {
+          // erase flash
+          if (FLASH_If_Erase_IT(RESERVE_SECTOR) == FLASHIF_OK) {
             flash_in_use = 1;
             up_state.is_erasing = 1;
             EPT("erase sector...\n");
@@ -230,23 +264,40 @@ uint32_t Cmd_Upgrade_Data()
     return RESPOND_NOT_CPLT;
   }
 
-  if (upgrade_status.flash_empty && length > 0) {
-    upgrade_status.flash_empty = 0;
-    if (Update_Up_Status(&upgrade_status) != osOK) {
-      EPT("Update upgrade status to eeprom failed\n");
-      up_state.pre_state = UPGRADE_FAILURE;
-      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
-      return RESPOND_SEGMENT_ERR;
+  if (!upgrade_bootloader) {
+    if (upgrade_status.flash_empty && length > 0) {
+      upgrade_status.flash_empty = 0;
+      if (Update_Up_Status(&upgrade_status) != osOK) {
+        EPT("Update upgrade status to eeprom failed\n");
+        up_state.pre_state = UPGRADE_FAILURE;
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
+    }
+  } else {
+    if (reserve_empty && length > 0) {
+      reserve_empty = 0;
     }
   }
+
   if (length > 0) {
-    if (FLASH_If_Write(up_state.upgrade_addr + up_state.recvd_length, (uint32_t*)p_fw_data, length / 4) != FLASHIF_OK) {
-      Set_Flag(&run_status.internal_exp, INT_EXP_UP_PROGRAM);
-      up_state.pre_state = UPGRADE_FAILURE;
-      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
-      return RESPOND_SEGMENT_ERR;
+    if (!upgrade_bootloader) {
+      if (FLASH_If_Write(up_state.upgrade_addr + up_state.recvd_length, (uint32_t*)p_fw_data, length / 4) != FLASHIF_OK) {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_PROGRAM);
+        up_state.pre_state = UPGRADE_FAILURE;
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
+      up_state.recvd_length += length;
+    } else {
+      if (FLASH_If_Write(RESERVE_ADDRESS + up_state.recvd_length, (uint32_t*)p_fw_data, length / 4) != FLASHIF_OK) {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_PROGRAM);
+        up_state.pre_state = UPGRADE_FAILURE;
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
+      up_state.recvd_length += length;
     }
-    up_state.recvd_length += length;
   }
   up_state.pre_state = UPGRADE_SUCCESS;
   FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SUCCESS, 8);
@@ -872,6 +923,16 @@ uint32_t Cmd_For_Debug()
       FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_FAILURE, 4);
       return RESPOND_FAILURE;
     }
+  } else if (temp == CMD_DEBUG_UP_BOOT_MODE) {
+    memset(resp_buf.buf, 0x55, 4);
+    ret = debug_bootloader_mode();
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_UP_BOOT) {
+    memset(resp_buf.buf, 0, 4);
+    ret = debug_bootloader_install();
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
   } else if (temp == CMD_DEBUG_INTER_EXP) {
     memset(resp_buf.buf, 0, 4);
     ret = debug_get_inter_exp();
@@ -882,4 +943,132 @@ uint32_t Cmd_For_Debug()
   FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 4);
   return RESPOND_UNKNOWN_CMD;
 }
+
+uint32_t debug_bootloader_mode()
+{
+  upgrade_bootloader = 0xFF;
+  return RESPOND_SUCCESS;
+}
+
+uint32_t debug_bootloader_install()
+{
+  uint32_t every_size, total_size;
+  uint8_t buf[512];
+
+  if (upgrade_bootloader == 0xFF) {
+    if (up_state.run != RUN_MODE_UPGRADE) {
+      EPT("Cannot excute cmd beacuse of wrong mode\n");
+      THROW_LOG("Cannot excute command because of wrong mode\n");
+      return RESPOND_UNKNOWN_CMD;
+    }
+
+    if (up_state.recvd_length != up_state.fw_size) {
+      EPT("The received length %u is not equal to length in header %u.\n", up_state.recvd_length, up_state.fw_size);
+      THROW_LOG("The received length %u is not equal to length in header %u.\n", up_state.recvd_length, up_state.fw_size);
+      return RESPOND_DL_INSTALL_FAIL;
+    }
+
+    if (up_state.pre_seq < 3) {
+      EPT("No valid data.\n");
+      THROW_LOG("No valid data.\n");
+      return RESPOND_DL_INSTALL_FAIL;
+    }
+
+    uint8_t *pdata = (uint8_t*)RESERVE_ADDRESS;
+    uint32_t crc = Cal_CRC32(pdata, up_state.fw_size);
+    if (crc ^ up_state.crc32) {
+      EPT("CRC verified failed. %#X != %#X\n", crc, up_state.crc32);
+      THROW_LOG("CRC verified failed. %#X != %#X\n", crc, up_state.crc32);
+      return RESPOND_DL_CHK_ERR;
+    }
+
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_DL_INSTALL_FAIL;
+    } else {
+      // erase flash
+      if (FLASH_If_Erase_IT(FLASH_SECTOR_0) == FLASHIF_OK) {
+        upgrade_bootloader = 1;
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
+    osDelay(pdMS_TO_TICKS(600));
+    return RESPOND_NOT_CPLT;
+  } else if (upgrade_bootloader == 1) {
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_NOT_CPLT;
+    } else {
+      // erase flash
+      if (FLASH_If_Erase_IT(FLASH_SECTOR_1) == FLASHIF_OK) {
+        upgrade_bootloader = 2;
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
+    osDelay(pdMS_TO_TICKS(600));
+    return RESPOND_NOT_CPLT;
+  } else if (upgrade_bootloader == 2) {
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_NOT_CPLT;
+    } else {
+      // erase flash
+      if (FLASH_If_Erase_IT(FLASH_SECTOR_2) == FLASHIF_OK) {
+        upgrade_bootloader = 3;
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
+    osDelay(pdMS_TO_TICKS(600));
+    return RESPOND_NOT_CPLT;
+  } else if (upgrade_bootloader == 3) {
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_NOT_CPLT;
+    } else {
+      // erase flash
+      if (FLASH_If_Erase_IT(FLASH_SECTOR_3) == FLASHIF_OK) {
+        upgrade_bootloader = 4;
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
+    osDelay(pdMS_TO_TICKS(600));
+    return RESPOND_NOT_CPLT;
+  } else if (upgrade_bootloader == 4) {
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_NOT_CPLT;
+    }
+    total_size = 0;
+    while (total_size < up_state.fw_size) {
+      every_size = total_size + 512 > up_state.fw_size ? up_state.fw_size - total_size: 512;
+      memcpy(buf, (void*)(RESERVE_ADDRESS + total_size), every_size);
+      if (FLASH_If_Write(BOOT_ADDRESS + total_size, (uint32_t*)buf, every_size / 4) != FLASHIF_OK) {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_PROGRAM);
+        return RESPOND_DL_INSTALL_FAIL;
+      }
+      total_size += every_size;
+    }
+
+    return RESPOND_SUCCESS;
+  }
+
+  return RESPOND_SUCCESS;
+}
+
 

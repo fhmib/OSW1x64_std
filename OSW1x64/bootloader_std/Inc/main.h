@@ -86,6 +86,8 @@ void Boot_Init(void);
 #define SPI1_CS_GPIO_Port GPIOA
 #define BOOT_Pin GPIO_PIN_12
 #define BOOT_GPIO_Port GPIOH
+#define HARD_RESET_Pin GPIO_PIN_0
+#define HARD_RESET_GPIO_Port GPIOI
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

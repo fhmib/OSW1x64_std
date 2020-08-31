@@ -66,6 +66,9 @@ const uint32_t file_flash_end = 0x0810BFFF;
 const uint8_t file_flash_count = sizeof(file_flash_addr) / sizeof (file_flash_addr[0]);
 
 RunTimeStatus run_status __attribute__((at(0x2002FC00)));
+
+uint8_t upgrade_bootloader = 0;
+uint8_t reserve_empty = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -425,10 +428,15 @@ void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue)
       // send signal to logTask
       osSemaphoreRelease(logEraseSemaphore);
     } else {
-      upgrade_status.flash_empty = 1;
-      up_state.is_erasing = 0;
-      isr_msg.type = MSG_TYPE_FLASH_ISR;
-      osMessageQueuePut(mid_ISR, &isr_msg, 0U, 0U);
+      if (!upgrade_bootloader) {
+        upgrade_status.flash_empty = 1;
+        up_state.is_erasing = 0;
+        isr_msg.type = MSG_TYPE_FLASH_ISR;
+        osMessageQueuePut(mid_ISR, &isr_msg, 0U, 0U);
+      } else {
+        reserve_empty = 1;
+        up_state.is_erasing = 0;
+      }
     }
   }
 }

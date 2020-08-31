@@ -67,6 +67,8 @@ typedef enum {
   CMD_DEBUG_RESET_LOG     = 0x0B,
   CMD_DEBUG_WRITE_LOG     = 0x0C,
   CMD_DEBUG_RESET_FW      = 0x0D,
+  CMD_DEBUG_UP_BOOT_MODE  = 0xFD,
+  CMD_DEBUG_UP_BOOT       = 0xFE,
   CMD_DEBUG_INTER_EXP     = 0xFF,
 } CmdDebugId;
 
@@ -118,6 +120,8 @@ int8_t debug_monitor(uint8_t argc, char **argv);
 int8_t debug_crc32(uint8_t argc, char **argv);
 int8_t debug_print_hex(uint8_t argc, char **argv);
 int8_t debug_send_hex(uint8_t argc, char **argv);
+int8_t debug_upgrade_bootloader_mode(void);
+int8_t debug_upgrade_bootloader_install(void);
 int8_t debug_get_inter_exp(void);
 
 int8_t process_command(uint32_t cmd, uint8_t *pdata, uint32_t len, uint8_t *rx_buf, uint32_t *rx_len);

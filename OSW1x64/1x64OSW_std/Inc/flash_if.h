@@ -74,18 +74,21 @@ enum {
 /* Define the address from where user application will be loaded.
    Note: this area is reserved for the IAP code                  */
 
-#define CONFIG_ADDRESS            (uint32_t)0x08008000
+#define BOOT_ADDRESS              (uint32_t)0x08000000
+//#define CONFIG_ADDRESS            (uint32_t)0x08008000
 #define APPLICATION_1_ADDRESS     (uint32_t)0x08040000
 //#define APPLICATION_1_ADDRESS     (uint32_t)0x080A0000
 #define APPLICATION_2_ADDRESS     (uint32_t)0x08060000
 #define RESERVE_ADDRESS           (uint32_t)0x08080000
-#define CONFIG_SECTOR             FLASH_SECTOR_2
+#define BOOT_SECTOR               FLASH_SECTOR_0
+//#define CONFIG_SECTOR             FLASH_SECTOR_2
 #define APPLICATION_1_SECTOR      FLASH_SECTOR_6
 //#define APPLICATION_1_SECTOR      FLASH_SECTOR_17
 #define APPLICATION_2_SECTOR      FLASH_SECTOR_7
 #define RESERVE_SECTOR            FLASH_SECTOR_8
 /* Notable Flash addresses */
-#define USER_FLASH_END_ADDRESS        0x08100000
+#define USER_FLASH_END_ADDRESS        0x08200000
+#define FLASH_SECTOR_COUNT       24
 
 
 /* Exported macro ------------------------------------------------------------*/

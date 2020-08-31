@@ -59,6 +59,9 @@ extern const uint32_t file_flash_addr[];
 extern const uint32_t file_flash_end;
 extern const uint8_t file_flash_count;
 extern RunTimeStatus run_status;
+
+extern uint8_t upgrade_bootloader;
+extern uint8_t reserve_empty;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

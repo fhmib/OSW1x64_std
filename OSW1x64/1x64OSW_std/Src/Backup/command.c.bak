@@ -15,7 +15,10 @@ RespondStu resp_buf;
 
 UpgradeStruct up_state;
 
-char *fw_version = "ONET00.0100.07"; // 14 bytes
+char *pn = "45070038";
+char *supplier_id = "ONET"; // 4 bytes
+char *hw_version = "01.01"; // 5 bytes
+char *fw_version = "01.01"; // 5 bytes
 
 extern UpgradeFlashState upgrade_status;
 
@@ -99,7 +102,8 @@ uint32_t Cmd_Upgrade_Init()
 
   memset(p, 4, 0);
 
-  if (block_size > UPGRADE_MAX_DATA_LENGTH || block_size < UPGRADE_MIN_DATA_LENGTH) {
+  if (block_size > UPGRADE_MAX_DATA_LENGTH || block_size < UPGRADE_MIN_DATA_LENGTH
+        || block_size % 4 != 0) {
     EPT("Received invalid block size %u\n", block_size);
     THROW_LOG("Received invalid block size %u\n", block_size);
     FILL_RESP_MSG(CMD_UPGRADE_INIT, RESPOND_NOT_CPLT, 4);
@@ -149,12 +153,22 @@ uint32_t Cmd_Upgrade_Data()
       FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
       return RESPOND_SEGMENT_ERR;
     }
-    if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_NAME], "ONET-OSW1x64")) {
-      EPT("The file is not the firmware corresponding to this module\n");
-      THROW_LOG("The file is not the firmware corresponding to this module\n");
-      //PRINT_HEX("module name", p_fw_data, 0x20);
-      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
-      return RESPOND_SEGMENT_ERR;
+    if (!upgrade_bootloader) {
+      if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_PN], pn) || 
+            strncmp((char*)&p_fw_data[FW_HEAD_MODULE_HW], hw_version, 2)) {
+        EPT("The file is not the firmware corresponding to this module\n");
+        THROW_LOG("The file is not the firmware corresponding to this module\n");
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
+    } else {
+      if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_PN], pn) || 
+            strcmp((char*)&p_fw_data[FW_HEAD_MODULE_NAME], "OSW1x64_Bootloader")) {
+        EPT("The file is not the firmware corresponding to this module\n");
+        THROW_LOG("The file is not the firmware corresponding to this module\n");
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
     }
     up_state.pre_seq = seq;
     up_state.recvd_length = 0;
@@ -168,19 +182,62 @@ uint32_t Cmd_Upgrade_Data()
                       (p_fw_data[FW_HEAD_CRC + 2] <<  8 )| \
                       (p_fw_data[FW_HEAD_CRC + 3] <<  0 );
     EPT("Fw size = %u, crc = %#X\n", up_state.fw_size, up_state.crc32);
+    if (up_state.fw_size > 0x18000) {
+      EPT("File size(%#X) exceeds limit\n", up_state.fw_size);
+      THROW_LOG("File size(%#X) exceeds limit\n", up_state.fw_size);
+      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+      return RESPOND_SEGMENT_ERR;
+    }
 
-    if (!upgrade_status.flash_empty) {
-      EPT("flash is not empty\n");
-      // erase flash
-      if (flash_in_use) {
-        EPT("Flash in using\n");
-      } else {
-        flash_in_use = 1;
-        up_state.is_erasing = 1;
-        // erase flash
-        if (up_state.upgrade_addr != RESERVE_ADDRESS)
-          FLASH_If_Erase_IT(up_state.upgrade_sector);
-        EPT("erase sector...\n");
+    if (!upgrade_bootloader) {
+      // Ensure the flash for Application is empty or erasing when seq = 1
+      if (!upgrade_status.flash_empty) {
+        EPT("flash is not empty\n");
+        if (flash_in_use) {
+          if (up_state.is_erasing) {
+            EPT("Flash in using for upgrading...\n");
+          } else {
+            EPT("Flash in using for other functions...\n");
+            THROW_LOG("Flash in using for other functions...\n");
+            osDelay(pdMS_TO_TICKS(600));
+            FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_NOT_CPLT, 8);
+            return RESPOND_NOT_CPLT;
+          }
+        } else {
+          // erase flash
+          if (up_state.upgrade_addr != RESERVE_ADDRESS) {
+            if (FLASH_If_Erase_IT(up_state.upgrade_sector) == FLASHIF_OK) {
+              flash_in_use = 1;
+              up_state.is_erasing = 1;
+              EPT("erase sector...\n");
+            } else {
+              Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+            }
+          }
+        }
+      }
+    } else {
+      if (!reserve_empty) {
+        if (flash_in_use) {
+          if (up_state.is_erasing) {
+            EPT("Flash in using for upgrading...\n");
+          } else {
+            EPT("Flash in using for other functions...\n");
+            THROW_LOG("Flash in using for other functions...\n");
+            osDelay(pdMS_TO_TICKS(600));
+            FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_NOT_CPLT, 8);
+            return RESPOND_NOT_CPLT;
+          }
+        } else {
+          // erase flash
+          if (FLASH_If_Erase_IT(RESERVE_SECTOR) == FLASHIF_OK) {
+            flash_in_use = 1;
+            up_state.is_erasing = 1;
+            EPT("erase sector...\n");
+          } else {
+            Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+          }
+        }
       }
     }
 
@@ -207,17 +264,41 @@ uint32_t Cmd_Upgrade_Data()
     return RESPOND_NOT_CPLT;
   }
 
-  if (upgrade_status.flash_empty) {
-    upgrade_status.flash_empty = 0;
-    if (Update_Up_Status(&upgrade_status) != osOK) {
-      EPT("Update upgrade status to eeprom failed\n");
-      up_state.pre_state = UPGRADE_FAILURE;
-      FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
-      return RESPOND_SEGMENT_ERR;
+  if (!upgrade_bootloader) {
+    if (upgrade_status.flash_empty && length > 0) {
+      upgrade_status.flash_empty = 0;
+      if (Update_Up_Status(&upgrade_status) != osOK) {
+        EPT("Update upgrade status to eeprom failed\n");
+        up_state.pre_state = UPGRADE_FAILURE;
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
+    }
+  } else {
+    if (reserve_empty && length > 0) {
+      reserve_empty = 0;
     }
   }
-  FLASH_If_Write(up_state.upgrade_addr + up_state.recvd_length, (uint32_t*)p_fw_data, length / 4);
-  up_state.recvd_length += length;
+
+  if (length > 0) {
+    if (!upgrade_bootloader) {
+      if (FLASH_If_Write(up_state.upgrade_addr + up_state.recvd_length, (uint32_t*)p_fw_data, length / 4) != FLASHIF_OK) {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_PROGRAM);
+        up_state.pre_state = UPGRADE_FAILURE;
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
+      up_state.recvd_length += length;
+    } else {
+      if (FLASH_If_Write(RESERVE_ADDRESS + up_state.recvd_length, (uint32_t*)p_fw_data, length / 4) != FLASHIF_OK) {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_PROGRAM);
+        up_state.pre_state = UPGRADE_FAILURE;
+        FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
+        return RESPOND_SEGMENT_ERR;
+      }
+      up_state.recvd_length += length;
+    }
+  }
   up_state.pre_state = UPGRADE_SUCCESS;
   FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SUCCESS, 8);
   return RESPOND_SUCCESS;
@@ -292,7 +373,9 @@ uint32_t Cmd_Get_Version()
   status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_DATE, buf, 8);
   memcpy(p, buf, 8);
   p += 10;
-  strcpy((char*)p, fw_version);
+  strcpy((char*)p, supplier_id);
+  strcpy((char*)p + 4, hw_version);
+  strcpy((char*)p + 4 + 5, fw_version);
   p += 37;
   status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_ASN, buf, 12);
   memcpy(p, buf, 12);
@@ -364,13 +447,18 @@ uint32_t Cmd_Get_Temperature()
     return RESPOND_SUCCESS;
   }
   temp = Cal_Temp(value);
-  if (temp > thr_table.temp_high || temp < thr_table.temp_low) {
-    EPT("temperature is %lf, high threshold is %lf, low threshold is %lf\n", temp, thr_table.temp_high, thr_table.temp_low);
+  if (temp > run_status.thr_table.temp_high_alarm || temp < run_status.thr_table.temp_low_alarm) {
+    EPT("Current temperature is %lf, high threshold is %lf, low threshold is %lf\n", temp, run_status.thr_table.temp_high_alarm, run_status.thr_table.temp_low_alarm);
+    THROW_LOG("Current temperature is %lf, high threshold is %lf, low threshold is %lf\n", temp, run_status.thr_table.temp_high_alarm, run_status.thr_table.temp_low_alarm);
     *p = switch_endian(1000);
     FILL_RESP_MSG(CMD_QUERY_TEMP, RESPOND_SUCCESS, 4);
     return RESPOND_SUCCESS;
   }
-  res = (int32_t)(temp * 10);
+  if (temp >= 0)
+    res = (int32_t)(temp * 10 + 0.5);
+  else
+    res = (int32_t)(temp * 10 - 0.5);
+
   *p = switch_endian((uint32_t)res);
 
   FILL_RESP_MSG(CMD_QUERY_TEMP, RESPOND_SUCCESS, 4);
@@ -404,7 +492,7 @@ uint32_t Cmd_Voltage()
     value = 0;
   }
   voltage = (double)value / 4096 * 2.5 * 2;
-  value = (uint16_t)(voltage * 10);
+  value = (uint16_t)(voltage * 10 + 0.5);
   BE32_To_Buffer(25, resp_buf.buf + 4);
   BE32_To_Buffer(value, resp_buf.buf + 8);
 
@@ -414,7 +502,7 @@ uint32_t Cmd_Voltage()
     value = 0;
   }
   voltage = (double)value / 4096 * 2.5 * 2;
-  value = (uint16_t)(voltage * 10);
+  value = (uint16_t)(voltage * 10 + 0.5);
   BE32_To_Buffer(33, resp_buf.buf + 12);
   BE32_To_Buffer(value, resp_buf.buf + 16);
 
@@ -424,7 +512,7 @@ uint32_t Cmd_Voltage()
     value = 0;
   }
   voltage = (double)value / 4096 * 2.5 * 3;
-  value = (uint16_t)(voltage * 10);
+  value = (uint16_t)(voltage * 10 + 0.5);
   BE32_To_Buffer(50, resp_buf.buf + 20);
   BE32_To_Buffer(value, resp_buf.buf + 24);
 
@@ -434,7 +522,7 @@ uint32_t Cmd_Voltage()
     value = 0;
   }
   voltage = (double)value / 4096 * 2.5 * 51;
-  value = (uint16_t)(voltage * 10);
+  value = (uint16_t)(voltage * 10 + 0.5);
   BE32_To_Buffer(640, resp_buf.buf + 28);
   BE32_To_Buffer(value, resp_buf.buf + 32);
 
@@ -447,20 +535,20 @@ uint32_t Cmd_Voltage_Threshold()
   BE32_To_Buffer(4, resp_buf.buf);
 
   BE32_To_Buffer(25, resp_buf.buf + 4);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_2_5_high * 10), resp_buf.buf + 8);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_2_5_low * 10), resp_buf.buf + 12);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_2_5_high_alarm * 10 + 0.5), resp_buf.buf + 8);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_2_5_low_alarm * 10 + 0.5), resp_buf.buf + 12);
 
   BE32_To_Buffer(33, resp_buf.buf + 16);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_3_3_high * 10), resp_buf.buf + 20);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_3_3_low * 10), resp_buf.buf + 24);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_3_3_high_alarm * 10 + 0.5), resp_buf.buf + 20);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_3_3_low_alarm * 10 + 0.5), resp_buf.buf + 24);
 
   BE32_To_Buffer(50, resp_buf.buf + 28);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_5_0_high * 10), resp_buf.buf + 32);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_5_0_low * 10), resp_buf.buf + 36);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_5_0_high_alarm * 10 + 0.5), resp_buf.buf + 32);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_5_0_low_alarm * 10 + 0.5), resp_buf.buf + 36);
 
   BE32_To_Buffer(640, resp_buf.buf + 40);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_64_0_high * 10), resp_buf.buf + 44);
-  BE32_To_Buffer((uint32_t)(thr_table.vol_64_0_low * 10), resp_buf.buf + 48);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_64_0_high_alarm * 10 + 0.5), resp_buf.buf + 44);
+  BE32_To_Buffer((uint32_t)(run_status.thr_table.vol_64_0_low_alarm * 10 + 0.5), resp_buf.buf + 48);
 
   FILL_RESP_MSG(CMD_QUERY_VOL_THR, RESPOND_SUCCESS, 52);
   return RESPOND_SUCCESS;
@@ -540,7 +628,7 @@ uint32_t Cmd_LOG_Content()
   uint8_t *prdata = trans_buf.buf + CMD_SEQ_MSG_DATA;
   uint32_t packet_count, packet_num;
   uint32_t addr;
-  uint32_t size;
+  int32_t size;
 
   size = log_file_state.offset - log_file_state.header;
   if (log_file_state.offset < log_file_state.header) {
@@ -645,10 +733,10 @@ uint32_t Cmd_Set_Switch(void)
     return RESPOND_SUCCESS;
   }
 
-  run_status.switch_channel = switch_channel;
   // DAC need 2ms at least
   osDelay(pdMS_TO_TICKS(4));
-  
+  run_status.switch_channel = switch_channel;
+
   // Check
   if (Get_Current_Switch_Channel() != switch_channel) {
     Reset_Switch();
@@ -676,7 +764,11 @@ uint32_t Cmd_Get_Switch(void)
 
   memset(resp_buf.buf, 0, 4);
   switch_channel = Get_Current_Switch_Channel();
-  if (switch_channel < 0) {
+  if (switch_channel <= 0) {
+    if (switch_channel == 0) {
+      THROW_LOG("Optical switch has not been configuired\n");
+    }
+    Clear_Switch_Ready();
     BE32_To_Buffer(0, resp_buf.buf);
     FILL_RESP_MSG(CMD_QUERY_SWITCH, RESPOND_SUCCESS, 4);
     return RESPOND_SUCCESS;
@@ -688,10 +780,10 @@ uint32_t Cmd_Get_Switch(void)
 
 uint32_t Cmd_Maintain(void)
 {
-  uint32_t err1 = 0, err2 = 0, err3 = 0, err4 = 0;
+  uint32_t err1 = 0, err2 = 0, err3 = 0;
   
   if (Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_2_5)) {
-    err1 |= 1 << 0;
+    err1 |= 1 << 1;
   }
   if (Is_Flag_Set(&run_status.exp, EXP_VOLTAGE_3_3)) {
     err1 |= 1 << 5;
@@ -716,8 +808,7 @@ uint32_t Cmd_Maintain(void)
   BE32_To_Buffer(err1, resp_buf.buf + 4);
   BE32_To_Buffer(err2, resp_buf.buf + 8);
   BE32_To_Buffer(err3, resp_buf.buf + 12);
-  BE32_To_Buffer(err4, resp_buf.buf + 16);
-  FILL_RESP_MSG(CMD_MAINTAIN, RESPOND_SUCCESS, 20);
+  FILL_RESP_MSG(CMD_MAINTAIN, RESPOND_SUCCESS, 16);
   return RESPOND_SUCCESS;
 }
 
@@ -815,9 +906,169 @@ uint32_t Cmd_For_Debug()
       FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_FAILURE, 4);
       return RESPOND_FAILURE;
     }
+  } else if (temp == CMD_DEBUG_WRITE_LOG) {
+    memset(resp_buf.buf, 0, 4);
+    sw_num = Buffer_To_BE32(prdata + 8);
+    u_val = Buffer_To_BE32(prdata + 12);
+    ret = debug_write_log(sw_num, u_val);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_RESET_FW) {
+    memset(resp_buf.buf, 0, 4);
+    if (Reset_Up_Status() == osOK) {
+      FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_SUCCESS, 4);
+      return RESPOND_SUCCESS;
+    }
+    else {
+      FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_FAILURE, 4);
+      return RESPOND_FAILURE;
+    }
+  } else if (temp == CMD_DEBUG_UP_BOOT_MODE) {
+    memset(resp_buf.buf, 0x55, 4);
+    ret = debug_bootloader_mode();
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_UP_BOOT) {
+    memset(resp_buf.buf, 0, 4);
+    ret = debug_bootloader_install();
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_INTER_EXP) {
+    memset(resp_buf.buf, 0, 4);
+    ret = debug_get_inter_exp();
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
   }
 
   FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 4);
   return RESPOND_UNKNOWN_CMD;
 }
+
+uint32_t debug_bootloader_mode()
+{
+  upgrade_bootloader = 0xFF;
+  return RESPOND_SUCCESS;
+}
+
+uint32_t debug_bootloader_install()
+{
+  uint32_t every_size, total_size;
+  uint8_t buf[512];
+
+  if (upgrade_bootloader == 0xFF) {
+    if (up_state.run != RUN_MODE_UPGRADE) {
+      EPT("Cannot excute cmd beacuse of wrong mode\n");
+      THROW_LOG("Cannot excute command because of wrong mode\n");
+      return RESPOND_UNKNOWN_CMD;
+    }
+
+    if (up_state.recvd_length != up_state.fw_size) {
+      EPT("The received length %u is not equal to length in header %u.\n", up_state.recvd_length, up_state.fw_size);
+      THROW_LOG("The received length %u is not equal to length in header %u.\n", up_state.recvd_length, up_state.fw_size);
+      return RESPOND_DL_INSTALL_FAIL;
+    }
+
+    if (up_state.pre_seq < 3) {
+      EPT("No valid data.\n");
+      THROW_LOG("No valid data.\n");
+      return RESPOND_DL_INSTALL_FAIL;
+    }
+
+    uint8_t *pdata = (uint8_t*)RESERVE_ADDRESS;
+    uint32_t crc = Cal_CRC32(pdata, up_state.fw_size);
+    if (crc ^ up_state.crc32) {
+      EPT("CRC verified failed. %#X != %#X\n", crc, up_state.crc32);
+      THROW_LOG("CRC verified failed. %#X != %#X\n", crc, up_state.crc32);
+      return RESPOND_DL_CHK_ERR;
+    }
+
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_DL_INSTALL_FAIL;
+    } else {
+      // erase flash
+      if (FLASH_If_Erase_IT(FLASH_SECTOR_0) == FLASHIF_OK) {
+        upgrade_bootloader = 1;
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
+    osDelay(pdMS_TO_TICKS(600));
+    return RESPOND_NOT_CPLT;
+  } else if (upgrade_bootloader == 1) {
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_NOT_CPLT;
+    } else {
+      // erase flash
+      if (FLASH_If_Erase_IT(FLASH_SECTOR_1) == FLASHIF_OK) {
+        upgrade_bootloader = 2;
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
+    osDelay(pdMS_TO_TICKS(600));
+    return RESPOND_NOT_CPLT;
+  } else if (upgrade_bootloader == 2) {
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_NOT_CPLT;
+    } else {
+      // erase flash
+      if (FLASH_If_Erase_IT(FLASH_SECTOR_2) == FLASHIF_OK) {
+        upgrade_bootloader = 3;
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
+    osDelay(pdMS_TO_TICKS(600));
+    return RESPOND_NOT_CPLT;
+  } else if (upgrade_bootloader == 3) {
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_NOT_CPLT;
+    } else {
+      // erase flash
+      if (FLASH_If_Erase_IT(FLASH_SECTOR_3) == FLASHIF_OK) {
+        upgrade_bootloader = 4;
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
+    osDelay(pdMS_TO_TICKS(600));
+    return RESPOND_NOT_CPLT;
+  } else if (upgrade_bootloader == 4) {
+    if (flash_in_use) {
+      osDelay(pdMS_TO_TICKS(600));
+      return RESPOND_NOT_CPLT;
+    }
+    total_size = 0;
+    while (total_size < up_state.fw_size) {
+      every_size = total_size + 512 > up_state.fw_size ? up_state.fw_size - total_size: 512;
+      memcpy(buf, (void*)(RESERVE_ADDRESS + total_size), every_size);
+      if (FLASH_If_Write(BOOT_ADDRESS + total_size, (uint32_t*)buf, every_size / 4) != FLASHIF_OK) {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_PROGRAM);
+        return RESPOND_DL_INSTALL_FAIL;
+      }
+      total_size += every_size;
+    }
+
+    return RESPOND_SUCCESS;
+  }
+
+  return RESPOND_SUCCESS;
+}
+
 

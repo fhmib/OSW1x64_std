@@ -3,7 +3,7 @@
 <title>Static Call Graph - [test_board_2_std\test_board_2_std.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image test_board_2_std\test_board_2_std.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sun Aug 30 13:32:49 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Aug 31 21:29:39 2020
 <BR><P>
 <H3>Maximum Stack Usage =        480 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -149,7 +149,7 @@ Global Symbols
 <P><STRONG><a name="[71]"></a>__main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry.o(.ARM.Collect$$$$00000000))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f427xx.o(.text)
 </UL>
-<P><STRONG><a name="[11b]"></a>_main_stk</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry2.o(.ARM.Collect$$$$00000001))
+<P><STRONG><a name="[11d]"></a>_main_stk</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry2.o(.ARM.Collect$$$$00000001))
 
 <P><STRONG><a name="[78]"></a>_main_scatterload</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry5.o(.ARM.Collect$$$$00000004))
 <BR><BR>[Calls]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
@@ -159,15 +159,15 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
 </UL>
 
-<P><STRONG><a name="[11c]"></a>_main_clock</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry7b.o(.ARM.Collect$$$$00000008))
+<P><STRONG><a name="[11e]"></a>_main_clock</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry7b.o(.ARM.Collect$$$$00000008))
 
-<P><STRONG><a name="[11d]"></a>_main_cpp_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry8b.o(.ARM.Collect$$$$0000000A))
+<P><STRONG><a name="[11f]"></a>_main_cpp_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry8b.o(.ARM.Collect$$$$0000000A))
 
-<P><STRONG><a name="[11e]"></a>_main_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry9a.o(.ARM.Collect$$$$0000000B))
+<P><STRONG><a name="[120]"></a>_main_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry9a.o(.ARM.Collect$$$$0000000B))
 
-<P><STRONG><a name="[11f]"></a>__rt_final_cpp</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry10a.o(.ARM.Collect$$$$0000000D))
+<P><STRONG><a name="[121]"></a>__rt_final_cpp</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry10a.o(.ARM.Collect$$$$0000000D))
 
-<P><STRONG><a name="[120]"></a>__rt_final_exit</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry11a.o(.ARM.Collect$$$$0000000F))
+<P><STRONG><a name="[122]"></a>__rt_final_exit</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry11a.o(.ARM.Collect$$$$0000000F))
 
 <P><STRONG><a name="[d]"></a>Reset_Handler</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, startup_stm32f427xx.o(.text))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f427xx.o(RESET)
@@ -437,14 +437,14 @@ Global Symbols
 <LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
-<P><STRONG><a name="[119]"></a>__aeabi_memcpy</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, memcpya.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
+<P><STRONG><a name="[11b]"></a>__aeabi_memcpy</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, memcpya.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 </UL>
 
-<P><STRONG><a name="[121]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text), UNUSED)
+<P><STRONG><a name="[123]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text), UNUSED)
 
-<P><STRONG><a name="[122]"></a>__aeabi_memcpy8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text), UNUSED)
+<P><STRONG><a name="[124]"></a>__aeabi_memcpy8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text), UNUSED)
 
 <P><STRONG><a name="[7e]"></a>__aeabi_memset</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, memseta.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help
@@ -452,9 +452,9 @@ Global Symbols
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
 </UL>
 
-<P><STRONG><a name="[123]"></a>__aeabi_memset4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
+<P><STRONG><a name="[125]"></a>__aeabi_memset4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 
-<P><STRONG><a name="[124]"></a>__aeabi_memset8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
+<P><STRONG><a name="[126]"></a>__aeabi_memset8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 
 <P><STRONG><a name="[7d]"></a>__aeabi_memclr</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, memseta.o(.text))
 <BR><BR>[Calls]<UL><LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
@@ -468,7 +468,7 @@ Global Symbols
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
 </UL>
 
-<P><STRONG><a name="[125]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
+<P><STRONG><a name="[127]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 
 <P><STRONG><a name="[7f]"></a>_memset$wrapper</STRONG> (Thumb, 18 bytes, Stack size 8 bytes, memseta.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
@@ -476,22 +476,24 @@ Global Symbols
 
 <P><STRONG><a name="[db]"></a>strlen</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, strlen.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
-<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
-<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
-<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
+<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
+<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
-<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_mode
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_install
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_tag
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_switch_io
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
 <LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_monitor
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_eeprom
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dump
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dac
@@ -506,26 +508,26 @@ Global Symbols
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_IL
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_HEX
 <LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_CHAR
-<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
+<LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help
 </UL>
 
-<P><STRONG><a name="[103]"></a>strcmp</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, strcmp.o(.text))
+<P><STRONG><a name="[105]"></a>strcmp</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, strcmp.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = strcmp
 </UL>
 <BR>[Called By]<UL><LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help
 </UL>
 
-<P><STRONG><a name="[114]"></a>strcpy</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, strcpy.o(.text))
+<P><STRONG><a name="[116]"></a>strcpy</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, strcpy.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_tag
 </UL>
 
-<P><STRONG><a name="[113]"></a>strtok</STRONG> (Thumb, 62 bytes, Stack size 16 bytes, strtok.o(.text))
+<P><STRONG><a name="[115]"></a>strtok</STRONG> (Thumb, 62 bytes, Stack size 16 bytes, strtok.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = strtok
 </UL>
 <BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
-<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
+<LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
 </UL>
 
 <P><STRONG><a name="[80]"></a>strcasecmp</STRONG> (Thumb, 42 bytes, Stack size 24 bytes, strcasecmp.o(.text))
@@ -533,7 +535,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tolower
 </UL>
-<BR>[Called By]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<BR>[Called By]<UL><LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_tag
 <LI><a href="#[100]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_print_hex
 <LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_pin
@@ -549,7 +551,7 @@ Global Symbols
 <LI><a href="#[2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_reset
 <LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_log
 <LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
-<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
+<LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 </UL>
 
@@ -595,10 +597,10 @@ Global Symbols
 <LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_errno_addr
 <LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_ctype_table
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
-<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_switch
-<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
+<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_switch
+<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
 <LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_write_log
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_switch_io
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
@@ -617,8 +619,8 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dump
 <LI><a href="#[3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_temp
-<LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_value
 <LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_value
 </UL>
 
 <P><STRONG><a name="[8d]"></a>__aeabi_i2d</STRONG> (Thumb, 34 bytes, Stack size 16 bytes, dflti.o(.text))
@@ -631,8 +633,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[f2]"></a>__aeabi_f2d</STRONG> (Thumb, 38 bytes, Stack size 0 bytes, f2d.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
+<BR><BR>[Called By]<UL><LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_IL
 </UL>
 
@@ -645,28 +647,28 @@ Global Symbols
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_scanf_really_real
 </UL>
 
-<P><STRONG><a name="[126]"></a>__aeabi_uidiv</STRONG> (Thumb, 0 bytes, Stack size 12 bytes, uidiv.o(.text), UNUSED)
+<P><STRONG><a name="[128]"></a>__aeabi_uidiv</STRONG> (Thumb, 0 bytes, Stack size 12 bytes, uidiv.o(.text), UNUSED)
 
 <P><STRONG><a name="[ee]"></a>__aeabi_uidivmod</STRONG> (Thumb, 44 bytes, Stack size 12 bytes, uidiv.o(.text), UNUSED)
 <BR><BR>[Called By]<UL><LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
 <P><STRONG><a name="[7c]"></a>__aeabi_llsl</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, llshl.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
+<BR><BR>[Called By]<UL><LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
+<LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
-<LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
 
-<P><STRONG><a name="[127]"></a>_ll_shift_l</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llshl.o(.text), UNUSED)
+<P><STRONG><a name="[129]"></a>_ll_shift_l</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llshl.o(.text), UNUSED)
 
 <P><STRONG><a name="[7b]"></a>__aeabi_llsr</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, llushr.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
+<BR><BR>[Called By]<UL><LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
+<LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
-<LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
 
-<P><STRONG><a name="[128]"></a>_ll_ushift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llushr.o(.text), UNUSED)
+<P><STRONG><a name="[12a]"></a>_ll_ushift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llushr.o(.text), UNUSED)
 
 <P><STRONG><a name="[89]"></a>__rt_ctype_table</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, ctype_o.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isspace
@@ -724,13 +726,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_atof
 </UL>
 
-<P><STRONG><a name="[129]"></a>__I$use$fp</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, iusefp.o(.text), UNUSED)
+<P><STRONG><a name="[12b]"></a>__I$use$fp</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, iusefp.o(.text), UNUSED)
 
 <P><STRONG><a name="[90]"></a>_float_round</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, fepilogue.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2f
 </UL>
 
-<P><STRONG><a name="[12a]"></a>_float_epilogue</STRONG> (Thumb, 92 bytes, Stack size 4 bytes, fepilogue.o(.text), UNUSED)
+<P><STRONG><a name="[12c]"></a>_float_epilogue</STRONG> (Thumb, 92 bytes, Stack size 4 bytes, fepilogue.o(.text), UNUSED)
 
 <P><STRONG><a name="[8c]"></a>_double_round</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, depilogue.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = _double_round
@@ -759,9 +761,9 @@ Global Symbols
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 <LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_round
 </UL>
-<BR>[Called By]<UL><LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_drsub
+<BR>[Called By]<UL><LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_drsub
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
-<LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
 <P><STRONG><a name="[97]"></a>__aeabi_dsub</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, dadd.o(.text), UNUSED)
@@ -775,8 +777,8 @@ Global Symbols
 <P><STRONG><a name="[99]"></a>__aeabi_dmul</STRONG> (Thumb, 228 bytes, Stack size 48 bytes, dmul.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 </UL>
-<BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_value
-<LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<BR>[Called By]<UL><LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_value
 </UL>
 
 <P><STRONG><a name="[9a]"></a>__aeabi_d2ulz</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, dfixul.o(.text), UNUSED)
@@ -796,13 +798,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[78]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_main_scatterload
 </UL>
 
-<P><STRONG><a name="[12b]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
+<P><STRONG><a name="[12d]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
 
 <P><STRONG><a name="[96]"></a>__aeabi_lasr</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, llsshr.o(.text), UNUSED)
 <BR><BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 </UL>
 
-<P><STRONG><a name="[12c]"></a>_ll_sshift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llsshr.o(.text), UNUSED)
+<P><STRONG><a name="[12e]"></a>_ll_sshift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llsshr.o(.text), UNUSED)
 
 <P><STRONG><a name="[91]"></a>__vfscanf</STRONG> (Thumb, 808 bytes, Stack size 88 bytes, _scanf.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = __vfscanf &rArr; _scanf_real
@@ -833,19 +835,21 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_value
 </UL>
 
-<P><STRONG><a name="[12d]"></a>__decompress</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
+<P><STRONG><a name="[12f]"></a>__decompress</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
 
-<P><STRONG><a name="[12e]"></a>__decompress1</STRONG> (Thumb, 86 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
+<P><STRONG><a name="[130]"></a>__decompress1</STRONG> (Thumb, 86 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
 
-<P><STRONG><a name="[110]"></a>BE32_To_Buffer</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, function.o(i.BE32_To_Buffer))
-<BR><BR>[Called By]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_switch
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<P><STRONG><a name="[112]"></a>BE32_To_Buffer</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, function.o(i.BE32_To_Buffer))
+<BR><BR>[Called By]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_switch
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
 <LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_write_log
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_mode
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_install
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_tag
 <LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_reset_log
 <LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_reset_fw
 <LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_pin
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_eeprom
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dump
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dac
@@ -854,12 +858,13 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[f1]"></a>Buffer_To_BE32</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, function.o(i.Buffer_To_BE32))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
+<BR><BR>[Called By]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_mode
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dump
 <LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_adc
 <LI><a href="#[3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_temp
@@ -875,10 +880,10 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f427xx.o(RESET)
 </UL>
-<P><STRONG><a name="[111]"></a>Cal_CRC32</STRONG> (Thumb, 36 bytes, Stack size 12 bytes, function.o(i.Cal_CRC32))
+<P><STRONG><a name="[113]"></a>Cal_CRC32</STRONG> (Thumb, 36 bytes, Stack size 12 bytes, function.o(i.Cal_CRC32))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = Cal_CRC32
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
+<BR>[Called By]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
 <LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_crc32
@@ -904,7 +909,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
+<BR>[Called By]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_switch_io
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
 <LI><a href="#[2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_reset
@@ -920,7 +925,7 @@ Global Symbols
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
 </UL>
 
-<P><STRONG><a name="[112]"></a>HAL_GPIO_ReadPin</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_ReadPin))
+<P><STRONG><a name="[114]"></a>HAL_GPIO_ReadPin</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_ReadPin))
 <BR><BR>[Called By]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_monitor
 </UL>
 
@@ -959,8 +964,8 @@ Global Symbols
 <P><STRONG><a name="[a5]"></a>HAL_InitTick</STRONG> (Thumb, 54 bytes, Stack size 16 bytes, stm32f4xx_hal.o(i.HAL_InitTick))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = HAL_InitTick &rArr; HAL_NVIC_SetPriority
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
-<LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SYSTICK_Config
+<BR>[Calls]<UL><LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SYSTICK_Config
+<LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_ClockConfig
 <LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Init
@@ -973,8 +978,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[b1]"></a>HAL_NVIC_EnableIRQ</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, stm32f4xx_hal_cortex.o(i.HAL_NVIC_EnableIRQ))
-<BR><BR>[Called By]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_MspInit
-<LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
+<BR><BR>[Called By]<UL><LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
+<LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_MspInit
 </UL>
 
 <P><STRONG><a name="[a8]"></a>HAL_NVIC_SetPriority</STRONG> (Thumb, 60 bytes, Stack size 16 bytes, stm32f4xx_hal_cortex.o(i.HAL_NVIC_SetPriority))
@@ -982,9 +987,9 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__NVIC_SetPriority
 </UL>
-<BR>[Called By]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_MspInit
-<LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_InitTick
+<BR>[Called By]<UL><LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_InitTick
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
+<LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_MspInit
 </UL>
 
 <P><STRONG><a name="[a4]"></a>HAL_NVIC_SetPriorityGrouping</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, stm32f4xx_hal_cortex.o(i.HAL_NVIC_SetPriorityGrouping))
@@ -1059,8 +1064,8 @@ Global Symbols
 <P><STRONG><a name="[ae]"></a>HAL_TIM_Base_Init</STRONG> (Thumb, 54 bytes, Stack size 8 bytes, stm32f4xx_hal_tim.o(i.HAL_TIM_Base_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_NVIC_SetPriority
 </UL>
-<BR>[Calls]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_MspInit
-<LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_Base_SetConfig
+<BR>[Calls]<UL><LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_Base_SetConfig
+<LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_MspInit
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_TIM3_Init
 <LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_TIM2_Init
@@ -1156,9 +1161,9 @@ Global Symbols
 <P><STRONG><a name="[c7]"></a>HAL_UART_MspInit</STRONG> (Thumb, 258 bytes, Stack size 48 bytes, usart.o(i.HAL_UART_MspInit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = HAL_UART_MspInit &rArr; HAL_GPIO_Init
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
+<BR>[Calls]<UL><LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_Init
+<LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_EnableIRQ
-<LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_Init
 <LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Init
@@ -1170,7 +1175,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
+<BR>[Called By]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
 </UL>
@@ -1192,22 +1197,24 @@ Global Symbols
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
-<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
-<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
-<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
+<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
+<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
-<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_mode
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_install
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_tag
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_switch_io
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
 <LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_monitor
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_eeprom
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dump
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dac
@@ -1222,7 +1229,7 @@ Global Symbols
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_IL
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_HEX
 <LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_CHAR
-<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
+<LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help
 </UL>
@@ -1251,10 +1258,10 @@ Global Symbols
 <P><STRONG><a name="[d2]"></a>MX_TIM2_Init</STRONG> (Thumb, 100 bytes, Stack size 32 bytes, tim.o(i.MX_TIM2_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = MX_TIM2_Init &rArr; HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_NVIC_SetPriority
 </UL>
-<BR>[Calls]<UL><LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIMEx_MasterConfigSynchronization
-<LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
+<BR>[Calls]<UL><LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_ConfigClockSource
 <LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Init
+<LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIMEx_MasterConfigSynchronization
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -1262,10 +1269,10 @@ Global Symbols
 <P><STRONG><a name="[d5]"></a>MX_TIM3_Init</STRONG> (Thumb, 96 bytes, Stack size 32 bytes, tim.o(i.MX_TIM3_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = MX_TIM3_Init &rArr; HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_NVIC_SetPriority
 </UL>
-<BR>[Calls]<UL><LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIMEx_MasterConfigSynchronization
-<LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
+<BR>[Calls]<UL><LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_ConfigClockSource
 <LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Init
+<LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIMEx_MasterConfigSynchronization
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -1316,7 +1323,7 @@ Global Symbols
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 </UL>
-<BR>[Called By]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<BR>[Called By]<UL><LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
 </UL>
 
 <P><STRONG><a name="[dd]"></a>PRINT_HEX</STRONG> (Thumb, 294 bytes, Stack size 24 bytes, function.o(i.PRINT_HEX))
@@ -1423,28 +1430,30 @@ Global Symbols
 <LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
-<P><STRONG><a name="[12f]"></a>__1sprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0sprintf), UNUSED)
+<P><STRONG><a name="[131]"></a>__1sprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0sprintf), UNUSED)
 
 <P><STRONG><a name="[da]"></a>__2sprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0sprintf))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = __2sprintf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
-<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
-<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
-<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
+<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
+<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
-<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_mode
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_install
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_tag
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_switch_io
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
 <LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_monitor
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_eeprom
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dump
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dac
@@ -1459,21 +1468,21 @@ Global Symbols
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_IL
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_HEX
 <LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_CHAR
-<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
+<LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help
 </UL>
 
-<P><STRONG><a name="[130]"></a>__c89sprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0sprintf), UNUSED)
+<P><STRONG><a name="[132]"></a>__c89sprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0sprintf), UNUSED)
 
-<P><STRONG><a name="[131]"></a>sprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0sprintf), UNUSED)
+<P><STRONG><a name="[133]"></a>sprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0sprintf), UNUSED)
 
 <P><STRONG><a name="[88]"></a>__aeabi_errno_addr</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, errno.o(i.__aeabi_errno_addr))
 <BR><BR>[Called By]<UL><LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_strtoul
 <LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 
-<P><STRONG><a name="[132]"></a>__rt_errno_addr</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, errno.o(i.__aeabi_errno_addr), UNUSED)
+<P><STRONG><a name="[134]"></a>__rt_errno_addr</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, errno.o(i.__aeabi_errno_addr), UNUSED)
 
 <P><STRONG><a name="[e7]"></a>__hardfp_atof</STRONG> (Thumb, 44 bytes, Stack size 24 bytes, atof.o(i.__hardfp_atof))
 <BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = __hardfp_atof &rArr; __strtod_int &rArr; _local_sscanf &rArr; _scanf_real
@@ -1489,11 +1498,11 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_atof
 </UL>
 
-<P><STRONG><a name="[133]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
+<P><STRONG><a name="[135]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
 
-<P><STRONG><a name="[134]"></a>__scatterload_null</STRONG> (Thumb, 2 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_null), UNUSED)
+<P><STRONG><a name="[136]"></a>__scatterload_null</STRONG> (Thumb, 2 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_null), UNUSED)
 
-<P><STRONG><a name="[135]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
+<P><STRONG><a name="[137]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
 
 <P><STRONG><a name="[e9]"></a>__set_errno</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, errno.o(i.__set_errno))
 <BR><BR>[Called By]<UL><LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_atof
@@ -1530,10 +1539,12 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[b]"></a>cmd_for_debug</STRONG> (Thumb, 440 bytes, Stack size 16 bytes, function.o(i.cmd_for_debug))
+<P><STRONG><a name="[b]"></a>cmd_for_debug</STRONG> (Thumb, 480 bytes, Stack size 16 bytes, function.o(i.cmd_for_debug))
 <BR><BR>[Stack]<UL><LI>Max Depth = 328<LI>Call Chain = cmd_for_debug &rArr; debug_cal &rArr; __0sscanf &rArr; __vfscanf_char &rArr; __vfscanf &rArr; _scanf_real
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_write_log
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_mode
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_install
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_tag
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_switch_io
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
@@ -1542,7 +1553,7 @@ Global Symbols
 <LI><a href="#[100]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_print_hex
 <LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_pin
 <LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_monitor
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_eeprom
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dump
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dac
@@ -1561,7 +1572,7 @@ Global Symbols
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
-<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
+<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
 </UL>
@@ -1601,8 +1612,8 @@ Global Symbols
 <P><STRONG><a name="[7]"></a>cmd_log</STRONG> (Thumb, 64 bytes, Stack size 8 bytes, function.o(i.cmd_log))
 <BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = cmd_log &rArr; log_content &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 </UL>
@@ -1639,8 +1650,8 @@ Global Symbols
 <P><STRONG><a name="[8]"></a>cmd_switch</STRONG> (Thumb, 66 bytes, Stack size 16 bytes, function.o(i.cmd_switch))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = cmd_switch &rArr; get_switch &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_switch
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
+<BR>[Calls]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_switch
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 </UL>
@@ -1664,8 +1675,8 @@ Global Symbols
 <P><STRONG><a name="[6]"></a>cmd_time</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, function.o(i.cmd_time))
 <BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = cmd_time &rArr; set_log_time &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
-<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<BR>[Calls]<UL><LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 </UL>
@@ -1674,10 +1685,10 @@ Global Symbols
 <P><STRONG><a name="[0]"></a>cmd_upgrade</STRONG> (Thumb, 126 bytes, Stack size 8 bytes, function.o(i.cmd_upgrade))
 <BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = cmd_upgrade &rArr; upgrade_file &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_install
-<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
-<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
-<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
+<BR>[Calls]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_install
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
+<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 </UL>
@@ -1699,8 +1710,8 @@ Global Symbols
 <P><STRONG><a name="[5]"></a>cmd_voltage</STRONG> (Thumb, 70 bytes, Stack size 8 bytes, function.o(i.cmd_voltage))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = cmd_voltage &rArr; get_voltage_threshold &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
+<BR>[Calls]<UL><LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 </UL>
@@ -1711,14 +1722,14 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 <LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Buffer_To_BE32
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncasecmp
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
@@ -1728,17 +1739,17 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2f
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0sscanf
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncasecmp
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 <LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_atof
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
+<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0sscanf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
@@ -1746,7 +1757,7 @@ Global Symbols
 <P><STRONG><a name="[ff]"></a>debug_crc32</STRONG> (Thumb, 74 bytes, Stack size 16 bytes, function.o(i.debug_crc32))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = debug_crc32 &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
+<BR>[Calls]<UL><LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
@@ -1759,16 +1770,16 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 304<LI>Call Chain = debug_dac &rArr; __0sscanf &rArr; __vfscanf_char &rArr; __vfscanf &rArr; _scanf_real
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0sscanf
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncasecmp
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
+<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0sscanf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
@@ -1780,15 +1791,15 @@ Global Symbols
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ddiv
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 <LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Buffer_To_BE32
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncasecmp
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
@@ -1798,24 +1809,24 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_HEX
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
 
-<P><STRONG><a name="[102]"></a>debug_get_inter_exp</STRONG> (Thumb, 104 bytes, Stack size 16 bytes, function.o(i.debug_get_inter_exp))
+<P><STRONG><a name="[104]"></a>debug_get_inter_exp</STRONG> (Thumb, 104 bytes, Stack size 16 bytes, function.o(i.debug_get_inter_exp))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = debug_get_inter_exp &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 <LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Buffer_To_BE32
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
@@ -1827,7 +1838,7 @@ Global Symbols
 <P><STRONG><a name="[fe]"></a>debug_monitor</STRONG> (Thumb, 142 bytes, Stack size 16 bytes, function.o(i.debug_monitor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = debug_monitor &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
+<BR>[Calls]<UL><LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
@@ -1836,15 +1847,15 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
 
-<P><STRONG><a name="[f6]"></a>debug_pin</STRONG> (Thumb, 296 bytes, Stack size 24 bytes, function.o(i.debug_pin))
+<P><STRONG><a name="[f6]"></a>debug_pin</STRONG> (Thumb, 350 bytes, Stack size 24 bytes, function.o(i.debug_pin))
 <BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = debug_pin &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
@@ -1862,7 +1873,7 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = debug_reset_fw &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
@@ -1871,7 +1882,7 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = debug_reset_log &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
@@ -1881,15 +1892,15 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_HEX
-<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
+<LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
-<LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtok
+<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtok
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
@@ -1901,9 +1912,9 @@ Global Symbols
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
@@ -1912,13 +1923,40 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = debug_tag &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
-<LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcpy
+<LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcpy
+<LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+</UL>
+<BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
+</UL>
+
+<P><STRONG><a name="[103]"></a>debug_upgrade_bootloader_install</STRONG> (Thumb, 142 bytes, Stack size 24 bytes, function.o(i.debug_upgrade_bootloader_install))
+<BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = debug_upgrade_bootloader_install &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
+</UL>
+<BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
+<LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
+<LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
+<LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+</UL>
+<BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
+</UL>
+
+<P><STRONG><a name="[102]"></a>debug_upgrade_bootloader_mode</STRONG> (Thumb, 104 bytes, Stack size 16 bytes, function.o(i.debug_upgrade_bootloader_mode))
+<BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = debug_upgrade_bootloader_mode &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
+</UL>
+<BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
+<LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Buffer_To_BE32
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
+<LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
+<LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
@@ -1928,14 +1966,14 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = debug_write_log &rArr; __0sscanf &rArr; __vfscanf_char &rArr; __vfscanf &rArr; _scanf_real
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0sscanf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_for_debug
 </UL>
 
-<P><STRONG><a name="[109]"></a>get_log_time</STRONG> (Thumb, 88 bytes, Stack size 16 bytes, function.o(i.get_log_time))
+<P><STRONG><a name="[10b]"></a>get_log_time</STRONG> (Thumb, 88 bytes, Stack size 16 bytes, function.o(i.get_log_time))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = get_log_time &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
@@ -1947,7 +1985,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_time
 </UL>
 
-<P><STRONG><a name="[107]"></a>get_switch</STRONG> (Thumb, 94 bytes, Stack size 16 bytes, function.o(i.get_switch))
+<P><STRONG><a name="[109]"></a>get_switch</STRONG> (Thumb, 94 bytes, Stack size 16 bytes, function.o(i.get_switch))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = get_switch &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
@@ -1960,7 +1998,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_switch
 </UL>
 
-<P><STRONG><a name="[10e]"></a>get_voltage</STRONG> (Thumb, 230 bytes, Stack size 32 bytes, function.o(i.get_voltage))
+<P><STRONG><a name="[110]"></a>get_voltage</STRONG> (Thumb, 230 bytes, Stack size 32 bytes, function.o(i.get_voltage))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = get_voltage &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
@@ -1974,7 +2012,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_voltage
 </UL>
 
-<P><STRONG><a name="[10f]"></a>get_voltage_threshold</STRONG> (Thumb, 314 bytes, Stack size 32 bytes, function.o(i.get_voltage_threshold))
+<P><STRONG><a name="[111]"></a>get_voltage_threshold</STRONG> (Thumb, 314 bytes, Stack size 32 bytes, function.o(i.get_voltage_threshold))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = get_voltage_threshold &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
@@ -1988,24 +2026,24 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_voltage
 </UL>
 
-<P><STRONG><a name="[105]"></a>log_content</STRONG> (Thumb, 370 bytes, Stack size 72 bytes, function.o(i.log_content))
+<P><STRONG><a name="[107]"></a>log_content</STRONG> (Thumb, 370 bytes, Stack size 72 bytes, function.o(i.log_content))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = log_content &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 <LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_CHAR
 <LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Buffer_To_BE32
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_log
 </UL>
 
-<P><STRONG><a name="[104]"></a>log_packets</STRONG> (Thumb, 104 bytes, Stack size 16 bytes, function.o(i.log_packets))
+<P><STRONG><a name="[106]"></a>log_packets</STRONG> (Thumb, 104 bytes, Stack size 16 bytes, function.o(i.log_packets))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = log_packets &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
@@ -2021,8 +2059,8 @@ Global Symbols
 <P><STRONG><a name="[6f]"></a>main</STRONG> (Thumb, 552 bytes, Stack size 264 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 480<LI>Call Chain = main &rArr; process_cmd &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_read
-<LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_available
+<BR>[Calls]<UL><LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_read
+<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_available
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART3_UART_Init
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART2_UART_Init
 <LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART1_UART_Init
@@ -2031,24 +2069,24 @@ Global Symbols
 <LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPIO_Init
 <LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Init
 <LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemClock_Config
-<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rb_init
+<LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rb_init
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
-<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
+<LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
-<P><STRONG><a name="[118]"></a>process_cmd</STRONG> (Thumb, 220 bytes, Stack size 160 bytes, cmd.o(i.process_cmd))
+<P><STRONG><a name="[11a]"></a>process_cmd</STRONG> (Thumb, 220 bytes, Stack size 160 bytes, cmd.o(i.process_cmd))
 <BR><BR>[Stack]<UL><LI>Max Depth = 216<LI>Call Chain = process_cmd &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcasecmp
-<LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtok
+<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtok
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -2059,31 +2097,33 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_HEX
-<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
+<LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
-<LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
+<LI><a href="#[11b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_install
-<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
-<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
-<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
-<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_switch
-<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
-<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
-<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_install
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
+<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_file
+<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_switch
+<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
+<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
 <LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_write_log
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_mode
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_install
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_tag
 <LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_reset_log
 <LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_reset_fw
 <LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_pin
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_eeprom
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dump
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dac
@@ -2097,35 +2137,37 @@ Global Symbols
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_IL
 </UL>
 
-<P><STRONG><a name="[116]"></a>serial_available</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, usart.o(i.serial_available))
+<P><STRONG><a name="[118]"></a>serial_available</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, usart.o(i.serial_available))
 <BR><BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[117]"></a>serial_read</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, usart.o(i.serial_read))
+<P><STRONG><a name="[119]"></a>serial_read</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, usart.o(i.serial_read))
 <BR><BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
 <P><STRONG><a name="[dc]"></a>serial_tx</STRONG> (Thumb, 144 bytes, Stack size 24 bytes, usart.o(i.serial_tx))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = serial_tx
 </UL>
-<BR>[Calls]<UL><LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rb_is_empty
+<BR>[Calls]<UL><LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rb_is_empty
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
-<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
-<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init_with_size
+<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;upgrade_init
+<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_log_time
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
-<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_packets
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;log_content
+<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage_threshold
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_voltage
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_switch
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_log_time
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_mode
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_upgrade_bootloader_install
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_tag
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_switch_io
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_send_hex
 <LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_monitor
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_get_inter_exp
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_eeprom
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dump
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_dac
@@ -2140,50 +2182,50 @@ Global Symbols
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_IL
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_HEX
 <LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PRINT_CHAR
-<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
+<LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_cmd
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help2
 <LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_help
 </UL>
 
-<P><STRONG><a name="[108]"></a>set_log_time</STRONG> (Thumb, 176 bytes, Stack size 48 bytes, function.o(i.set_log_time))
+<P><STRONG><a name="[10a]"></a>set_log_time</STRONG> (Thumb, 176 bytes, Stack size 48 bytes, function.o(i.set_log_time))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = set_log_time &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_time
 </UL>
 
-<P><STRONG><a name="[106]"></a>set_switch</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, function.o(i.set_switch))
+<P><STRONG><a name="[108]"></a>set_switch</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, function.o(i.set_switch))
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = set_switch &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BE32_To_Buffer
 <LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_switch
 </UL>
 
-<P><STRONG><a name="[10c]"></a>upgrade_file</STRONG> (Thumb, 548 bytes, Stack size 48 bytes, function.o(i.upgrade_file))
+<P><STRONG><a name="[10e]"></a>upgrade_file</STRONG> (Thumb, 548 bytes, Stack size 48 bytes, function.o(i.upgrade_file))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = upgrade_file &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
-<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
+<LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
-<LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
+<LI><a href="#[11b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_upgrade
 </UL>
 
-<P><STRONG><a name="[10a]"></a>upgrade_init</STRONG> (Thumb, 98 bytes, Stack size 16 bytes, function.o(i.upgrade_init))
+<P><STRONG><a name="[10c]"></a>upgrade_init</STRONG> (Thumb, 98 bytes, Stack size 16 bytes, function.o(i.upgrade_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = upgrade_init &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
@@ -2195,20 +2237,20 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_upgrade
 </UL>
 
-<P><STRONG><a name="[10b]"></a>upgrade_init_with_size</STRONG> (Thumb, 168 bytes, Stack size 16 bytes, function.o(i.upgrade_init_with_size))
+<P><STRONG><a name="[10d]"></a>upgrade_init_with_size</STRONG> (Thumb, 168 bytes, Stack size 16 bytes, function.o(i.upgrade_init_with_size))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = upgrade_init_with_size &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_upgrade
 </UL>
 
-<P><STRONG><a name="[10d]"></a>upgrade_install</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, function.o(i.upgrade_install))
+<P><STRONG><a name="[10f]"></a>upgrade_install</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, function.o(i.upgrade_install))
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = upgrade_install &rArr; process_command &rArr; PRINT_HEX &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_command
@@ -2219,11 +2261,11 @@ Global Symbols
 <H3>
 Local Symbols
 </H3>
-<P><STRONG><a name="[115]"></a>rb_init</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, main.o(i.rb_init))
+<P><STRONG><a name="[117]"></a>rb_init</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, main.o(i.rb_init))
 <BR><BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[11a]"></a>rb_is_empty</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, usart.o(i.rb_is_empty))
+<P><STRONG><a name="[11c]"></a>rb_is_empty</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, usart.o(i.rb_is_empty))
 <BR><BR>[Called By]<UL><LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;serial_tx
 </UL>
 
@@ -2264,8 +2306,8 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[a9]"></a>__NVIC_SetPriority</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, stm32f4xx_hal_cortex.o(i.__NVIC_SetPriority))
-<BR><BR>[Called By]<UL><LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
-<LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SYSTICK_Config
+<BR><BR>[Called By]<UL><LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SYSTICK_Config
+<LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
 </UL>
 
 <P><STRONG><a name="[76]"></a>UART_DMAAbortOnError</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, stm32f4xx_hal_uart.o(i.UART_DMAAbortOnError))
@@ -2312,21 +2354,21 @@ Local Symbols
 
 <P><STRONG><a name="[ea]"></a>_fp_digits</STRONG> (Thumb, 366 bytes, Stack size 64 bytes, printfa.o(i._fp_digits), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ddiv
+<LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
-<LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
 <BR>[Called By]<UL><LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
 <P><STRONG><a name="[e6]"></a>_printf_core</STRONG> (Thumb, 1744 bytes, Stack size 136 bytes, printfa.o(i._printf_core), UNUSED)
-<BR><BR>[Calls]<UL><LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uidivmod
-<LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_pre_padding
+<BR><BR>[Calls]<UL><LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_pre_padding
 <LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_post_padding
 <LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 <LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
+<LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uidivmod
 </UL>
 <BR>[Called By]<UL><LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0sprintf
 </UL>

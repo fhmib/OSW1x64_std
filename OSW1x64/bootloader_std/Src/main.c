@@ -53,7 +53,7 @@
 
 /* USER CODE BEGIN PV */
 const char start_msg[] = "\nWaiting to enter application, Press any key to interrput";
-const char VERSION[] = "\n******* BOOTLOADER VERSION 0.0.1 *******\n";
+const char VERSION[] = "\n******* BOOTLOADER VERSION 0.0.2 *******\n";
 uint8_t reset_flag = 0;
 
 /* USER CODE END PV */
@@ -116,6 +116,11 @@ int main(void)
   HAL_UART_Transmit(&huart3, (uint8_t*)VERSION, strlen(VERSION), TX_TIMEOUT);
   //HAL_UART_Transmit(&huart3, (uint8_t*)start_msg, strlen(start_msg), TX_TIMEOUT);
 #endif
+  while (0) {
+    if (HAL_GPIO_ReadPin(HARD_RESET_GPIO_Port, HARD_RESET_Pin) == GPIO_PIN_SET) {
+      break;
+    }
+  }
   startup_process();
 #if 0
   boot_state = HAL_GPIO_ReadPin(BOOT_GPIO_Port, BOOT_Pin);

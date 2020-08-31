@@ -55,13 +55,20 @@ uint8_t reset_flag = 0;
 uint8_t flash_in_use;
 UpgradeFlashState upgrade_status;
 LogFileState log_file_state;
-ThresholdStruct thr_table;
+#if 1
 const uint32_t file_flash_addr[] =  {  0x08100000, 0x08104000, 0x08108000, 0x0810C000, 0x08110000, 0x08120000,\
                                        0x08140000, 0x08160000, 0x08180000, 0x081A0000, 0x081C0000, 0x081E0000};
 const uint32_t file_flash_end = 0x081FFFFF;
+#else
+const uint32_t file_flash_addr[] =  {  0x08100000, 0x08104000, 0x08108000};
+const uint32_t file_flash_end = 0x0810BFFF;
+#endif
 const uint8_t file_flash_count = sizeof(file_flash_addr) / sizeof (file_flash_addr[0]);
 
 RunTimeStatus run_status __attribute__((at(0x2002FC00)));
+
+uint8_t upgrade_bootloader = 0;
+uint8_t reserve_empty = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,6 +130,9 @@ int main(void)
   }
   HAL_GPIO_WritePin(SPI4_CS_GPIO_Port, SPI4_CS_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(SPI5_CS_GPIO_Port, SPI5_CS_Pin, GPIO_PIN_SET);
+  
+  run_status.internal_exp = 0;
+  Set_Flag(&run_status.internal_exp, INT_EXP_CONST);
   /* USER CODE END 2 */
   /* Init scheduler */
   osKernelInitialize();
@@ -162,8 +172,10 @@ void SystemClock_Config(void)
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE
+                              |RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
@@ -195,7 +207,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -253,7 +265,9 @@ void OSW_Init(void)
         THROW_LOG("Startup with SOFT Reset\n");
         memset(p, 0, 116);
         p += 4; p += 36;
-        strcpy((char*)p, fw_version);
+        strcpy((char*)p, supplier_id);
+        strcpy((char*)p + 4, hw_version);
+        strcpy((char*)p + 4 + 5, fw_version);
         p += 37;
         status = RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_ASN, buf, 12);
         memcpy(p, buf, 12);
@@ -301,6 +315,8 @@ void OSW_Init(void)
       osDelay(pdMS_TO_TICKS(1));
       HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_RESET);
       Init_Run_Status();
+      // Read threshold to variable
+      Get_Threshold_Table(&run_status.thr_table);
       EPT("Variable run_status exception\n");
       THROW_LOG("Variable run_status exception\n");
     }
@@ -312,6 +328,7 @@ void OSW_Init(void)
     osDelay(pdMS_TO_TICKS(1));
     HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_RESET);
     Init_Run_Status();
+    Get_Threshold_Table(&run_status.thr_table);
     EPT("Startup with POWER Reset\n");
     //THROW_LOG("Startup with POWER Reset\n");
   } else {
@@ -323,15 +340,9 @@ void OSW_Init(void)
     osDelay(pdMS_TO_TICKS(1));
     HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_RESET);
     Init_Run_Status();
+    Get_Threshold_Table(&run_status.thr_table);
     EPT("Startup with MASTER Reset\n");
     THROW_LOG("Startup with MASTER Reset\n");
-  }
-
-  // Read threshold to variable
-  status = Get_Threshold_Table(&thr_table);
-  if (status) {
-    EPT("Get threshold table failed, status = %d\n", status);
-    THROW_LOG("Get threshold table failed, status = %d\n", status);
   }
 
   // upgrade
@@ -377,13 +388,17 @@ void OSW_Init(void)
   }
   EPT("FLASH->OPTCR = %#X\n", FLASH->OPTCR);
   if (!upgrade_status.flash_empty) {
-    flash_in_use = 1;
-    up_state.is_erasing = 1;
     // erase flash
     EPT("flash is not empty\n");
-    if (up_state.upgrade_addr != RESERVE_ADDRESS)
-      FLASH_If_Erase_IT(up_state.upgrade_sector);
-    EPT("erase sector...\n");
+    if (up_state.upgrade_addr != RESERVE_ADDRESS) {
+      if (FLASH_If_Erase_IT(up_state.upgrade_sector) == FLASHIF_OK) {
+        flash_in_use = 1;
+        up_state.is_erasing = 1;
+        EPT("erase sector...\n");
+      } else {
+        Set_Flag(&run_status.internal_exp, INT_EXP_UP_ERASE);
+      }
+    }
   } else {
     EPT("flash is empty\n");
   }
@@ -400,7 +415,6 @@ void OSW_Init(void)
 }
 
 extern FLASH_ProcessTypeDef pFlash;
-extern osMutexId_t i2cMutex;
 extern osMessageQueueId_t mid_ISR;
 extern osSemaphoreId_t logEraseSemaphore;
 void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue)
@@ -414,10 +428,15 @@ void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue)
       // send signal to logTask
       osSemaphoreRelease(logEraseSemaphore);
     } else {
-      upgrade_status.flash_empty = 1;
-      up_state.is_erasing = 0;
-      isr_msg.type = MSG_TYPE_FLASH_ISR;
-      osMessageQueuePut(mid_ISR, &isr_msg, 0U, 0U);
+      if (!upgrade_bootloader) {
+        upgrade_status.flash_empty = 1;
+        up_state.is_erasing = 0;
+        isr_msg.type = MSG_TYPE_FLASH_ISR;
+        osMessageQueuePut(mid_ISR, &isr_msg, 0U, 0U);
+      } else {
+        reserve_empty = 1;
+        up_state.is_erasing = 0;
+      }
     }
   }
 }

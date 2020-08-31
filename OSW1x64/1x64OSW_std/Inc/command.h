@@ -72,6 +72,8 @@ typedef enum {
   CMD_DEBUG_RESET_LOG     = 0x0B,
   CMD_DEBUG_WRITE_LOG     = 0x0C,
   CMD_DEBUG_RESET_FW      = 0x0D,
+  CMD_DEBUG_UP_BOOT_MODE  = 0xFD,
+  CMD_DEBUG_UP_BOOT       = 0xFE,
   CMD_DEBUG_INTER_EXP     = 0xFF,
 } CmdDebugId;
 
@@ -172,5 +174,7 @@ uint32_t Cmd_Set_Switch(void);
 uint32_t Cmd_Get_Switch(void);
 uint32_t Cmd_Maintain(void);
 uint32_t Cmd_For_Debug(void);
+uint32_t debug_bootloader_mode(void);
+uint32_t debug_bootloader_install(void);
 
 #endif

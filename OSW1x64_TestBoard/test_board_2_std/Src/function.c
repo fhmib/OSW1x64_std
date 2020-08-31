@@ -605,6 +605,10 @@ int8_t cmd_for_debug(uint8_t argc, char **argv)
     return debug_print_hex(argc, argv);
   } else if (argc == 2 && !strcasecmp(argv[1], "send_hex")) {
     return debug_send_hex(argc, argv);
+  } else if (argc == 2 && !strcasecmp(argv[1], "upgrade_bootloader_mode")) {
+    return debug_upgrade_bootloader_mode();
+  } else if (argc == 2 && !strcasecmp(argv[1], "upgrade_bootloader_install")) {
+    return debug_upgrade_bootloader_install();
   } else if (argc == 2 && !strcasecmp(argv[1], "inter_exp")) {
     return debug_get_inter_exp();
   } else {
@@ -815,6 +819,14 @@ int8_t debug_pin(uint8_t argc, char **argv)
     type = 0xFF;
     port = OUT_STROBE_GPIO_Port;
     pin = OUT_STROBE_Pin;
+  } else if (!strcasecmp(argv[2], "master_reset")) {
+    type = 0xFF;
+    port = MASTER_RESET_GPIO_Port;
+    pin = MASTER_RESET_Pin;
+  } else if (!strcasecmp(argv[2], "hard_reset")) {
+    type = 0xFF;
+    port = HARD_RESET_GPIO_Port;
+    pin = HARD_RESET_Pin;
   } else {
     cmd_help2(argv[0]);
     return 0;
@@ -1213,6 +1225,38 @@ int8_t debug_send_hex(uint8_t argc, char **argv)
   }
 
   return 0;
+}
+
+int8_t debug_upgrade_bootloader_mode(void)
+{
+  int8_t ret;
+  uint32_t value;
+
+  BE32_To_Buffer(0x5A5AA5A5, txBuf);
+  BE32_To_Buffer(CMD_DEBUG_UP_BOOT_MODE, txBuf + 4);
+  ret = process_command(CMD_FOR_DEBUG, txBuf, 8, rBuf, &rLen);
+   if (ret) {
+    return ret;
+  }
+
+  value = Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA);
+  PRINT("Returned code is %#X\r\n", value);
+  return ret;
+}
+
+int8_t debug_upgrade_bootloader_install(void)
+{
+  int8_t ret;
+
+  BE32_To_Buffer(0x5A5AA5A5, txBuf);
+  BE32_To_Buffer(CMD_DEBUG_UP_BOOT, txBuf + 4);
+  PRINT("Installing Bootloader... Do not Power off until success!!!\r\n");
+  do {
+    ret = process_command(CMD_FOR_DEBUG, txBuf, 8, rBuf, &rLen);
+  } while (ret != 0);
+
+  PRINT("Upgrade Bootloader success\r\n");
+  return ret;
 }
 
 int8_t debug_get_inter_exp()

@@ -1,0 +1,1 @@
+cmd /k "start pack_bootloader.exe D:\Work\stm32_project\OSW1x64\OSW1x64\bootloader_std\MDK-ARM\BOOTLOADER_F429\BOOTLOADER_F429.bin && exit"
