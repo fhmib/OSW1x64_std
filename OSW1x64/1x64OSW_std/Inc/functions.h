@@ -29,6 +29,8 @@ typedef enum {
   EE_TAG_DATE             = 0x0020, // Manufacture Date
   EE_TAG_ASN              = 0x0040, // Assembly Serial Number
   EE_TAG_FSN              = 0x0060, // Filter Serial Number
+  EE_TAG_SUPPLIER         = 0x0080, // Supplier ID
+  EE_TAG_HW_VERSION       = 0x00A0, // Hardware Version
   // calibration
   EE_CAL_SWITCH1          = 0x1000, // 0x1000 ~ 0x125F
   EE_CAL_SWITCH2          = 0x1030, // 0x1000 ~ 0x125F

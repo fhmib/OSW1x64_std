@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	}
 
 	sprintf(pn, "45070038");
-	sprintf(hw, "01.01");
+	sprintf(hw, "01.--");
 	printf("Please input software version:");
 	scanf("%s", buf);
 	sprintf(d_name, "45070038_OSW1x64_%s%s.bin", hw, buf);

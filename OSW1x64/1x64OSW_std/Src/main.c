@@ -69,6 +69,7 @@ RunTimeStatus run_status __attribute__((at(0x2002FC00)));
 
 uint8_t upgrade_bootloader = 0;
 uint8_t reserve_empty = 0;
+uint8_t lock_debug = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -226,6 +227,16 @@ void OSW_Init(void)
 
   EPT("Firmware version: %s\n", fw_version);
 
+  status = RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_PN, (uint8_t*)pn, 8);
+  pn[8] = 0;
+  status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_HW_VERSION, (uint8_t*)hw_version, 5);
+  hw_version[5] = 0;
+  status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_SUPPLIER, (uint8_t*)supplier_id, 4);
+  supplier_id[4] = 0;
+  if (status != osOK) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
+  }
+
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST) != RESET){
     SET_RESETFLAG(BOR_RESET_BIT);
     //EPT("BOR Reset is set\n");
@@ -265,9 +276,9 @@ void OSW_Init(void)
         THROW_LOG("Startup with SOFT Reset\n");
         memset(p, 0, 116);
         p += 4; p += 36;
-        strcpy((char*)p, supplier_id);
-        strcpy((char*)p + 4, hw_version);
-        strcpy((char*)p + 4 + 5, fw_version);
+        strncpy((char*)p, supplier_id, 4);
+        strncpy((char*)p + 4, hw_version, 5);
+        strncpy((char*)p + 4 + 5, fw_version, 5);
         p += 37;
         status = RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_ASN, buf, 12);
         memcpy(p, buf, 12);
@@ -278,6 +289,7 @@ void OSW_Init(void)
         if (status != osOK) {
           EPT("EEPROM ERROR! status = %d\n", status);
           //THROW_LOG("Read EEPROM Failed! status = %d\n", status);
+          Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
         }
         Uart_Respond(CMD_SOFTRESET, RESPOND_SUCCESS, resp_buf.buf, 120);
       } else {
@@ -296,7 +308,7 @@ void OSW_Init(void)
         THROW_LOG("Detect optical switch channel %u incorrect while initializing\n", run_status.switch_channel);
         Reset_Switch();
       }
-      
+
       if (run_status.exp) {
         HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_RESET);
       } else {
@@ -355,6 +367,7 @@ void OSW_Init(void)
   if (status) {
     EPT("Get upgrade status failed, status = %d\n", status);
     THROW_LOG("Get upgrade status failed, status = %d\n", status);
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
   EPT("upgrade_status: %#X, %u, %u, %u, %#X, %u, %#X\n", upgrade_status.magic, upgrade_status.run, upgrade_status.flash_empty, upgrade_status.length, upgrade_status.crc32,\
                 upgrade_status.factory_length, upgrade_status.factory_crc32);

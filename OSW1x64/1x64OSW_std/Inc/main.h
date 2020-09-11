@@ -62,6 +62,7 @@ extern RunTimeStatus run_status;
 
 extern uint8_t upgrade_bootloader;
 extern uint8_t reserve_empty;
+extern uint8_t lock_debug;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

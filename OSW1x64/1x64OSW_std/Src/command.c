@@ -15,41 +15,46 @@ RespondStu resp_buf;
 
 UpgradeStruct up_state;
 
-char *pn = "45070038";
-char *supplier_id = "ONET"; // 4 bytes
-char *hw_version = "01.01"; // 5 bytes
-char *fw_version = "01.01"; // 5 bytes
+//char *pn = "45070038";
+//char *supplier_id = "ONET"; // 4 bytes
+//char *hw_version = "01.01"; // 5 bytes
+char *fw_version = "01.02"; // 5 bytes
+char pn[9];
+char hw_version[6];
+char supplier_id[5];
 
 extern UpgradeFlashState upgrade_status;
 
 CmdStruct command_list[] = {
-  {CMD_UPGRADE_INIT, Cmd_Upgrade_Init},
-  {CMD_UPGRADE_DATA, Cmd_Upgrade_Data},
-  {CMD_UPGRADE_INSTALL, Cmd_Upgrade_Install},
-  {CMD_QUERY_VERSION, Cmd_Get_Version},
-  {CMD_SOFTRESET, Cmd_Softreset},
-  {CMD_QUERY_TEMP, Cmd_Get_Temperature},
-  {CMD_DEVICE_STATUS, Cmd_Device_Status},
-  {CMD_QUERY_VOLTAGE, Cmd_Voltage},
-  {CMD_QUERY_VOL_THR, Cmd_Voltage_Threshold},
-  {CMD_SET_LOG_TIME, Cmd_Set_Time},
-  {CMD_QUERY_LOG_TIME, Cmd_Get_Time},
-  {CMD_QUERY_LOG_NUM, Cmd_LOG_Number},
-  {CMD_QUERY_LOG, Cmd_LOG_Content},
-  {CMD_QUERY_IL, Cmd_Get_IL},
-  {CMD_SET_SWITCH, Cmd_Set_Switch},
-  {CMD_QUERY_SWITCH, Cmd_Get_Switch},
-  {CMD_MAINTAIN, Cmd_Maintain},
+  {CMD_UPGRADE_INIT, 0x1C, Cmd_Upgrade_Init},
+  {CMD_UPGRADE_DATA, 0xFFFFFFFF, Cmd_Upgrade_Data},
+  {CMD_UPGRADE_INSTALL, 0x14, Cmd_Upgrade_Install},
+  {CMD_QUERY_VERSION, 0x14, Cmd_Get_Version},
+  {CMD_SOFTRESET, 0x14, Cmd_Softreset},
+  {CMD_QUERY_TEMP, 0x14, Cmd_Get_Temperature},
+  {CMD_DEVICE_STATUS, 0x14, Cmd_Device_Status},
+  {CMD_QUERY_VOLTAGE, 0x14, Cmd_Voltage},
+  {CMD_QUERY_VOL_THR, 0x14, Cmd_Voltage_Threshold},
+  {CMD_SET_LOG_TIME, 0x20, Cmd_Set_Time},
+  {CMD_QUERY_LOG_TIME, 0x14, Cmd_Get_Time},
+  {CMD_QUERY_LOG_NUM, 0x14, Cmd_LOG_Number},
+  {CMD_QUERY_LOG, 0x14, Cmd_LOG_Content},
+  {CMD_QUERY_IL, 0x14, Cmd_Get_IL},
+  {CMD_SET_SWITCH, 0x14, Cmd_Set_Switch},
+  {CMD_QUERY_SWITCH, 0x14, Cmd_Get_Switch},
+  {CMD_MAINTAIN, 0x14, Cmd_Maintain},
 
-  {CMD_FOR_DEBUG, Cmd_For_Debug},
+  {CMD_FOR_DEBUG, 0xFFFFFFFF, Cmd_For_Debug},
 };
 
 uint32_t Cmd_Process()
 {
   int i;
   uint32_t cmd_id;
+  uint32_t cmd_length;
 
   cmd_id = switch_endian(*(uint32_t*)&trans_buf.buf[CMD_SEQ_MSG_ID]);
+  cmd_length = switch_endian(*(uint32_t*)&trans_buf.buf[CMD_SEQ_MSG_LENGTH]);
 
   for (i = 0; i < sizeof(command_list) / sizeof(command_list[0]); ++i) {
     if (cmd_id == command_list[i].cmd_id) {
@@ -57,13 +62,20 @@ uint32_t Cmd_Process()
       if (command_list[i].func == NULL) {
         break;
       }
+      if (command_list[i].cmd_std_len != 0xFFFFFFFF) {
+        if (cmd_length != command_list[i].cmd_std_len) {
+          THROW_LOG("Command %#X Length %#X invalid\n", cmd_id, cmd_length);
+          FILL_RESP_MSG(cmd_id, RESPOND_LENGTH_ERR, 0);
+          return RESPOND_LENGTH_ERR;
+        }
+      }
       return command_list[i].func();
     }
   }
 
   THROW_LOG("Unknow command id = %#X\n", cmd_id);
   FILL_RESP_MSG(cmd_id, RESPOND_UNKNOWN_CMD, 0);
-  return 0;
+  return RESPOND_UNKNOWN_CMD;
 }
 
 int Uart_Respond(uint32_t cmd, uint32_t status, uint8_t *pdata, uint32_t len)
@@ -155,7 +167,7 @@ uint32_t Cmd_Upgrade_Data()
     }
     if (!upgrade_bootloader) {
       if (strcmp((char*)&p_fw_data[FW_HEAD_MODULE_PN], pn) || 
-            strncmp((char*)&p_fw_data[FW_HEAD_MODULE_HW], hw_version, 2)) {
+            strncmp((char*)&p_fw_data[FW_HEAD_MODULE_HW], hw_version, 3)) {
         EPT("The file is not the firmware corresponding to this module\n");
         THROW_LOG("The file is not the firmware corresponding to this module\n");
         FILL_RESP_MSG(CMD_UPGRADE_DATA, RESPOND_SEGMENT_ERR, 8);
@@ -373,9 +385,9 @@ uint32_t Cmd_Get_Version()
   status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_DATE, buf, 8);
   memcpy(p, buf, 8);
   p += 10;
-  strcpy((char*)p, supplier_id);
-  strcpy((char*)p + 4, hw_version);
-  strcpy((char*)p + 4 + 5, fw_version);
+  strncpy((char*)p, supplier_id, 4);
+  strncpy((char*)p + 4, hw_version, 5);
+  strncpy((char*)p + 4 + 5, fw_version, 5);
   p += 37;
   status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_ASN, buf, 12);
   memcpy(p, buf, 12);
@@ -733,8 +745,6 @@ uint32_t Cmd_Set_Switch(void)
     return RESPOND_SUCCESS;
   }
 
-  // DAC need 2ms at least
-  osDelay(pdMS_TO_TICKS(4));
   run_status.switch_channel = switch_channel;
 
   // Check
@@ -821,11 +831,21 @@ uint32_t Cmd_For_Debug()
   uint32_t temp = Buffer_To_BE32(prdata);
   memset(resp_buf.buf, 0, 4);
   if (temp != 0x5A5AA5A5) {
-    FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 4);
+    FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 0);
     return RESPOND_UNKNOWN_CMD;
   }
   
   temp = Buffer_To_BE32(prdata + 4);
+  if (temp == CMD_DEBUG_UNLOCK) {
+    lock_debug = 0;
+    FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_SUCCESS, 0);
+    return ret;
+  }
+  
+  if (lock_debug) {
+    FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 0);
+    return RESPOND_UNKNOWN_CMD;
+  }
   if (temp == CMD_DEBUG_SW_DAC) {
     memset(resp_buf.buf, 0, 4);
     sw_num = Buffer_To_BE32(prdata + 8);
@@ -940,7 +960,7 @@ uint32_t Cmd_For_Debug()
     return ret;
   }
 
-  FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 4);
+  FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 0);
   return RESPOND_UNKNOWN_CMD;
 }
 

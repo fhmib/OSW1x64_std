@@ -671,6 +671,8 @@ int8_t set_sw_dac(uint8_t sw_num, int32_t val_x, int32_t val_y)
       EPT("Write dac failed\n");
       return -1;
     }
+    // DAC need 2ms at least
+    osDelay(pdMS_TO_TICKS(4));
 #if 0
     val_x = switch_map[i].px_chan << 24;
     val_x |= switch_map[i].nx_chan << 16;
@@ -755,7 +757,7 @@ uint32_t debug_tag(uint8_t type, uint8_t *p, uint32_t length)
   uint16_t addr;
   uint8_t buf[TAG_MAX_SPACE] = {0};
 
-  if (type > 3 || length > TAG_MAX_SPACE) {
+  if (type > 5 || length > TAG_MAX_SPACE) {
     return RESPOND_FAILURE;
   }
   
@@ -772,15 +774,30 @@ uint32_t debug_tag(uint8_t type, uint8_t *p, uint32_t length)
     case 3:
       addr = EE_TAG_FSN;
       break;
+    case 4:
+      addr = EE_TAG_SUPPLIER;
+      break;
+    case 5:
+      addr = EE_TAG_HW_VERSION;
+      break;
     default:
       break;
   }
 
   memcpy(buf, p, length);
   status = RTOS_EEPROM_Write(EEPROM_ADDR, addr, buf, sizeof(buf));
-
   if (status != osOK) {
     EPT("Read adc failed\n");
+    return RESPOND_FAILURE;
+  }
+
+  status = RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_PN, (uint8_t*)pn, 8);
+  pn[8] = 0;
+  status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_HW_VERSION, (uint8_t*)hw_version, 5);
+  hw_version[5] = 0;
+  status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_SUPPLIER, (uint8_t*)supplier_id, 4);
+  supplier_id[4] = 0;
+  if (status != osOK) {
     return RESPOND_FAILURE;
   }
 

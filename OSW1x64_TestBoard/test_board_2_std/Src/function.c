@@ -605,12 +605,16 @@ int8_t cmd_for_debug(uint8_t argc, char **argv)
     return debug_print_hex(argc, argv);
   } else if (argc == 2 && !strcasecmp(argv[1], "send_hex")) {
     return debug_send_hex(argc, argv);
+  } else if (argc == 3 && !strcasecmp(argv[1], "send_hex") && !strcasecmp(argv[2], "no_check")) {
+    return debug_send_hex(argc, argv);
   } else if (argc == 2 && !strcasecmp(argv[1], "upgrade_bootloader_mode")) {
     return debug_upgrade_bootloader_mode();
   } else if (argc == 2 && !strcasecmp(argv[1], "upgrade_bootloader_install")) {
     return debug_upgrade_bootloader_install();
   } else if (argc == 2 && !strcasecmp(argv[1], "inter_exp")) {
     return debug_get_inter_exp();
+  } else if (argc == 2 && !strcasecmp(argv[1], "unlock")) {
+    return debug_unlock();
   } else {
     cmd_help2(argv[0]);
     return 0;
@@ -747,6 +751,18 @@ int8_t debug_tag(uint8_t argc, char **argv)
     type = 3;
     if (len > 23) {
       PRINT("FSN must less than 23 bytes\r\n");
+      return 1;
+    }
+  } else if (!strcasecmp(argv[2], "supplier_id")) {
+    type = 4;
+    if (len > 4) {
+      PRINT("FSN must less than 4 bytes\r\n");
+      return 1;
+    }
+  } else if (!strcasecmp(argv[2], "hw_version")) {
+    type = 5;
+    if (len > 5) {
+      PRINT("FSN must less than 5 bytes\r\n");
       return 1;
     }
   } else {
@@ -1184,6 +1200,11 @@ int8_t debug_send_hex(uint8_t argc, char **argv)
     for (p = strtok((char*)fw_buf, " \t\r\n,"), i = 0; p != NULL; ++i, p = strtok(NULL, " \t\r\n,")) {
       p_data[i] = (uint8_t)strtoul(p, NULL, 0);
     }
+    if (argc == 3 && !strcasecmp(argv[2], "no_check")) {
+      rcv_crc = Cal_CRC32((uint8_t*)&p_data[1], i - 1);
+      *(uint32_t*)(&p_data[i]) = switch_endian(rcv_crc);
+      i += 4;
+    }
     PRINT_HEX("tx_buf", p_data, i);
     if (HAL_UART_Transmit(&COMMUNICATION_UART, p_data, i, 0xFF) != HAL_OK) {
       EPT("Transmit failed\r\n");
@@ -1276,6 +1297,19 @@ int8_t debug_get_inter_exp()
   return ret;
 }
 
+int8_t debug_unlock(void)
+{
+  int8_t ret;
+
+  BE32_To_Buffer(0x5A5AA5A5, txBuf);
+  BE32_To_Buffer(CMD_DEBUG_UNLOCK, txBuf + 4);
+  ret = process_command(CMD_FOR_DEBUG, txBuf, 8, rBuf, &rLen);
+   if (ret) {
+    return ret;
+  }
+
+  return ret;
+}
 
 int8_t process_command(uint32_t cmd, uint8_t *pdata, uint32_t len, uint8_t *rx_buf, uint32_t *rx_len)
 {

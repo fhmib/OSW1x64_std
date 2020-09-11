@@ -4,8 +4,9 @@
 #include "main.h"
 #include "cmsis_os.h"
 
-extern char *supplier_id;
-extern char *hw_version;
+extern char supplier_id[];
+extern char hw_version[];
+extern char pn[];
 extern char *fw_version;
 
 #define TAG_MAX_SPACE               0x20
@@ -75,6 +76,7 @@ typedef enum {
   CMD_DEBUG_UP_BOOT_MODE  = 0xFD,
   CMD_DEBUG_UP_BOOT       = 0xFE,
   CMD_DEBUG_INTER_EXP     = 0xFF,
+  CMD_DEBUG_UNLOCK        = 0x12345678,
 } CmdDebugId;
 
 typedef enum {
@@ -106,6 +108,7 @@ typedef uint32_t (*cmdFunc)(void);
 
 typedef struct {
   uint32_t cmd_id;
+  uint32_t cmd_std_len;
   cmdFunc func;
 }CmdStruct;
 
