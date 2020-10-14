@@ -116,7 +116,7 @@ int main(void)
   HAL_UART_Transmit(&huart3, (uint8_t*)VERSION, strlen(VERSION), TX_TIMEOUT);
   //HAL_UART_Transmit(&huart3, (uint8_t*)start_msg, strlen(start_msg), TX_TIMEOUT);
 #endif
-  while (0) {
+  while (1) {
     if (HAL_GPIO_ReadPin(HARD_RESET_GPIO_Port, HARD_RESET_Pin) == GPIO_PIN_SET) {
       break;
     }

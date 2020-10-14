@@ -3,7 +3,7 @@
 <title>Static Call Graph - [1x64OSW\1x64OSW.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image 1x64OSW\1x64OSW.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Thu Sep 10 12:50:32 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Thu Sep 17 16:51:48 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1288 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -594,7 +594,6 @@ Global Symbols
 <LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_Get_Temperature
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Is_Value_Approximate
-<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;monitorTask
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_drsub
 <LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_log
 <LI><a href="#[17d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__kernel_poly
@@ -610,7 +609,6 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_Temp
 <LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_Get_Temperature
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Is_Value_Approximate
-<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;monitorTask
 <LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_log
 </UL>
 
@@ -1461,6 +1459,7 @@ Global Symbols
 <LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_PWREx_EnableOverDrive
 <LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FLASH_WaitForLastOperation
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort
+<LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_WaitFlagStateUntilTimeout
 <LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_EnterInitMode
 <LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_WaitForSynchro
 <LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_WaitOnTXEFlagUntilTimeout
@@ -1468,7 +1467,6 @@ Global Symbols
 <LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_WaitOnMasterAddressFlagUntilTimeout
 <LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_WaitOnFlagUntilTimeout
 <LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_WaitOnBTFFlagUntilTimeout
-<LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI_WaitFlagStateUntilTimeout
 <LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
 </UL>
 
@@ -2823,15 +2821,13 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
-<P><STRONG><a name="[82]"></a>monitorTask</STRONG> (Thumb, 1502 bytes, Stack size 56 bytes, freertos.o(i.monitorTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 296<LI>Call Chain = monitorTask &rArr; RTOS_ADC7828_Read &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[82]"></a>monitorTask</STRONG> (Thumb, 1514 bytes, Stack size 48 bytes, freertos.o(i.monitorTask))
+<BR><BR>[Stack]<UL><LI>Max Depth = 288<LI>Call Chain = monitorTask &rArr; RTOS_ADC7828_Read &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
 <LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_Temp
 <LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
-<LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
 <LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Throw_Log

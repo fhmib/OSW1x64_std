@@ -628,7 +628,7 @@ void monitorTask(void *argument)
         Set_Flag(&run_status.exp, EXP_VOLTAGE_3_3);
       }
     } else {
-      if (voltage <= run_status.thr_table.vol_3_3_high_clear - 0.05 && voltage >= run_status.thr_table.vol_3_3_low_clear + 0.05) {
+      if (voltage <= run_status.thr_table.vol_3_3_high_clear && voltage >= run_status.thr_table.vol_3_3_low_clear) {
         THROW_LOG("Voltage 3.3V back to normal\n");
         Clear_Flag(&run_status.exp, EXP_VOLTAGE_3_3);
       }
