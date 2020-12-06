@@ -27,6 +27,7 @@
 #include "iwdg.h"
 #include "rtc.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -69,6 +70,9 @@ RunTimeStatus run_status __attribute__((at(0x2002FC00)));
 
 uint8_t upgrade_bootloader = 0;
 uint8_t reserve_empty = 0;
+uint8_t lock_debug = 1;
+
+SwTimControl sw_tim_control;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,6 +127,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
   MX_RTC_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   uint8_t buf[3] = {0};
   if (HAL_SPI_Transmit(&hspi1, buf, 1, 10) != HAL_OK) {
@@ -226,6 +231,16 @@ void OSW_Init(void)
 
   EPT("Firmware version: %s\n", fw_version);
 
+  status = RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_PN, (uint8_t*)pn, 8);
+  pn[8] = 0;
+  status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_HW_VERSION, (uint8_t*)hw_version, 5);
+  hw_version[5] = 0;
+  status |= RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_SUPPLIER, (uint8_t*)supplier_id, 4);
+  supplier_id[4] = 0;
+  if (status != osOK) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
+  }
+
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST) != RESET){
     SET_RESETFLAG(BOR_RESET_BIT);
     //EPT("BOR Reset is set\n");
@@ -265,9 +280,9 @@ void OSW_Init(void)
         THROW_LOG("Startup with SOFT Reset\n");
         memset(p, 0, 116);
         p += 4; p += 36;
-        strcpy((char*)p, supplier_id);
-        strcpy((char*)p + 4, hw_version);
-        strcpy((char*)p + 4 + 5, fw_version);
+        strncpy((char*)p, supplier_id, 4);
+        strncpy((char*)p + 4, hw_version, 5);
+        strncpy((char*)p + 4 + 5, fw_version, 5);
         p += 37;
         status = RTOS_EEPROM_Read(EEPROM_ADDR, EE_TAG_ASN, buf, 12);
         memcpy(p, buf, 12);
@@ -278,6 +293,7 @@ void OSW_Init(void)
         if (status != osOK) {
           EPT("EEPROM ERROR! status = %d\n", status);
           //THROW_LOG("Read EEPROM Failed! status = %d\n", status);
+          Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
         }
         Uart_Respond(CMD_SOFTRESET, RESPOND_SUCCESS, resp_buf.buf, 120);
       } else {
@@ -296,7 +312,7 @@ void OSW_Init(void)
         THROW_LOG("Detect optical switch channel %u incorrect while initializing\n", run_status.switch_channel);
         Reset_Switch();
       }
-      
+
       if (run_status.exp) {
         HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_RESET);
       } else {
@@ -355,6 +371,7 @@ void OSW_Init(void)
   if (status) {
     EPT("Get upgrade status failed, status = %d\n", status);
     THROW_LOG("Get upgrade status failed, status = %d\n", status);
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
   EPT("upgrade_status: %#X, %u, %u, %u, %#X, %u, %#X\n", upgrade_status.magic, upgrade_status.run, upgrade_status.flash_empty, upgrade_status.length, upgrade_status.crc32,\
                 upgrade_status.factory_length, upgrade_status.factory_crc32);
@@ -412,6 +429,9 @@ void OSW_Init(void)
     }
   }
   log_file_state.cur_sector = LOG_FIRST_SECTOR + i;
+
+  // check calibration data
+  Check_Cali();
 }
 
 extern FLASH_ProcessTypeDef pFlash;
@@ -478,6 +498,33 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+  if (htim->Instance == TIM6) {
+    if (++sw_tim_control.counter < sw_tim_control.time) {
+    } else {
+      if (sw_tim_control.cur_x < sw_tim_control.dst_x) {
+        sw_tim_control.cur_x = (sw_tim_control.dst_x - sw_tim_control.cur_x > sw_tim_control.step) ?\
+                                (sw_tim_control.cur_x + sw_tim_control.step) : (sw_tim_control.dst_x);
+      } else if (sw_tim_control.cur_x > sw_tim_control.dst_x) {
+        sw_tim_control.cur_x = (sw_tim_control.cur_x - sw_tim_control.dst_x > sw_tim_control.step) ?\
+                                (sw_tim_control.cur_x - sw_tim_control.step) : (sw_tim_control.dst_x);
+      }
+      
+      if (sw_tim_control.cur_y < sw_tim_control.dst_y) {
+        sw_tim_control.cur_y = (sw_tim_control.dst_y - sw_tim_control.cur_y > sw_tim_control.step) ?\
+                                (sw_tim_control.cur_y + sw_tim_control.step) : (sw_tim_control.dst_y);
+      } else if (sw_tim_control.cur_y > sw_tim_control.dst_y) {
+        sw_tim_control.cur_y = (sw_tim_control.cur_y - sw_tim_control.dst_y > sw_tim_control.step) ?\
+                                (sw_tim_control.cur_y - sw_tim_control.step) : (sw_tim_control.dst_y);
+      }
+
+      if (sw_tim_control.cur_x == sw_tim_control.dst_x && sw_tim_control.cur_y == sw_tim_control.dst_y) {
+        HAL_TIM_Base_Stop_IT(&htim6);
+      }
+
+      set_sw_dac_2(sw_tim_control.sw_num, sw_tim_control.cur_x, sw_tim_control.cur_y);
+      sw_tim_control.counter = 0;
+    }
+  }
 
   /* USER CODE END Callback 1 */
 }

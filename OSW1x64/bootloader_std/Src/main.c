@@ -53,7 +53,7 @@
 
 /* USER CODE BEGIN PV */
 const char start_msg[] = "\nWaiting to enter application, Press any key to interrput";
-const char VERSION[] = "\n******* BOOTLOADER VERSION 0.0.2 *******\n";
+const char VERSION[] = "\n******* BOOTLOADER VERSION 0.0.3 *******\n";
 uint8_t reset_flag = 0;
 
 /* USER CODE END PV */

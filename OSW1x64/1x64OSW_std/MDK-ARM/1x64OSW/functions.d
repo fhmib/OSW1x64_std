@@ -65,3 +65,4 @@
 1x64osw\functions.o: ../Inc/i2c.h
 1x64osw\functions.o: ../Inc/spi.h
 1x64osw\functions.o: ../Inc/rtc.h
+1x64osw\functions.o: ../Inc/tim.h

@@ -76,10 +76,10 @@ void SerialDownload(uint32_t addr)
   uint32_t fw_length;
   uint32_t fw_crc;
   uint8_t buf[256];
-#if 0
-  Serial_PutString((uint8_t *)"Waiting for the file to be sent ... \n\r");
+#if 1
+  Serial_PutString((uint8_t *)"Waiting for the file to be sent ... \r\n");
   if (HAL_UART_Receive(&huart3, buf, 256, 1000 * 60) != HAL_OK) {
-    Serial_PutString((uint8_t *)"Timeout\n\r");
+    Serial_PutString((uint8_t *)"Timeout\r\n");
     return;
   }
   fw_length = (buf[FW_HEAD_FW_LENGTH] << 24) | (buf[FW_HEAD_FW_LENGTH + 1] << 16) |\
@@ -88,13 +88,13 @@ void SerialDownload(uint32_t addr)
            (buf[FW_HEAD_CRC + 2] << 8) | (buf[FW_HEAD_CRC + 3] << 0);
   HAL_UART_Receive(&huart3, fw_buf, fw_length, 1000 * 10);
   if (strcmp((char*)&buf[FW_HEAD_MODULE_NAME], "ONET-BJ-TESTBOARD2.0")) {
-    Serial_PutString((uint8_t*)"The file is not the firmware corresponding to this module\n");
+    Serial_PutString((uint8_t*)"The file is not the firmware corresponding to this module\r\n");
     return;
   }
   if (Cal_CRC32(fw_buf, fw_length) == fw_crc) {
-    Serial_PutString((uint8_t*)"CRC32 success\n");
+    Serial_PutString((uint8_t*)"CRC32 success\r\n");
   } else {
-    Serial_PutString((uint8_t*)"CRC32 failed\n");
+    Serial_PutString((uint8_t*)"CRC32 failed\r\n");
     return;
   }
 
@@ -166,7 +166,7 @@ void SerialDownload(uint32_t addr)
   }
 
 #endif
-  Serial_PutString((uint8_t*)"Download success\n\r");
+  Serial_PutString((uint8_t*)"Download success\r\n");
 }
 
 /**
@@ -178,7 +178,7 @@ void SerialUpload(uint32_t addr)
 {
   uint8_t status = 0;
 
-  Serial_PutString((uint8_t *)"\n\n\rSelect Receive File\n\r");
+  Serial_PutString((uint8_t *)"\r\nSelect Receive File\r\n");
 
   HAL_UART_Receive(&huart3, &status, 1, RX_TIMEOUT);
   if ( status == CRC16)
@@ -188,11 +188,11 @@ void SerialUpload(uint32_t addr)
 
     if (status != 0)
     {
-      Serial_PutString((uint8_t *)"\n\rError Occurred while Transmitting File\n\r");
+      Serial_PutString((uint8_t *)"\r\nError Occurred while Transmitting File\r\n");
     }
     else
     {
-      Serial_PutString((uint8_t *)"\n\rFile uploaded successfully \n\r");
+      Serial_PutString((uint8_t *)"\r\nFile uploaded successfully \r\n");
     }
   }
 }

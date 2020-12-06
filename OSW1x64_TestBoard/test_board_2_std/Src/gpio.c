@@ -46,14 +46,18 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOI_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  //HAL_GPIO_WritePin(GPIOI, MASTER_RESET_Pin|HARD_RESET_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOI, MASTER_RESET_Pin|HARD_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOH, OUT_STROBE_Pin|OUT_MODE_Pin|OUT_D5_Pin|OUT_D4_Pin 
                           |OUT_D0_Pin|OUT_D2_Pin|OUT_D3_Pin|OUT_D1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOG, OUT_VOL_3_3_Pin|OUT_VOL_5_0_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PIPin PIPin */
   GPIO_InitStruct.Pin = MASTER_RESET_Pin|HARD_RESET_Pin;
@@ -89,6 +93,13 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PGPin PGPin */
+  GPIO_InitStruct.Pin = OUT_VOL_3_3_Pin|OUT_VOL_5_0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
 }
 

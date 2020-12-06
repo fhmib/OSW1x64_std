@@ -64,4 +64,5 @@
 1x64osw\main.o: ../Inc/iwdg.h
 1x64osw\main.o: ../Inc/rtc.h
 1x64osw\main.o: ../Inc/spi.h
+1x64osw\main.o: ../Inc/tim.h
 1x64osw\main.o: ../Inc/gpio.h

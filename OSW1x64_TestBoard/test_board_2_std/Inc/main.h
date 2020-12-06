@@ -82,12 +82,16 @@ uint32_t send_cmd(uint8_t ch, char *arg);
 #define OUT_D5_GPIO_Port GPIOH
 #define OUT_D4_Pin GPIO_PIN_10
 #define OUT_D4_GPIO_Port GPIOH
+#define OUT_VOL_3_3_Pin GPIO_PIN_1
+#define OUT_VOL_3_3_GPIO_Port GPIOG
 #define OUT_D0_Pin GPIO_PIN_6
 #define OUT_D0_GPIO_Port GPIOH
 #define OUT_D2_Pin GPIO_PIN_8
 #define OUT_D2_GPIO_Port GPIOH
 #define OUT_D3_Pin GPIO_PIN_9
 #define OUT_D3_GPIO_Port GPIOH
+#define OUT_VOL_5_0_Pin GPIO_PIN_0
+#define OUT_VOL_5_0_GPIO_Port GPIOG
 #define OUT_D1_Pin GPIO_PIN_7
 #define OUT_D1_GPIO_Port GPIOH
 /* USER CODE BEGIN Private defines */

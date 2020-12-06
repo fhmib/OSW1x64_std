@@ -13,6 +13,7 @@
 "1x64osw\iwdg.o"
 "1x64osw\rtc.o"
 "1x64osw\spi.o"
+"1x64osw\tim.o"
 "1x64osw\usart.o"
 "1x64osw\stm32f4xx_it.o"
 "1x64osw\stm32f4xx_hal_msp.o"

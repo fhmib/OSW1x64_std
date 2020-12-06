@@ -97,19 +97,19 @@ int main(void)
   /* USER CODE BEGIN 2 */
   CLEAR_BIT(huart3.Instance->SR, USART_SR_RXNE);
   __HAL_UART_FLUSH_DRREGISTER(&huart3);
-  Serial_PutString((uint8_t *)"\n\rPress any key to enter command line ");
+  Serial_PutString((uint8_t *)"\r\nPress any key to enter command line ");
   while (i--) {
     Serial_PutString((uint8_t *)".");
     /* Receive key */
     if (HAL_UART_Receive(&huart3, &key, 1, 1000) != HAL_TIMEOUT) {
-      Serial_PutString((uint8_t *)"\n\r");
+      Serial_PutString((uint8_t *)"\r\n");
       Main_Menu();
     }
   }
-  Serial_PutString((uint8_t *)"\n\r");
+  Serial_PutString((uint8_t *)"\r\n");
   get_config_date(&config_data);
   if (config_data.magic != CONFIG_MAGIC) {
-    Serial_PutString((uint8_t *)"Need Default Application\n\r");
+    Serial_PutString((uint8_t *)"Need Default Application\r\n");
     Main_Menu();
   } else {
     Serial_PutString((uint8_t *)"Booting from Application ");

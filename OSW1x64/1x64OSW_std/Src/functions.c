@@ -9,6 +9,9 @@
 #include "i2c.h"
 #include "spi.h"
 #include "rtc.h"
+#include "tim.h"
+
+extern osSemaphoreId_t switchSemaphore;
 
 ChannelSwitchMapStruct channel_map[] = {
   { 1, 11, SWITCH_NUM_2, EE_CAL_SWITCH2},
@@ -307,6 +310,42 @@ osStatus_t Get_Threshold_Table(ThresholdStruct *table)
   return osOK;
 }
 
+void Check_Cali(void)
+{
+  uint16_t start = 0x1000;
+  uint16_t end = EE_PARA_TABLE_END;
+  uint16_t offset;
+  uint8_t buf[4];
+  uint32_t crc32 = 0xFFFFFFFF;
+  uint32_t chk;
+  
+  if (get_32_from_eeprom(EEPROM_ADDR, EE_CALI_CHECK, &chk) != osOK) {
+    return;
+  }
+
+  for (offset = start; offset < end; offset += 4) {
+    if (RTOS_EEPROM_Read(EEPROM_ADDR, offset, buf, 4) != osOK) {
+      return ;
+    }
+    
+    crc32 = Cal_CRC32_2(buf, 4, crc32);
+  }
+  
+  crc32 = ~crc32;
+  
+  if (crc32 != chk) {
+    if (!Is_Flag_Set(&run_status.exp, EXP_CALI_CHK)) {
+      Set_Flag(&run_status.exp, EXP_CALI_CHK);
+    }
+  } else {
+    if (Is_Flag_Set(&run_status.exp, EXP_CALI_CHK)) {
+      Clear_Flag(&run_status.exp, EXP_CALI_CHK);
+    }
+  }
+  
+  return;
+}
+
 uint32_t Get_Switch_Channel_By_IO()
 {
   uint32_t val = 0;
@@ -332,8 +371,12 @@ int8_t Set_Switch(uint32_t switch_channel)
   int32_t pre_index, index;
   uint8_t first_switch, second_switch;
   uint16_t addr;
-  int val_x, val_y;
+  int32_t val_x, val_y;
   osStatus_t status;
+  
+  int32_t old_x, old_y;
+  int32_t tmp_x, tmp_y;
+  int32_t safe_dist = 1000;
 
   index = Get_Index_Of_Channel_Map(switch_channel);
   if (index < 0) {
@@ -345,17 +388,44 @@ int8_t Set_Switch(uint32_t switch_channel)
   second_switch = SWITCH_NUM_1;
 
   // TODO: Disable previous switch channel
+#if 0
   if (run_status.switch_channel != 0) {
     pre_index = Get_Index_Of_Channel_Map(run_status.switch_channel);
     if (pre_index != index) {
       Clear_Switch_Dac(channel_map[pre_index].first_switch);
+
+      addr = EE_CAL_SWITCH1 + pre_index * 8;
+      status = get_32_from_eeprom(EEPROM_ADDR, addr, (uint32_t*)&old_x);
+      if (status != osOK) {
+        EPT("Get val_x failed 0. status = %d\n", status);
+        return -5;
+      }
+      status = get_32_from_eeprom(EEPROM_ADDR, addr + 4, (uint32_t*)&old_y);
+      if (status != osOK) {
+        EPT("Get val_y failed 0. status = %d\n", status);
+        return -6;
+      }
     } else {
       Clear_Switch_Dac(second_switch);
+      old_x = 0;
+      old_y = 0;
     }
+  } else {
+    old_x = 0;
+    old_y = 0;
   }
+#else
+  if (run_status.switch_channel != 0) {
+    pre_index = Get_Index_Of_Channel_Map(run_status.switch_channel);
+    Clear_Switch_Dac(second_switch);
+    Clear_Switch_Dac(channel_map[pre_index].first_switch);
+  }
+  old_x = 0;
+  old_y = 0;
+#endif
 
   // Configure new switch channel
-
+  // first level
   addr = channel_map[index].first_eeprom_addr + (switch_channel - channel_map[index].min_channel_num) * 8;
   status = get_32_from_eeprom(EEPROM_ADDR, addr, (uint32_t*)&val_x);
   if (status != osOK) {
@@ -367,11 +437,64 @@ int8_t Set_Switch(uint32_t switch_channel)
     EPT("Get val_y failed 1. status = %d\n", status);
     return -3;
   }
-
+#if 1
   if (set_sw_dac(first_switch, val_x, val_y)) {
     EPT("Write DAC faliled\n");
     return -4;
   }
+  osDelay(pdMS_TO_TICKS(2));
+#else
+  //osDelay(2);
+  if (val_x - old_x >= 0 && val_y - old_y >= 0) {
+    // third quadrant
+    tmp_x = (val_x - old_x >= safe_dist) ? (val_x - safe_dist) : (old_x);
+    tmp_y = (val_y - old_y >= safe_dist) ? (val_y - safe_dist) : (old_y);
+  } else if (val_x - old_x <= 0 && val_y - old_y >= 0) {
+    // fourth quadrant
+    tmp_x = (old_x - val_x >= safe_dist) ? (val_x + safe_dist) : (old_x);
+    tmp_y = (val_y - old_y >= safe_dist) ? (val_y - safe_dist) : (old_y);
+  } else if (val_x - old_x <= 0 && val_y - old_y <= 0) {
+    // first quadrant
+    tmp_x = (old_x - val_x >= safe_dist) ? (val_x + safe_dist) : (old_x);
+    tmp_y = (old_y - val_y >= safe_dist) ? (val_y + safe_dist) : (old_y);
+  } else if (val_x - old_x >= 0 && val_y - old_y <= 0) {
+    // second quadrant
+    tmp_x = (val_x - old_x >= safe_dist) ? (val_x - safe_dist) : (old_x);
+    tmp_y = (old_y - val_y >= safe_dist) ? (val_y + safe_dist) : (old_y);
+  }
+
+
+  if (set_sw_dac(first_switch, tmp_x, tmp_y)) {
+    EPT("Write DAC faliled\n");
+    return -7;
+  }
+    
+  sw_tim_control.time = 2;
+  sw_tim_control.step = 30;
+  sw_tim_control.counter = 0;
+  sw_tim_control.sw_num = first_switch;
+  sw_tim_control.cur_x = tmp_x;
+  sw_tim_control.cur_y = tmp_y;
+  sw_tim_control.dst_x = val_x;
+  sw_tim_control.dst_y = val_y;
+  HAL_TIM_Base_Start_IT(&htim6);
+
+  status = osSemaphoreAcquire(switchSemaphore, 30);
+  if (status != osOK) {
+    THROW_LOG("Set Switch Timeout!\n");
+  }
+  osDelay(1);
+#endif
+  // second level
+#if 0
+  if (set_sw_dac(second_switch, 0, 0)) {
+    EPT("Write DAC faliled\n");
+    return -7;
+  }
+  old_x = 0;
+  old_y = 0;
+#endif
+
   addr = EE_CAL_SWITCH1 + index * 8;
   status = get_32_from_eeprom(EEPROM_ADDR, addr, (uint32_t*)&val_x);
   if (status != osOK) {
@@ -384,10 +507,47 @@ int8_t Set_Switch(uint32_t switch_channel)
     return -6;
   }
 
-  if (set_sw_dac(second_switch, val_x, val_y)) {
+  if (val_x - old_x >= 0 && val_y - old_y >= 0) {
+    // third quadrant
+    tmp_x = (val_x - old_x >= safe_dist) ? (val_x - safe_dist) : (old_x);
+    tmp_y = (val_y - old_y >= safe_dist) ? (val_y - safe_dist) : (old_y);
+  } else if (val_x - old_x <= 0 && val_y - old_y >= 0) {
+    // fourth quadrant
+    tmp_x = (old_x - val_x >= safe_dist) ? (val_x + safe_dist) : (old_x);
+    tmp_y = (val_y - old_y >= safe_dist) ? (val_y - safe_dist) : (old_y);
+  } else if (val_x - old_x <= 0 && val_y - old_y <= 0) {
+    // first quadrant
+    tmp_x = (old_x - val_x >= safe_dist) ? (val_x + safe_dist) : (old_x);
+    tmp_y = (old_y - val_y >= safe_dist) ? (val_y + safe_dist) : (old_y);
+  } else if (val_x - old_x >= 0 && val_y - old_y <= 0) {
+    // second quadrant
+    tmp_x = (val_x - old_x >= safe_dist) ? (val_x - safe_dist) : (old_x);
+    tmp_y = (old_y - val_y >= safe_dist) ? (val_y + safe_dist) : (old_y);
+  }
+
+
+  if (set_sw_dac(second_switch, tmp_x, tmp_y)) {
     EPT("Write DAC faliled\n");
     return -7;
   }
+    
+  sw_tim_control.time = 3; //300us
+  sw_tim_control.step = 20;
+  sw_tim_control.counter = 0;
+  sw_tim_control.sw_num = second_switch;
+  sw_tim_control.cur_x = tmp_x;
+  sw_tim_control.cur_y = tmp_y;
+  sw_tim_control.dst_x = val_x;
+  sw_tim_control.dst_y = val_y;
+
+  HAL_IWDG_Refresh(&hiwdg);
+  HAL_TIM_Base_Start_IT(&htim6);
+
+  status = osSemaphoreAcquire(switchSemaphore, 30);
+  if (status != osOK) {
+    THROW_LOG("Set Switch Timeout!\n");
+  }
+  osDelay(1);
 
   return 0;
 }
@@ -591,6 +751,7 @@ void Init_Run_Status(void)
   run_status.switch_channel = 0;
   run_status.uart_reset = 0;
   run_status.exp = 0;
+  run_status.pre_alarm = 0;
 }
 
 void Set_Flag(uint32_t *status, uint32_t bit_addr)
@@ -672,7 +833,7 @@ int8_t set_sw_dac(uint8_t sw_num, int32_t val_x, int32_t val_y)
       return -1;
     }
     // DAC need 2ms at least
-    osDelay(pdMS_TO_TICKS(4));
+    osDelay(pdMS_TO_TICKS(2));
 #if 0
     val_x = switch_map[i].px_chan << 24;
     val_x |= switch_map[i].nx_chan << 16;
@@ -698,6 +859,42 @@ int8_t set_sw_dac(uint8_t sw_num, int32_t val_x, int32_t val_y)
   }
   
   return 0;
+}
+
+void set_sw_dac_2(uint8_t sw_num, int32_t val_x, int32_t val_y)
+{
+  uint32_t i;
+  uint16_t dac_px_val, dac_nx_val, dac_py_val, dac_ny_val;
+
+  for (i = 0; i < sizeof(switch_map)/sizeof(switch_map[0]); ++i) {
+    if (switch_map[i].sw_num == sw_num) {
+      // x
+      if (val_x >= 0) {
+        dac_px_val = (uint16_t)val_x;
+        dac_nx_val = 0;
+      } else {
+        dac_px_val = 0;
+        dac_nx_val = (uint16_t)my_abs(val_x);
+      }
+      // y
+      if (val_y >= 0) {
+        dac_py_val = (uint16_t)val_y;
+        dac_ny_val = 0;
+      } else {
+        dac_py_val = 0;
+        dac_ny_val = (uint16_t)my_abs(val_y);
+      }
+      break;
+    }
+  }
+
+  // write dac
+  RTOS_DAC5535_Write_Nodelay(switch_map[i].px_chan, dac_px_val);
+  RTOS_DAC5535_Write_Nodelay(switch_map[i].nx_chan, dac_nx_val);
+  RTOS_DAC5535_Write_Nodelay(switch_map[i].py_chan, dac_py_val);
+  RTOS_DAC5535_Write_Nodelay(switch_map[i].ny_chan, dac_ny_val);
+
+  return ;
 }
 
 uint32_t debug_sw_adc(uint8_t sw_num)
@@ -1034,8 +1231,8 @@ uint32_t debug_cal_dump(uint32_t which, uint32_t *resp_len)
       addr = EE_CAL_SWITCH7;
       break;
     case 8: // Threshold
-      len = 5 * 16;
-      addr = EE_VOLTAGE_2_5_THR;
+      len = 0;
+      addr = 0;
       break;
   }
   if (which == 8) {
@@ -1105,3 +1302,30 @@ uint32_t debug_get_inter_exp(void)
   BE32_To_Buffer(run_status.internal_exp, resp_buf.buf);
   return RESPOND_SUCCESS;
 }
+
+uint32_t debug_Check_Cali(void)
+{
+  uint16_t start = 0x1000;
+  uint16_t end = EE_PARA_TABLE_END;
+  uint16_t offset;
+  uint8_t buf[4];
+  uint32_t crc32 = 0xFFFFFFFF;
+  
+  for (offset = start; offset < end; offset += 4) {
+    if (RTOS_EEPROM_Read(EEPROM_ADDR, offset, buf, 4) != osOK) {
+      return RESPOND_FAILURE;
+    }
+    
+    crc32 = Cal_CRC32_2(buf, 4, crc32);
+  }
+  
+  crc32 = ~crc32;
+
+  BE32_To_Buffer(crc32, resp_buf.buf);
+  if (RTOS_EEPROM_Write(EEPROM_ADDR, EE_CALI_CHECK, resp_buf.buf, 4) !=osOK) {
+    return RESPOND_FAILURE;
+  }
+  
+  return RESPOND_SUCCESS;
+}
+

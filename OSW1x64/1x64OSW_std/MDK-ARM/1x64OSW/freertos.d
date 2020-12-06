@@ -61,3 +61,4 @@
 1x64osw\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 1x64osw\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 1x64osw\freertos.o: ../Inc/iwdg.h
+1x64osw\freertos.o: ../Inc/tim.h

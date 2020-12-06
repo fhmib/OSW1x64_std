@@ -34,6 +34,21 @@ uint32_t block_size = FW_BLOCK_MAX_SIZE;
 uint32_t rLen;
 
 
+int8_t cmd_power(uint8_t argc, char **argv)
+{
+  if (!strcasecmp(argv[0], "poweron")) {
+    HAL_GPIO_WritePin(OUT_VOL_5_0_GPIO_Port, OUT_VOL_5_0_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(OUT_VOL_3_3_GPIO_Port, OUT_VOL_3_3_Pin, GPIO_PIN_SET);
+  } else if (!strcasecmp(argv[0], "poweroff")) {
+    HAL_GPIO_WritePin(OUT_VOL_5_0_GPIO_Port, OUT_VOL_5_0_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(OUT_VOL_3_3_GPIO_Port, OUT_VOL_3_3_Pin, GPIO_PIN_RESET);
+  } else {
+    cmd_help2(argv[0]);
+  }
+  
+  return 0;
+}
+
 int8_t cmd_upgrade(uint8_t argc, char **argv)
 {
   if (argc == 2 && !strcasecmp(argv[1], "init")) {
@@ -207,7 +222,7 @@ int8_t cmd_reset(uint8_t argc, char **argv)
 
   if (argc == 2 && !strcasecmp(argv[1], "hard")) {
     HAL_GPIO_WritePin(HARD_RESET_GPIO_Port, HARD_RESET_Pin, GPIO_PIN_RESET);
-    HAL_Delay(1);
+    //HAL_Delay(1);
     HAL_GPIO_WritePin(HARD_RESET_GPIO_Port, HARD_RESET_Pin, GPIO_PIN_SET);
   } else if (argc == 2 && !strcasecmp(argv[1], "master")) {
     HAL_GPIO_WritePin(MASTER_RESET_GPIO_Port, MASTER_RESET_Pin, GPIO_PIN_RESET);
@@ -607,6 +622,8 @@ int8_t cmd_for_debug(uint8_t argc, char **argv)
     return debug_send_hex(argc, argv);
   } else if (argc == 3 && !strcasecmp(argv[1], "send_hex") && !strcasecmp(argv[2], "no_check")) {
     return debug_send_hex(argc, argv);
+  } else if (argc == 2 && !strcasecmp(argv[1], "check_cali")) {
+    return debug_check_cali();
   } else if (argc == 2 && !strcasecmp(argv[1], "upgrade_bootloader_mode")) {
     return debug_upgrade_bootloader_mode();
   } else if (argc == 2 && !strcasecmp(argv[1], "upgrade_bootloader_install")) {
@@ -890,9 +907,9 @@ int8_t debug_switch_io(uint8_t argc, char **argv)
   HAL_GPIO_WritePin(OUT_D4_GPIO_Port, OUT_D4_Pin, (GPIO_PinState)((chan >> 4) & 0x1));
   HAL_GPIO_WritePin(OUT_D5_GPIO_Port, OUT_D5_Pin, (GPIO_PinState)((chan >> 5) & 0x1));
   HAL_GPIO_WritePin(OUT_STROBE_GPIO_Port, OUT_STROBE_Pin, GPIO_PIN_RESET);
-  HAL_Delay(10);
-  HAL_GPIO_WritePin(OUT_MODE_GPIO_Port, OUT_MODE_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(OUT_STROBE_GPIO_Port, OUT_STROBE_Pin, GPIO_PIN_SET);
+  HAL_Delay(1);
+  HAL_GPIO_WritePin(OUT_MODE_GPIO_Port, OUT_MODE_Pin, GPIO_PIN_SET);
 
   return 0;
 }
@@ -1246,6 +1263,22 @@ int8_t debug_send_hex(uint8_t argc, char **argv)
   }
 
   return 0;
+}
+
+int8_t debug_check_cali(void)
+{
+  int8_t ret;
+
+  BE32_To_Buffer(0x5A5AA5A5, txBuf);
+  BE32_To_Buffer(CMD_DEBUG_CHECK_CALI, txBuf + 4);
+  ret = process_command(CMD_FOR_DEBUG, txBuf, 8, rBuf, &rLen);
+  if (ret) {
+    return ret;
+  }
+  
+  PRINT("CRC32 : %#X\r\n", Buffer_To_BE32(rBuf + CMD_SEQ_MSG_DATA));
+
+  return ret;
 }
 
 int8_t debug_upgrade_bootloader_mode(void)

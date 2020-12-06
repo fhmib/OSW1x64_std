@@ -564,10 +564,8 @@ void monitorTask(void *argument)
   osStatus_t status;
   uint16_t value;
   double voltage, temp;
-  uint8_t pre_alarm;
 
   osDelay(pdMS_TO_TICKS(1000));
-  pre_alarm = run_status.exp == 0 ? 0: 1;
 
   for (;;) {
 
@@ -628,7 +626,7 @@ void monitorTask(void *argument)
         Set_Flag(&run_status.exp, EXP_VOLTAGE_3_3);
       }
     } else {
-      if (voltage <= run_status.thr_table.vol_3_3_high_clear - 0.05 && voltage >= run_status.thr_table.vol_3_3_low_clear + 0.05) {
+      if (voltage <= run_status.thr_table.vol_3_3_high_clear && voltage >= run_status.thr_table.vol_3_3_low_clear) {
         THROW_LOG("Voltage 3.3V back to normal\n");
         Clear_Flag(&run_status.exp, EXP_VOLTAGE_3_3);
       }
@@ -734,12 +732,12 @@ void monitorTask(void *argument)
     }
 #endif
 
-    if (run_status.exp && !pre_alarm) {
+    if (run_status.exp && !run_status.pre_alarm) {
       Set_Alarm();
-      pre_alarm = 1;
-    } else if (!run_status.exp && pre_alarm) {
+      run_status.pre_alarm = 1;
+    } else if (!run_status.exp && run_status.pre_alarm) {
       Clear_Alarm();
-      pre_alarm = 0;
+      run_status.pre_alarm = 0;
     }
 
     osDelay(pdMS_TO_TICKS(500));

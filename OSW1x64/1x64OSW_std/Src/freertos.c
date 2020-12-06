@@ -30,6 +30,7 @@
 #include "iwdg.h"
 #include "flash_if.h"
 #include "functions.h"
+#include "tim.h"
 
 /* USER CODE END Includes */
 
@@ -52,16 +53,19 @@
 /* USER CODE BEGIN Variables */
 osSemaphoreId_t uartProcessSemaphore;
 osSemaphoreId_t cmdProcessSemaphore;
+osSemaphoreId_t switchSemaphore;
 osSemaphoreId_t logEraseSemaphore;                  // semaphore id
 
 osMessageQueueId_t mid_LogMsg;
 osMessageQueueId_t mid_ISR;                // message queue id
+osMessageQueueId_t mid_SwISR;                // message queue id
 
 osMutexId_t i2c1Mutex;
 osMutexId_t i2c2Mutex;
 osMutexId_t spi1Mutex;
 osMutexId_t spi4Mutex;
 osMutexId_t spi5Mutex;
+osMutexId_t swMutex;
 const osMutexAttr_t Thread_Mutex_attr = {
   "Mutex",                              // human readable mutex name
   osMutexPrioInherit,                       // attr_bits
@@ -97,6 +101,13 @@ const osThreadAttr_t isrTask_attributes = {
   .stack_size = 1024
 };
 
+osThreadId_t swIsrTaskHandle;
+const osThreadAttr_t swIsrTask_attributes = {
+  .name = "swIsrTask",
+  .priority = (osPriority_t) INTERRUPT_TASK_PRIORITY,
+  .stack_size = 1024
+};
+
 osThreadId_t logTaskHandle;
 const osThreadAttr_t logTask_attributes = {
   .name = "logTask",
@@ -126,6 +137,7 @@ void uartProcessTask(void *argument);
 void cmdProcessTask(void *argument);
 void watchdogTask(void *argument);
 void isrTask(void *argument);
+void swIsrTask(void *argument);
 void logTask(void *argument);
 void monitorTask(void *argument);
 
@@ -161,6 +173,11 @@ void MX_FREERTOS_Init(void) {
     Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
+  switchSemaphore = osSemaphoreNew(1U, 0U, NULL);
+  if (switchSemaphore == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
+  }
+
   logEraseSemaphore = osSemaphoreNew(1U, 0U, NULL);
   if (logEraseSemaphore == NULL) {
     Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
@@ -173,6 +190,11 @@ void MX_FREERTOS_Init(void) {
 
   mid_ISR = osMessageQueueNew(ISR_QUEUE_LENGTH, sizeof(MsgStruct), NULL);
   if (mid_ISR == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
+  }
+
+  mid_SwISR = osMessageQueueNew(SW_ISR_QUEUE_LENGTH, sizeof(MsgStruct), NULL);
+  if (mid_SwISR == NULL) {
     Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
@@ -201,6 +223,11 @@ void MX_FREERTOS_Init(void) {
     Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
   }
 
+  swMutex = osMutexNew(&Thread_Mutex_attr);
+  if (swMutex == NULL) {
+    Set_Flag(&run_status.internal_exp, INT_EXP_INIT);
+  }
+
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -221,6 +248,7 @@ void MX_FREERTOS_Init(void) {
   cmdProcessTaskHandle = osThreadNew(cmdProcessTask, NULL, &cmdProcessTask_attributes);
   watchdogTaskHandle = osThreadNew(watchdogTask, NULL, &watchdogTask_attributes);
   isrTaskHandle = osThreadNew(isrTask, NULL, &isrTask_attributes);
+  swIsrTaskHandle = osThreadNew(swIsrTask, NULL, &swIsrTask_attributes);
   logTaskHandle = osThreadNew(logTask, NULL, &logTask_attributes);
   monTaskHandle = osThreadNew(monitorTask, NULL, &monTask_attributes);
 
@@ -439,6 +467,11 @@ void isrTask(void *argument)
         continue;
       }
 
+      if ((status = osMutexAcquire(swMutex, 50)) != osOK) {
+        THROW_LOG("Acquire mutex of sw failed\n");
+        continue;
+      }
+
       Clear_Switch_Ready();
       if (Set_Switch(switch_channel)) {
         run_status.switch_channel = 0;
@@ -446,11 +479,12 @@ void isrTask(void *argument)
           THROW_LOG("Switch abnormal\n");
           Set_Flag(&run_status.exp, EXP_SWITCH);
         }
+        osMutexRelease(swMutex);
         continue;
       }
 
       run_status.switch_channel = switch_channel;
-      osDelay(pdMS_TO_TICKS(4));
+      // osDelay(pdMS_TO_TICKS(4));
 
       // Check
       if (Get_Current_Switch_Channel() != switch_channel) {
@@ -459,6 +493,7 @@ void isrTask(void *argument)
           THROW_LOG("Switch abnormal\n");
           Set_Flag(&run_status.exp, EXP_SWITCH);
         }
+        osMutexRelease(swMutex);
         continue;
       }
 
@@ -466,6 +501,46 @@ void isrTask(void *argument)
       if (Is_Flag_Set(&run_status.exp, EXP_SWITCH)) {
         THROW_LOG("Switch back to normal\n");
         Clear_Flag(&run_status.exp, EXP_SWITCH);
+      }
+      osMutexRelease(swMutex);
+    }
+  }
+}
+
+void swIsrTask(void *argument)
+{
+  osStatus_t status;
+  MsgStruct msg;
+
+  for (;;)
+  {
+    status = osMessageQueueGet(mid_SwISR, &msg, 0U, osWaitForever);
+    if (status != osOK)
+      continue;
+
+    if (msg.type == MSG_TYPE_SWITCH_DAC_ISR) {
+      if (sw_tim_control.cur_x < sw_tim_control.dst_x) {
+        sw_tim_control.cur_x = (sw_tim_control.dst_x - sw_tim_control.cur_x > sw_tim_control.step) ?\
+                                (sw_tim_control.cur_x + sw_tim_control.step) : (sw_tim_control.dst_x);
+      } else if (sw_tim_control.cur_x > sw_tim_control.dst_x) {
+        sw_tim_control.cur_x = (sw_tim_control.cur_x - sw_tim_control.dst_x > sw_tim_control.step) ?\
+                                (sw_tim_control.cur_x - sw_tim_control.step) : (sw_tim_control.dst_x);
+      }
+      
+      if (sw_tim_control.cur_y < sw_tim_control.dst_y) {
+        sw_tim_control.cur_y = (sw_tim_control.dst_y - sw_tim_control.cur_y > sw_tim_control.step) ?\
+                                (sw_tim_control.cur_y + sw_tim_control.step) : (sw_tim_control.dst_y);
+      } else if (sw_tim_control.cur_y > sw_tim_control.dst_y) {
+        sw_tim_control.cur_y = (sw_tim_control.cur_y - sw_tim_control.dst_y > sw_tim_control.step) ?\
+                                (sw_tim_control.cur_y - sw_tim_control.step) : (sw_tim_control.dst_y);
+      }
+
+      set_sw_dac_2(sw_tim_control.sw_num, sw_tim_control.cur_x, sw_tim_control.cur_y);
+
+      if (sw_tim_control.cur_x == sw_tim_control.dst_x && sw_tim_control.cur_y == sw_tim_control.dst_y) {
+        osSemaphoreRelease(switchSemaphore);
+      } else {
+        HAL_TIM_Base_Start_IT(&htim6);
       }
     }
   }
@@ -564,10 +639,8 @@ void monitorTask(void *argument)
   osStatus_t status;
   uint16_t value;
   double voltage, temp;
-  uint8_t pre_alarm;
 
   osDelay(pdMS_TO_TICKS(1000));
-  pre_alarm = run_status.exp == 0 ? 0: 1;
 
   for (;;) {
 
@@ -734,12 +807,12 @@ void monitorTask(void *argument)
     }
 #endif
 
-    if (run_status.exp && !pre_alarm) {
+    if (run_status.exp && !run_status.pre_alarm) {
       Set_Alarm();
-      pre_alarm = 1;
-    } else if (!run_status.exp && pre_alarm) {
+      run_status.pre_alarm = 1;
+    } else if (!run_status.exp && run_status.pre_alarm) {
       Clear_Alarm();
-      pre_alarm = 0;
+      run_status.pre_alarm = 0;
     }
 
     osDelay(pdMS_TO_TICKS(500));

@@ -63,6 +63,8 @@ extern RunTimeStatus run_status;
 extern uint8_t upgrade_bootloader;
 extern uint8_t reserve_empty;
 extern uint8_t lock_debug;
+
+extern SwTimControl sw_tim_control;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -94,6 +96,7 @@ extern uint8_t lock_debug;
 #define LOG_PACKET_LENGTH         1024
 
 #define ISR_QUEUE_LENGTH          6
+#define SW_ISR_QUEUE_LENGTH       2
 
 
 #define EEPROM_ADDR               (0x50 << 1)

@@ -45,6 +45,7 @@ uint32_t Buffer_To_BE32(uint8_t *pbuf);
 uint16_t UpdateCRC16(uint16_t crc_in, uint8_t byte);
 uint16_t Cal_CRC16(const uint8_t* p_data, uint32_t size);
 uint32_t Cal_CRC32(uint8_t* packet, uint32_t length);
+uint32_t Cal_CRC32_2(uint8_t* packet, uint32_t length, uint32_t CRC32);
 
 void PRINT_HEX(char *head, uint8_t *pdata, uint32_t len);
 
@@ -58,6 +59,7 @@ osStatus_t RTOS_EEPROM_Read(int16_t dev_addr, uint16_t mem_addr, uint8_t *buf, i
 HAL_StatusTypeDef I2cEepromWrite(int16_t dev_addr, uint16_t mem_addr, uint8_t *buf, int32_t length);
 HAL_StatusTypeDef I2cEepromRead(int16_t dev_addr, uint16_t mem_addr, uint8_t *buf, int32_t length);
 osStatus_t RTOS_DAC5535_Write(uint8_t chan, uint16_t val);
+osStatus_t RTOS_DAC5535_Write_Nodelay(uint8_t chan, uint16_t val);
 osStatus_t RTOS_ADC7953_Read(uint8_t chan, uint16_t *val);
 osStatus_t RTOS_ADC7953_SPI4_Read(uint8_t chan, uint16_t *val);
 osStatus_t RTOS_ADC7953_SPI5_Read(uint8_t chan, uint16_t *val);

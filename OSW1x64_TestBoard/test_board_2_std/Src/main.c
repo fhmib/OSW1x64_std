@@ -41,7 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define VER "OSW1x64_testboard_1.0.4"
+#define VER "OSW1x64_testboard_1.0.5"
 #define CMD_LENGTH 256
 /* USER CODE END PD */
 
@@ -226,6 +226,8 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 console_cmd cmdlist[] = {
+  {"poweron", cmd_power, "Command about power", "poweron", "poweron"},
+  {"poweroff", cmd_power, "Command about power", "poweroff", "poweroff"},
   {"upgrade", cmd_upgrade, "Command about upgrade", "upgrade init [block_size] | file | install", "upgrade init [512] | file | install"},
   {"version", cmd_version, "Get version", "version", "version"},
   {"reset", cmd_reset, "Reset the device", "reset <soft | hard | master>", "reset soft"},

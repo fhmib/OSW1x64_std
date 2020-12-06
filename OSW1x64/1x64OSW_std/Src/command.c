@@ -18,12 +18,14 @@ UpgradeStruct up_state;
 //char *pn = "45070038";
 //char *supplier_id = "ONET"; // 4 bytes
 //char *hw_version = "01.01"; // 5 bytes
-char *fw_version = "01.02"; // 5 bytes
+char *fw_version = "01.03"; // 5 bytes
 char pn[9];
 char hw_version[6];
 char supplier_id[5];
 
 extern UpgradeFlashState upgrade_status;
+
+extern osMutexId_t swMutex;
 
 CmdStruct command_list[] = {
   {CMD_UPGRADE_INIT, 0x1C, Cmd_Upgrade_Init},
@@ -732,6 +734,12 @@ uint32_t Cmd_Set_Switch(void)
     return RESPOND_SUCCESS;
   }
   
+  if (osMutexAcquire(swMutex, 50) != osOK) {
+    THROW_LOG("Acquire mutex of sw failed when excute command\n");
+    FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
+    return RESPOND_SUCCESS;
+  }
+
   Clear_Switch_Ready();
 
   if (Set_Switch(switch_channel)) {
@@ -741,6 +749,7 @@ uint32_t Cmd_Set_Switch(void)
       Set_Flag(&run_status.exp, EXP_SWITCH);
     }
     THROW_LOG("Set switch to %u channel failed\n", switch_channel);
+    osMutexRelease(swMutex);
     FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
     return RESPOND_SUCCESS;
   }
@@ -755,6 +764,7 @@ uint32_t Cmd_Set_Switch(void)
       Set_Flag(&run_status.exp, EXP_SWITCH);
     }
     THROW_LOG("Set switch to %u channel failed 2\n", switch_channel);
+    osMutexRelease(swMutex);
     FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
     return RESPOND_SUCCESS;
   }
@@ -764,6 +774,7 @@ uint32_t Cmd_Set_Switch(void)
     THROW_LOG("Switch back to normal\n");
     Clear_Flag(&run_status.exp, EXP_SWITCH);
   }
+  osMutexRelease(swMutex);
   FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
   return RESPOND_SUCCESS;
 }
@@ -810,10 +821,13 @@ uint32_t Cmd_Maintain(void)
   if (Is_Flag_Set(&run_status.exp, EXP_ADC_B)) {
     err1 |= 1 << 10;
   }
+  if (Is_Flag_Set(&run_status.exp, EXP_CALI_CHK)) {
+    err2 |= 1 << 0;
+  }
   if (Is_Flag_Set(&run_status.exp, EXP_TEMPERATURE)) {
     err2 |= 1 << 1;
   }
-  
+
   BE32_To_Buffer(0, resp_buf.buf);
   BE32_To_Buffer(err1, resp_buf.buf + 4);
   BE32_To_Buffer(err2, resp_buf.buf + 8);
@@ -841,7 +855,7 @@ uint32_t Cmd_For_Debug()
     FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_SUCCESS, 0);
     return ret;
   }
-  
+
   if (lock_debug) {
     FILL_RESP_MSG(CMD_FOR_DEBUG, RESPOND_UNKNOWN_CMD, 0);
     return RESPOND_UNKNOWN_CMD;
@@ -951,6 +965,10 @@ uint32_t Cmd_For_Debug()
   } else if (temp == CMD_DEBUG_UP_BOOT) {
     memset(resp_buf.buf, 0, 4);
     ret = debug_bootloader_install();
+    FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
+    return ret;
+  } else if (temp == CMD_DEBUG_CHECK_CALI) {
+    ret = debug_Check_Cali();
     FILL_RESP_MSG(CMD_FOR_DEBUG, ret, 4);
     return ret;
   } else if (temp == CMD_DEBUG_INTER_EXP) {

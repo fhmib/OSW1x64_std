@@ -27,6 +27,7 @@
 #include "iwdg.h"
 #include "rtc.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -70,6 +71,10 @@ RunTimeStatus run_status __attribute__((at(0x2002FC00)));
 uint8_t upgrade_bootloader = 0;
 uint8_t reserve_empty = 0;
 uint8_t lock_debug = 1;
+
+SwTimControl sw_tim_control;
+extern osSemaphoreId_t switchSemaphore;
+MsgStruct tim_isr_msg;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -124,6 +129,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
   MX_RTC_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   uint8_t buf[3] = {0};
   if (HAL_SPI_Transmit(&hspi1, buf, 1, 10) != HAL_OK) {
@@ -425,10 +431,14 @@ void OSW_Init(void)
     }
   }
   log_file_state.cur_sector = LOG_FIRST_SECTOR + i;
+
+  // check calibration data
+  Check_Cali();
 }
 
 extern FLASH_ProcessTypeDef pFlash;
 extern osMessageQueueId_t mid_ISR;
+extern osMessageQueueId_t mid_SwISR;
 extern osSemaphoreId_t logEraseSemaphore;
 void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue)
 {
@@ -491,6 +501,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+  if (htim->Instance == TIM6) {
+    if (++sw_tim_control.counter < sw_tim_control.time) {
+    } else {
+      HAL_TIM_Base_Stop_IT(&htim6);
+      tim_isr_msg.type = MSG_TYPE_SWITCH_DAC_ISR;
+      osMessageQueuePut(mid_SwISR, &tim_isr_msg, 0U, 0U);
+      sw_tim_control.counter = 0;
+    }
+  }
 
   /* USER CODE END Callback 1 */
 }

@@ -29,6 +29,8 @@ typedef enum {
   EE_TAG_DATE             = 0x0020, // Manufacture Date
   EE_TAG_ASN              = 0x0040, // Assembly Serial Number
   EE_TAG_FSN              = 0x0060, // Filter Serial Number
+  EE_TAG_SUPPLIER         = 0x0080, // Supplier ID
+  EE_TAG_HW_VERSION       = 0x00A0, // Hardware Version
   // calibration
   EE_CAL_SWITCH1          = 0x1000, // 0x1000 ~ 0x125F
   EE_CAL_SWITCH2          = 0x1030, // 0x1000 ~ 0x125F
@@ -38,12 +40,16 @@ typedef enum {
   EE_CAL_SWITCH6          = 0x11B0, // 0x1000 ~ 0x125F
   EE_CAL_SWITCH7          = 0x1210, // 0x1000 ~ 0x125F
   EE_CAL_IL               = 0x1260, // 0x1260 ~ 0x135F Insertion Loss
+  
+  // Parameter Table end Address
+  EE_PARA_TABLE_END       = 0x145F,
+
   // threshold
-  EE_VOLTAGE_2_5_THR      = 0x1460,
-  EE_VOLTAGE_3_3_THR      = 0x1468,
-  EE_VOLTAGE_5_0_THR      = 0x1470,
-  EE_VOLTAGE_64_0_THR     = 0x1478,
-  EE_TEMPERATURE_THR      = 0x1480,
+  //EE_VOLTAGE_2_5_THR      = 0x1460,
+  //EE_VOLTAGE_3_3_THR      = 0x1468,
+  //EE_VOLTAGE_5_0_THR      = 0x1470,
+  //EE_VOLTAGE_64_0_THR     = 0x1478,
+  //EE_TEMPERATURE_THR      = 0x1480,
   // upgrade
   EE_UP_MAGIC             = 0x3000, // 0x3000 ~ 0x3003
   EE_UP_RUN               = 0x3004, // 0x3004 ~ 0x3004 Which fw is running
@@ -56,6 +62,8 @@ typedef enum {
   EE_LOG_MAGIC            = 0x3020, // 0x3020 ~ 0x3023
   EE_LOG_OFFSET           = 0x3024, // 0x3024 ~ 0x3027
   EE_LOG_HEADER           = 0x3028, // 0x3028 ~ 0x302B
+  // Calibration CRC Check
+  EE_CALI_CHECK           = 0x302C,
 } EepromAddrMap;
 
 typedef enum {
@@ -148,6 +156,7 @@ typedef enum {
   EXP_SWITCH              = 0x5,
   EXP_ADC_A               = 0x6,
   EXP_ADC_B               = 0x7,
+  EXP_CALI_CHK            = 0x8,
 } ExptoinValue;
 
 typedef enum {
@@ -163,10 +172,22 @@ typedef struct {
   uint32_t maigc;
   uint8_t switch_channel;
   uint8_t uart_reset; // Indicate if reset by uart communication
+  uint8_t pre_alarm;
   uint32_t exp; // exception
   uint32_t internal_exp;
   ThresholdStruct thr_table;
 } RunTimeStatus;
+
+typedef struct {
+  uint32_t counter;
+  uint32_t time; // Unit: 100us
+  int32_t step;
+  uint8_t sw_num;
+  int32_t dst_x;
+  int32_t dst_y;
+  int32_t cur_x;
+  int32_t cur_y;
+} SwTimControl;
 
 void Throw_Log(uint8_t *buf, uint32_t length);
 uint32_t Log_Write(uint32_t addr, uint8_t *pbuf, uint32_t length);
@@ -180,6 +201,7 @@ osStatus_t Get_Log_Status(LogFileState *log_status);
 osStatus_t Update_Log_Status(LogFileState *log_status);
 osStatus_t Reset_Log_Status(void);
 osStatus_t Get_Threshold_Table(ThresholdStruct *table);
+void Check_Cali(void);
 
 uint32_t Get_Switch_Channel_By_IO(void);
 int8_t Set_Switch(uint32_t switch_channel);
@@ -202,6 +224,7 @@ double Cal_Temp(uint16_t adc);
 
 uint32_t debug_sw_dac(uint8_t sw_num, int32_t val_x, int32_t val_y);
 int8_t set_sw_dac(uint8_t sw_num, int32_t val_x, int32_t val_y);
+void set_sw_dac_2(uint8_t sw_num, int32_t val_x, int32_t val_y);
 uint32_t debug_sw_adc(uint8_t sw_num);
 uint32_t debug_vol_adc(uint8_t chan);
 uint32_t debug_tag(uint8_t type, uint8_t *p, uint32_t length);
@@ -213,5 +236,6 @@ uint32_t debug_cal_dump(uint32_t which, uint32_t *resp_len);
 uint32_t debug_eeprom(uint32_t addr, uint32_t *len);
 uint32_t debug_write_log(uint32_t value, uint32_t len);
 uint32_t debug_get_inter_exp(void);
+uint32_t debug_Check_Cali(void);
 
 #endif
