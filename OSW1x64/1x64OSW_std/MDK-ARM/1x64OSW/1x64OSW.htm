@@ -3,7 +3,7 @@
 <title>Static Call Graph - [1x64OSW\1x64OSW.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image 1x64OSW\1x64OSW.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sun Dec 06 20:54:26 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Fri Jan 22 20:25:46 2021
 <BR><P>
 <H3>Maximum Stack Usage =       1288 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -713,9 +713,9 @@ Global Symbols
 
 <P><STRONG><a name="[8d]"></a>__aeabi_llsl</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, llshl.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
-<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
 
 <P><STRONG><a name="[1ef]"></a>_ll_shift_l</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llshl.o(.text), UNUSED)
@@ -723,9 +723,9 @@ Global Symbols
 <P><STRONG><a name="[8c]"></a>__aeabi_llsr</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, llushr.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2uiz
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2iz
-<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
 
 <P><STRONG><a name="[1f0]"></a>_ll_ushift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llushr.o(.text), UNUSED)
@@ -894,7 +894,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_sw_dac
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Switch
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch_Only
 </UL>
 
 <P><STRONG><a name="[b2]"></a>Clear_Switch_Ready</STRONG> (Thumb, 46 bytes, Stack size 16 bytes, functions.o(i.Clear_Switch_Ready))
@@ -903,8 +903,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
-<BR>[Called By]<UL><LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch
-<LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_Set_Switch
+<BR>[Called By]<UL><LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_Set_Switch
 <LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_Get_Switch
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isrTask
 </UL>
@@ -992,9 +991,9 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 272<LI>Call Chain = Cmd_Get_Version &rArr; RTOS_EEPROM_Read &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTOS_EEPROM_Read
-<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncpy
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
+<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> command.o(.data)
 </UL>
@@ -1036,12 +1035,12 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmdProcessTask
 </UL>
 
-<P><STRONG><a name="[f]"></a>Cmd_Set_Switch</STRONG> (Thumb, 320 bytes, Stack size 32 bytes, command.o(i.Cmd_Set_Switch))
-<BR><BR>[Stack]<UL><LI>Max Depth = 392<LI>Call Chain = Cmd_Set_Switch &rArr; Get_Current_Switch_Channel &rArr; Get_Switch_Adc &rArr; RTOS_ADC7953_Read &rArr; RTOS_ADC7953_SPI4_Read &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[f]"></a>Cmd_Set_Switch</STRONG> (Thumb, 346 bytes, Stack size 40 bytes, command.o(i.Cmd_Set_Switch))
+<BR><BR>[Stack]<UL><LI>Max Depth = 400<LI>Call Chain = Cmd_Set_Switch &rArr; Get_Current_Switch_Channel &rArr; Get_Switch_Adc &rArr; RTOS_ADC7953_Read &rArr; RTOS_ADC7953_SPI4_Read &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Switch_Ready
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Switch
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch_Only
 <LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Current_Switch_Channel
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Clear_Switch_Ready
@@ -1241,14 +1240,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_Set_Switch
 <LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_Get_Switch
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isrTask
-<LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;OSW_Init
 </UL>
 
 <P><STRONG><a name="[ee]"></a>Get_Index_Of_Channel_Map</STRONG> (Thumb, 54 bytes, Stack size 12 bytes, functions.o(i.Get_Index_Of_Channel_Map))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = Get_Index_Of_Channel_Map
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Switch
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch_Only
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Current_Switch_Channel
 </UL>
 
@@ -1332,9 +1330,9 @@ Global Symbols
 <P><STRONG><a name="[fa]"></a>HAL_DMA_Init</STRONG> (Thumb, 206 bytes, Stack size 24 bytes, stm32f4xx_hal_dma.o(i.HAL_DMA_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = HAL_DMA_Init &rArr; DMA_CheckFifoParam
 </UL>
-<BR>[Calls]<UL><LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
-<LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA_CheckFifoParam
+<BR>[Calls]<UL><LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA_CheckFifoParam
 <LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA_CalcBaseAndBitshift
+<LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
 <BR>[Called By]<UL><LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
 </UL>
@@ -1572,9 +1570,9 @@ Global Symbols
 <P><STRONG><a name="[119]"></a>HAL_Init</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, stm32f4xx_hal.o(i.HAL_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = HAL_Init &rArr; HAL_InitTick &rArr; HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_NVIC_SetPriority
 </UL>
-<BR>[Calls]<UL><LI><a href="#[11b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_InitTick
+<BR>[Calls]<UL><LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriorityGrouping
+<LI><a href="#[11b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_InitTick
 <LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_MspInit
-<LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriorityGrouping
 </UL>
 <BR>[Called By]<UL><LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -2190,11 +2188,10 @@ Global Symbols
 <P><STRONG><a name="[14]"></a>NMI_Handler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.NMI_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f427xx.o(RESET)
 </UL>
-<P><STRONG><a name="[16d]"></a>OSW_Init</STRONG> (Thumb, 938 bytes, Stack size 80 bytes, main.o(i.OSW_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 440<LI>Call Chain = OSW_Init &rArr; Get_Current_Switch_Channel &rArr; Get_Switch_Adc &rArr; RTOS_ADC7953_Read &rArr; RTOS_ADC7953_SPI4_Read &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[16d]"></a>OSW_Init</STRONG> (Thumb, 930 bytes, Stack size 80 bytes, main.o(i.OSW_Init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 352<LI>Call Chain = OSW_Init &rArr; Reset_Switch_Only &rArr; Clear_Switch_Dac &rArr; set_sw_dac &rArr; RTOS_DAC5535_Write &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch
-<LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Current_Switch_Channel
+<BR>[Calls]<UL><LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch_Only
 <LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Uart_Respond
 <LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FLASH_If_Init
 <LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FLASH_If_Erase_IT
@@ -2208,11 +2205,11 @@ Global Symbols
 <LI><a href="#[170]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Threshold_Table
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Log_Status
 <LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Check_Cali
-<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncpy
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
+<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isrTask
 </UL>
@@ -2383,11 +2380,10 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_For_Debug
 </UL>
 
-<P><STRONG><a name="[d8]"></a>Reset_Switch</STRONG> (Thumb, 98 bytes, Stack size 8 bytes, functions.o(i.Reset_Switch))
-<BR><BR>[Stack]<UL><LI>Max Depth = 272<LI>Call Chain = Reset_Switch &rArr; Clear_Switch_Dac &rArr; set_sw_dac &rArr; RTOS_DAC5535_Write &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[d8]"></a>Reset_Switch_Only</STRONG> (Thumb, 92 bytes, Stack size 8 bytes, functions.o(i.Reset_Switch_Only))
+<BR><BR>[Stack]<UL><LI>Max Depth = 272<LI>Call Chain = Reset_Switch_Only &rArr; Clear_Switch_Dac &rArr; set_sw_dac &rArr; RTOS_DAC5535_Write &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Clear_Switch_Ready
-<LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Index_Of_Channel_Map
+<BR>[Calls]<UL><LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Index_Of_Channel_Map
 <LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Clear_Switch_Dac
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_Set_Switch
@@ -2454,6 +2450,7 @@ Global Symbols
 <LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_Set_Switch
+<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;monitorTask
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isrTask
 </UL>
 
@@ -2517,9 +2514,9 @@ Global Symbols
 <LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_GetDate
 <LI><a href="#[17d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pvPortMalloc
 <LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessageQueuePut
-<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_write_log
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Switch
@@ -2562,9 +2559,9 @@ Global Symbols
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Throw_Log
 <LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_endian
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
-<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uartProcessTask
 <LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;OSW_Init
@@ -2742,9 +2739,9 @@ Global Symbols
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Throw_Log
 <LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Flag
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_CRC32
-<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
+<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_For_Debug
 </UL>
@@ -2835,8 +2832,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[176]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTOS_EEPROM_Write
 <LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTOS_EEPROM_Read
-<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 <LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
+<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cmd_For_Debug
 </UL>
@@ -2871,13 +2868,13 @@ Global Symbols
 <LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Check_Cali
 </UL>
 
-<P><STRONG><a name="[80]"></a>isrTask</STRONG> (Thumb, 238 bytes, Stack size 16 bytes, freertos.o(i.isrTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 456<LI>Call Chain = isrTask &rArr; OSW_Init &rArr; Get_Current_Switch_Channel &rArr; Get_Switch_Adc &rArr; RTOS_ADC7953_Read &rArr; RTOS_ADC7953_SPI4_Read &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[80]"></a>isrTask</STRONG> (Thumb, 250 bytes, Stack size 16 bytes, freertos.o(i.isrTask))
+<BR><BR>[Stack]<UL><LI>Max Depth = 376<LI>Call Chain = isrTask &rArr; Get_Current_Switch_Channel &rArr; Get_Switch_Adc &rArr; RTOS_ADC7953_Read &rArr; RTOS_ADC7953_SPI4_Read &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Update_Up_Status
 <LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Switch_Ready
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Switch
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Switch_Only
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_Current_Switch_Channel
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Clear_Switch_Ready
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMutexRelease
@@ -2937,10 +2934,11 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
-<P><STRONG><a name="[83]"></a>monitorTask</STRONG> (Thumb, 1458 bytes, Stack size 48 bytes, freertos.o(i.monitorTask))
+<P><STRONG><a name="[83]"></a>monitorTask</STRONG> (Thumb, 1462 bytes, Stack size 48 bytes, freertos.o(i.monitorTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 288<LI>Call Chain = monitorTask &rArr; RTOS_ADC7828_Read &rArr; Throw_Log &rArr; osMessageQueuePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
+<LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Set_Switch_Ready
 <LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Cal_Temp
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
@@ -4259,18 +4257,18 @@ Local Symbols
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
 <LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ddiv
-<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
 <BR>[Called By]<UL><LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
 <P><STRONG><a name="[181]"></a>_printf_core</STRONG> (Thumb, 1744 bytes, Stack size 136 bytes, printfa.o(i._printf_core), UNUSED)
-<BR><BR>[Calls]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
-<LI><a href="#[18b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uidivmod
+<BR><BR>[Calls]<UL><LI><a href="#[18b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uidivmod
 <LI><a href="#[189]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_pre_padding
 <LI><a href="#[18a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_post_padding
 <LI><a href="#[188]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
 <BR>[Called By]<UL><LI><a href="#[180]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0sprintf
 </UL>

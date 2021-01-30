@@ -86,7 +86,12 @@ void SerialDownload(uint32_t addr)
            (buf[FW_HEAD_FW_LENGTH + 2] << 8) | (buf[FW_HEAD_FW_LENGTH + 3] << 0);
   fw_crc = (buf[FW_HEAD_CRC] << 24) | (buf[FW_HEAD_CRC + 1] << 16) |\
            (buf[FW_HEAD_CRC + 2] << 8) | (buf[FW_HEAD_CRC + 3] << 0);
-  HAL_UART_Receive(&huart3, fw_buf, fw_length, 1000 * 10);
+  if (fw_length > 0xFF00) {
+    HAL_UART_Receive(&huart3, fw_buf, 0xFF00, 1000 * 10);
+    HAL_UART_Receive(&huart3, fw_buf + 0xFF00, fw_length - 0xFF00, 1000 * 10);
+  } else {
+    HAL_UART_Receive(&huart3, fw_buf, fw_length, 1000 * 10);
+  }
   if (strcmp((char*)&buf[FW_HEAD_MODULE_NAME], "ONET-BJ-TESTBOARD2.0")) {
     Serial_PutString((uint8_t*)"The file is not the firmware corresponding to this module\r\n");
     return;
@@ -216,6 +221,8 @@ void JumpToAddr(uint32_t addr)
   /* Initialize user application's Stack Pointer */
   __set_MSP(*(__IO uint32_t*) addr);
   JumpToApplication();
+  __NOP();
+  __NOP();
 }
 
 void update_config_data(ConfigState *config_data)
@@ -245,7 +252,7 @@ void Main_Menu(void)
   Serial_PutString((uint8_t *)"\r\n======================================================================");
   Serial_PutString((uint8_t *)"\r\n=              (C) COPYRIGHT 2020 O-Net Technologies                 =");
   Serial_PutString((uint8_t *)"\r\n=                                                                    =");
-  Serial_PutString((uint8_t *)"\r\n=         Test Board Programming Application  (Version 1.0.1)        =");
+  Serial_PutString((uint8_t *)"\r\n=         Test Board Programming Application  (Version 1.0.2)        =");
   Serial_PutString((uint8_t *)"\r\n=                                                                    =");
   Serial_PutString((uint8_t *)"\r\n=                                                By Beijing R&D      =");
   Serial_PutString((uint8_t *)"\r\n======================================================================");

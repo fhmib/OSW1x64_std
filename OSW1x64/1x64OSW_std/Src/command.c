@@ -18,7 +18,7 @@ UpgradeStruct up_state;
 //char *pn = "45070038";
 //char *supplier_id = "ONET"; // 4 bytes
 //char *hw_version = "01.01"; // 5 bytes
-char *fw_version = "01.03"; // 5 bytes
+char *fw_version = "01.04"; // 5 bytes
 char pn[9];
 char hw_version[6];
 char supplier_id[5];
@@ -734,6 +734,12 @@ uint32_t Cmd_Set_Switch(void)
     return RESPOND_SUCCESS;
   }
   
+  if (switch_channel == run_status.switch_channel) {
+    THROW_LOG("Same as current chennel %u\n", switch_channel);
+    FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
+    return RESPOND_SUCCESS;
+  }
+  
   if (osMutexAcquire(swMutex, 50) != osOK) {
     THROW_LOG("Acquire mutex of sw failed when excute command\n");
     FILL_RESP_MSG(CMD_SET_SWITCH, RESPOND_SUCCESS, 4);
@@ -758,7 +764,7 @@ uint32_t Cmd_Set_Switch(void)
 
   // Check
   if (Get_Current_Switch_Channel() != switch_channel) {
-    Reset_Switch();
+    Reset_Switch_Only();
     if (!Is_Flag_Set(&run_status.exp, EXP_SWITCH)) {
       THROW_LOG("Switch abnormal\n");
       Set_Flag(&run_status.exp, EXP_SWITCH);

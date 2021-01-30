@@ -275,6 +275,11 @@ void OSW_Init(void)
   EPT("Run status maigc = %#X, uart_reset = %u\n", run_status.maigc, run_status.uart_reset);
 
   if (IS_RESETFLAG_SET(SFT_RESET_BIT) || IS_RESETFLAG_SET(IWDG_RESET_BIT)) {
+    HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_SET);
+    osDelay(pdMS_TO_TICKS(1));
+    HAL_GPIO_WritePin(LATCH_GPIO_Port, LATCH_Pin, GPIO_PIN_RESET);
+
     if (run_status.maigc == RUN_MAGIC) {
       if (run_status.uart_reset) {
         run_status.uart_reset = 0;
@@ -307,24 +312,26 @@ void OSW_Init(void)
           THROW_LOG("Startup with HARD Reset\n");
         }
       }
-      
+#if 0
       EPT("The optical switch channel configured last time is %u\n", run_status.switch_channel);
       if (run_status.switch_channel != (uint32_t)Get_Current_Switch_Channel()) {
         EPT("Detect optical switch channel incorrect while initializing\n");
         THROW_LOG("Detect optical switch channel %u incorrect while initializing\n", run_status.switch_channel);
         Reset_Switch();
       }
-
+#endif
       if (run_status.exp) {
         HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_RESET);
       } else {
         HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_SET);
       }
+#if 0
       if (run_status.switch_channel) {
         HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_RESET);
       } else {
         HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_SET);
       }
+#endif
     } else {
       // Init device
       HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_SET);
@@ -350,7 +357,7 @@ void OSW_Init(void)
     EPT("Startup with POWER Reset\n");
     //THROW_LOG("Startup with POWER Reset\n");
   } else {
-    Reset_Switch();
+    Reset_Switch_Only();
     // Init device
     HAL_GPIO_WritePin(SW_READY_GPIO_Port, SW_READY_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin(ALARM_GPIO_Port, ALARM_Pin, GPIO_PIN_SET);

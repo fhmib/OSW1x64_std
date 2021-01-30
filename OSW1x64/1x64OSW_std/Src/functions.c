@@ -566,6 +566,7 @@ void Reset_Switch(void)
 {
   uint32_t index;
 
+  Clear_Switch_Ready();
   if (run_status.maigc == RUN_MAGIC && run_status.switch_channel != 0) {
     index = Get_Index_Of_Channel_Map(run_status.switch_channel);
     Clear_Switch_Dac(channel_map[index].first_switch);
@@ -581,7 +582,28 @@ void Reset_Switch(void)
   }
 
   run_status.switch_channel = 0;
-  Clear_Switch_Ready();
+  Set_Switch_Ready();
+}
+
+void Reset_Switch_Only(void)
+{
+  uint32_t index;
+
+  if (run_status.maigc == RUN_MAGIC && run_status.switch_channel != 0) {
+    index = Get_Index_Of_Channel_Map(run_status.switch_channel);
+    Clear_Switch_Dac(channel_map[index].first_switch);
+    Clear_Switch_Dac(SWITCH_NUM_1);
+  } else if (run_status.maigc != RUN_MAGIC) {
+    Clear_Switch_Dac(SWITCH_NUM_1);
+    Clear_Switch_Dac(SWITCH_NUM_2);
+    Clear_Switch_Dac(SWITCH_NUM_3);
+    Clear_Switch_Dac(SWITCH_NUM_4);
+    Clear_Switch_Dac(SWITCH_NUM_5);
+    Clear_Switch_Dac(SWITCH_NUM_6);
+    Clear_Switch_Dac(SWITCH_NUM_7);
+  }
+
+  run_status.switch_channel = 0;
 }
 
 int8_t Get_Switch_Adc(uint32_t switch_id, uint16_t *px, uint16_t *nx, uint16_t *py, uint16_t *ny)

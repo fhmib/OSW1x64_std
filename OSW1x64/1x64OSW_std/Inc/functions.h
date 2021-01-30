@@ -208,6 +208,7 @@ uint32_t Get_Switch_Channel_By_IO(void);
 int8_t Set_Switch(uint32_t switch_channel);
 int8_t Clear_Switch_Dac(uint32_t switch_id);
 void Reset_Switch(void);
+void Reset_Switch_Only(void);
 int8_t Get_Switch_Adc(uint32_t switch_id, uint16_t *px, uint16_t *nx, uint16_t *py, uint16_t *ny);
 int32_t Get_Current_Switch_Channel(void);
 int32_t Get_Index_Of_Channel_Map(uint32_t switch_channel);

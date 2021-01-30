@@ -467,6 +467,11 @@ void isrTask(void *argument)
         continue;
       }
 
+      if (switch_channel == run_status.switch_channel) {
+        THROW_LOG("Same as current chennel %u\n", switch_channel);
+        continue;
+      }
+
       if ((status = osMutexAcquire(swMutex, 50)) != osOK) {
         THROW_LOG("Acquire mutex of sw failed\n");
         continue;
@@ -488,7 +493,7 @@ void isrTask(void *argument)
 
       // Check
       if (Get_Current_Switch_Channel() != switch_channel) {
-        Reset_Switch();
+        Reset_Switch_Only();
         if (!Is_Flag_Set(&run_status.exp, EXP_SWITCH)) {
           THROW_LOG("Switch abnormal\n");
           Set_Flag(&run_status.exp, EXP_SWITCH);
@@ -640,7 +645,9 @@ void monitorTask(void *argument)
   uint16_t value;
   double voltage, temp;
 
-  osDelay(pdMS_TO_TICKS(1000));
+  osDelay(pdMS_TO_TICKS(500));
+
+  Set_Switch_Ready();
 
   for (;;) {
 
